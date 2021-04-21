@@ -1,0 +1,25 @@
+# Define the exports for the prx
+PSP_BEGIN_EXPORTS
+
+# These four lines are mandatory (although you can add other functions like module_stop)
+# syslib is a psynonym for the single mandatory export.
+PSP_EXPORT_START(syslib, 0, 0x8000)
+PSP_EXPORT_FUNC_HASH(module_start)
+PSP_EXPORT_FUNC_HASH(module_reboot_before)
+PSP_EXPORT_VAR_HASH(module_info)
+PSP_EXPORT_END
+
+PSP_EXPORT_START(sceLFatFs_driver, 0x11, 0x0001)
+PSP_EXPORT_FUNC_HASH(sceLfatfsWaitReady)
+PSP_EXPORT_FUNC_HASH(sceLfatfsStop)
+PSP_EXPORT_FUNC_NID(sceLFatFs_driver_51c7f7ae, 0x51C7F7AE)
+PSP_EXPORT_FUNC_NID(sceLFatFs_driver_f1fba85f, 0xF1FBA85F)
+PSP_EXPORT_END
+
+
+PSP_EXPORT_START(FlashEmu, 0, 0x0001)
+PSP_EXPORT_FUNC_HASH(InstallFlashEmu)
+PSP_EXPORT_FUNC_HASH(UninstallFlashEmu)
+PSP_EXPORT_END
+
+PSP_END_EXPORTS
