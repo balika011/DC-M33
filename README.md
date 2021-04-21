@@ -10,5 +10,5 @@ The psptools folder is used to encrypt and sign the built modules, a modified ve
 
 Thanks to:
 - M33 Team Developers (Dark_Alex, adrahil, Mathieulh)
-- Mathieulh for answering my questions and 
+- Mathieulh for answering my questions and rubberducking
 - Davee for 03g bootrom dump and psptools.
