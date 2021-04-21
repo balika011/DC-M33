@@ -54,10 +54,10 @@ void SystemControlPatch()
 {
 	u32 text_addr = ((SceModule2 *)sceKernelFindModuleByName("SystemControl"))->text_addr;
 	
-	u32 addr = text_addr + 0x2408;
+	u32 addr = text_addr + 0x27B8;
 	
 	if (sceKernelGetModel())
-		addr = text_addr + 0x2690;
+		addr = text_addr + 0x2A68;
 	
 	MAKE_CALL(addr, sceKernelGzipDecompressPatched);
 
