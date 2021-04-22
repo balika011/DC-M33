@@ -147,8 +147,8 @@ int sceBootLfatOpenPatched(char *file)
 #ifdef MSIPL
 		else if (!msboot)
 			g_file[9] = 'd';
-		else
 #endif
+		else
 			g_file[9] = 'j';
 	}
 
@@ -189,46 +189,6 @@ void ClearCaches()
 	IcacheClear();
 }
 
-#ifndef MSIPL
-int (* UnsignCheck)(void *buf, int size);
-int UnsignCheckPatched(u8 *buf, int size)
-{
-	int unsigncheck = 0, i;
-
-	for (i = 0; i < 0x58; i++)
-	{
-		if (buf[i+0xD4] != 0)
-		{
-			unsigncheck = 1;
-			break;
-		}
-	}
-
-	if (unsigncheck)
-		return UnsignCheck(buf, size);
-
-	return 0;
-}
-
-int (* KDecrypt)(u32 *buf, int size, int *retSize);
-int KDecryptPatched(u32 *buf, int size, int *retSize)
-{
-#ifdef IPL_01G
-	if (buf[0x130/4] == 0xA030DB35)
-#else
-	if (buf[0x130/4] == 0xB301AEBA)
-#endif
-	{
-		*retSize = buf[0xB0/4];				
-		memcpy((char *)buf, ((char *)buf)+0x150, *retSize);			
-			
-		return 0;
-	}
-
-	return KDecrypt(buf, size, retSize);
-}
-#endif
-
 int PatchLoadCore(void *a0, void *a1, void *a2, int (* module_start)(void *, void *, void *))
 {
 #ifdef DEBUG
@@ -237,20 +197,11 @@ int PatchLoadCore(void *a0, void *a1, void *a2, int (* module_start)(void *, voi
 
 	u32 text_addr = ((u32)module_start) - 0xC74;
 
-	// disable unsign check
 #ifdef MSIPL
+	// disable unsign check
 	_sw(0x1021, text_addr + 0x691C);
 	_sw(0x1021, text_addr + 0x694C);
 	_sw(0x1021, text_addr + 0x69E4);
-#else
-	MAKE_CALL(text_addr + 0x691C, UnsignCheckPatched);
-	MAKE_CALL(text_addr + 0x694C, UnsignCheckPatched);
-	MAKE_CALL(text_addr + 0x69E4, UnsignCheckPatched);
-	UnsignCheck = (void *)(text_addr + 0x81B4);
-	
-	MAKE_CALL(text_addr + 0x41D0, KDecryptPatched);
-	MAKE_CALL(text_addr + 0x68F8, KDecryptPatched);
-	KDecrypt = (void *)(text_addr + 0x81D4);
 #endif
 
 	ClearCaches();
