@@ -1,3 +1,5 @@
+PSPDEV=$(shell psp-config --pspdev-path)
+
 all: DC8 DC8/msipl.bin DC8/ipl_01g.bin DC8/ipl_02g.bin DC8/ipl_03g.bin DC8/nandipl_01g.bin DC8/nandipl_02g.bin DC8/nandipl_03g.bin DC8/kd/pspbtdnf.bin DC8/kd/pspbtjnf.bin DC8/kd/pspbtknf.bin DC8/kd/pspbtlnf.bin DC8/kd/pspbtrnf.bin DC8/kd/pspbtdnf_02g.bin DC8/kd/pspbtjnf_02g.bin DC8/kd/pspbtknf_02g.bin DC8/kd/pspbtlnf_02g.bin DC8/kd/pspbtrnf_02g.bin DC8/kd/pspbtdnf_03g.bin DC8/kd/pspbtjnf_03g.bin DC8/kd/pspbtknf_03g.bin DC8/kd/pspbtlnf_03g.bin DC8/kd/pspbtrnf_03g.bin DC8/tmctrl500.prx DC8/kd/ipl_update.prx DC8/kd/resurrection.prx DC8/kd/dcman.prx DC8/kd/iop.prx DC8/kd/lflash_fdisk.prx DC8/kd/idsregeneration.prx DC8/kd/emc_sm_updater.prx DC8/kd/lfatfs_updater.prx DC8/kd/lflash_fatfmt_updater.prx DC8/vsh/module/intraFont.prx DC8/vsh/module/vlf.prx DC8/kd/pspdecrypt.prx DC8/kd/galaxy.prx DC8/kd/idcanager.prx DC8/kd/march33.prx DC8/kd/popcorn.prx DC8/kd/systemctrl.prx DC8/kd/systemctrl_02g.prx DC8/kd/systemctrl_03g.prx DC8/kd/usbdevice.prx DC8/kd/vshctrl.prx DC8/vsh/module/recovery.prx DC8/vsh/module/satelite.prx
 
 clean:
@@ -43,11 +45,11 @@ DC8/msipl.bin:
 DC8/ipl_01g.bin:
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_01G -DMSIPL=1"
-	bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_01G -DMSIPL=1"
-	bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
 
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_01G -DMSIPL=1"
@@ -58,11 +60,11 @@ DC8/ipl_01g.bin:
 DC8/ipl_02g.bin:
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_02G -DMSIPL=1"
-	bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_02G -DMSIPL=1"
-	bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
 
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_02G -DMSIPL=1"
@@ -73,11 +75,11 @@ DC8/ipl_02g.bin:
 DC8/ipl_03g.bin:
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_03G -DMSIPL=1"
-	bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_03G -DMSIPL=1"
-	bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
 
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_03G -DMSIPL=1"
@@ -94,11 +96,11 @@ DC8/nandipl_01g.bin: ipl/nandipl/nandipl.bin
 
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_01G"
-	bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_01G"
-	bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
 
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_01G"
@@ -112,11 +114,11 @@ DC8/nandipl_02g.bin: ipl/nandipl/nandipl.bin
 
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_02G"
-	bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_02G"
-	bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
 
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_02G"
@@ -130,11 +132,11 @@ DC8/nandipl_03g.bin: ipl/nandipl/nandipl.bin
 
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_03G"
-	bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_03G"
-	bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
 
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_03G"
@@ -194,19 +196,19 @@ DC8/tmctrl500.prx:
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS=-DIPL_01G
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
-	bin2s rebootex.bin.gz modules/flashemu/rebootex.S rebootex
+	$(PSPDEV)/bin/bin2s rebootex.bin.gz modules/flashemu/rebootex.S rebootex
 	rm rebootex.bin.gz
 
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS=-DIPL_02G
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex_02g.bin.gz
-	bin2s rebootex_02g.bin.gz modules/flashemu/rebootex_02g.S rebootex_02g
+	$(PSPDEV)/bin/bin2s rebootex_02g.bin.gz modules/flashemu/rebootex_02g.S rebootex_02g
 	rm rebootex_02g.bin.gz
 
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS=-DIPL_03G
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex_03g.bin.gz
-	bin2s rebootex_03g.bin.gz modules/flashemu/rebootex_03g.S rebootex_03g
+	$(PSPDEV)/bin/bin2s rebootex_03g.bin.gz modules/flashemu/rebootex_03g.S rebootex_03g
 	rm rebootex_03g.bin.gz
 
 	make -C modules/flashemu
