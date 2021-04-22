@@ -35,7 +35,7 @@ uint32_t GetTachyonVersion()
 
 int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 {
-	// SYSCON SPI enablekb egy óra volt
+	// SYSCON SPI enable
 	REG32(0xbc100058) |= 0x02;
 	REG32(0xbc10007c) |= 0xc8;
 	asm("sync"::);
