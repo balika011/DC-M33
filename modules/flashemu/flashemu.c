@@ -48,10 +48,10 @@ void WaitMS()
 	{
 		while (1)
 		{
-			SceUID fd = sceIoOpen("ms0:/TM/DC8/ipl.bin", PSP_O_RDONLY, 0);
+			SceUID fd = sceIoDopen("ms0:/TM/DC8/");
 			if (fd >= 0)
 			{
-				sceIoClose(fd);
+				sceIoDclose(fd);
 				need_wait = 0;
 				break;
 			}
