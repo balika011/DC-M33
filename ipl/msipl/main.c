@@ -35,7 +35,20 @@ uint32_t GetTachyonVersion()
 
 int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 {
+	// SYSCON SPI enable
+	REG32(0xbc100058) |= 0x02;
+	REG32(0xbc10007c) |= 0xc8;
+	
+	asm("sync"::);
+
+	pspSyscon_init();
+	pspSysconCrlMsPower(1);
+	
 #ifdef DEBUG
+	pspSysconCrlHpPower(1);
+	
+	uart_init();
+
 	printf("msipl starting...\n");
 #endif
 	uint32_t baryon_version = 0;

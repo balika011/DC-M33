@@ -1,12 +1,17 @@
-#include <stdint.h>
+#include <pspsdk.h>
+#include <string.h>
+#include "syscon.h"
+
+#ifdef DEBUG
+#include "printf.h"
+#include "uart.h"
+#endif
 
 #define JAL_OPCODE	0x0C000000
 #define J_OPCODE	0x08000000
 
-#define _sw(val, addr) *(uint32_t *) (addr) = val
-
-#define MAKE_JUMP(a, f) _sw(J_OPCODE | (((uint32_t)(f) & 0x0ffffffc) >> 2), a)
-#define MAKE_CALL(a, f) _sw(JAL_OPCODE | (((uint32_t)(f) >> 2)  & 0x03ffffff), a)
+#define MAKE_JUMP(a, f) _sw(J_OPCODE | (((u32)(f) & 0x0ffffffc) >> 2), a); 
+#define MAKE_CALL(a, f) _sw(JAL_OPCODE | (((u32)(f) >> 2)  & 0x03ffffff), a); 
 
 #ifdef IPL_01G
 
@@ -54,7 +59,17 @@ void Dcache();
 void Icache();
 #define MAIN_BIN() ((void (*)()) 0x4000000)()
 
-void *memcpy(void *dest, void *src, uint32_t size)
+void *memset(void *dest, int value, size_t size)
+{
+	uint32_t *d = (uint32_t *) dest;
+	
+	while (size--)
+		*(d++) = value;
+	
+	return dest;
+}
+
+void *memcpy(void *dest, const void *src, size_t size)
 {
 	uint32_t *d = (uint32_t *) dest;
 	uint32_t *s = (uint32_t *) src;
@@ -76,8 +91,6 @@ uint8_t seed[] = {
 	0x79, 0xDB, 0x85, 0x6E, 0x7A, 0x37, 0xF7, 0x3A, 0x5D, 0x85, 0x04, 0xC4, 0xC3, 0x96, 0xBC, 0xA3,
 	0xFB, 0x03, 0x26, 0x11, 0x28, 0x5D, 0xFD, 0x5A, 0xE9, 0x92, 0xA1, 0xE3, 0xF7, 0xF7, 0x9E, 0xF3,
 #endif
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 
@@ -136,8 +149,53 @@ void prestage2()
 	MAIN_BIN();
 }
 
+uint32_t GetTachyonVersion()
+{
+	uint32_t ver = _lw(0xbc100040);
+	
+	if (ver & 0xFF000000)
+		return (ver >> 8);
+
+	return 0x100000;
+}
+
 int main()
 {
+	// SYSCON SPI enable
+	REG32(0xbc100058) |= 0x02;
+	REG32(0xbc10007c) |= 0xc8;
+	asm("sync"::);
+	
+	pspSyscon_init();
+
+#ifdef DEBUG
+	pspSysconCrlHpPower(1);
+	
+	uart_init();
+	
+	_putchar('n');
+	_putchar('a');
+	_putchar('n');
+	_putchar('d');
+	_putchar('i');
+	_putchar('p');
+	_putchar('l');
+	_putchar('l');
+	_putchar('d');
+	_putchar('r');
+	_putchar('\n');
+#endif
+	uint32_t baryon_version = 0;
+	pspSysconGetBaryonVersion(&baryon_version);
+	uint32_t tachyon_version = GetTachyonVersion();
+	
+	if (tachyon_version >= 0x600000)
+		_sw(0x20070910, 0xbfc00ffc);
+	else if (tachyon_version >= 0x400000)
+		_sw(0x20050104, 0xbfc00ffc);
+	else
+		_sw(0x20040420, 0xbfc00ffc);
+
 	_sw(0x3c08bfc0, RESET_VECTOR_ADDRESS);
 	MAKE_CALL(ROM_HMAC_ADDRESS, sha256hmacPatched);
 	

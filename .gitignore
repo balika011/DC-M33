@@ -9,7 +9,7 @@ DC8
 
 bootcnf/bootcnf
 
-ipl/ipl_stage1_payload/payload.s
+ipl/ipl_stage1_payload/payload.S
 
 ipl/ipl_stage2_payload/payloadex.s
 

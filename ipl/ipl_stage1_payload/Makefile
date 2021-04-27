@@ -1,16 +1,15 @@
-PSPDEV=/usr/local/pspdev/bin
-INCLUDES=-I $(PSPDEV)/../psp/sdk/include
+TARGET = ipl_stage1_payload
+OBJS = crt0.o main.o printf.o uart.o syscon.o sysreg.o payload.o
 
-all:	clean ipl_stage1_payload.bin
+INCDIR = 
+CFLAGS = -Os -G0 -Wall -fno-pic $(BFLAGS) -fdata-sections -ffunction-sections -Wl,--gc-sections
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti 
+ASFLAGS = $(CFLAGS)
 
-ipl_stage1_payload.bin: 
-	$(PSPDEV)/psp-as crt0.s -o crt0.o
-	$(PSPDEV)/psp-gcc -c main.c -o main.o -O2 -G0 -Wall -fno-pic $(CFLAGS)
-	$(PSPDEV)/psp-as payload.s -o payload.o
-	$(PSPDEV)/psp-ld -nostartfiles -T linkfile.l crt0.o payload.o main.o -o ipl_stage1_payload.elf
-	$(PSPDEV)/psp-strip -s ipl_stage1_payload.elf
-	$(PSPDEV)/psp-objcopy -O binary ipl_stage1_payload.elf ipl_stage1_payload.bin
+LIBS = -lc
+LIBDIR =
+LDFLAGS = -nostartfiles  -T linkfile.l -fdata-sections -ffunction-sections -Wl,--gc-sections
 
-clean:
-	rm -rf *~ *.o *.elf *.bin
-
+PSPSDK=$(shell psp-config --pspsdk-path)
+#include $(PSPSDK)/lib/build.mak
+include build.mak

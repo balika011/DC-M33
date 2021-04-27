@@ -4,14 +4,12 @@ all: DC8 DC8/msipl.bin DC8/ipl_01g.bin DC8/ipl_02g.bin DC8/ipl_03g.bin DC8/nandi
 
 clean:
 	rm -rf DC8
-	make -C ipl/msiplldr clean
 	make -C ipl/msipl clean
 	make -C ipl/payloadex clean
 	make -C ipl/ipl_stage2_payload clean
 	rm -f ipl/ipl_stage2_payload/payloadex.s
 	make -C ipl/ipl_stage1_payload clean
 	rm -f ipl/ipl_stage1_payload/payload.s
-	make -C ipl/nandipl clean
 	make -C bootcnf clean
 	make -C ipl/rebootex clean
 	make -C modules/flashemu clean
@@ -36,11 +34,9 @@ DC8:
 	mkdir -p DC8/vsh/theme
 
 DC8/msipl.bin:
-	make -C ipl/msiplldr
-	psptools/pack_ipl.py ipl/msiplldr/msiplldr.bin DC8/msipl.bin
-
 	make -C ipl/msipl
-	dd if=ipl/msipl/msipl.bin of=DC8/msipl.bin bs=1 seek=4096
+
+	psptools/pack_ipl.py ipl/msipl/msipl.bin@0x40c0000 DC8/msipl.bin 0x40c0000
 
 DC8/ipl_01g.bin:
 	make -C ipl/payloadex clean
@@ -49,10 +45,10 @@ DC8/ipl_01g.bin:
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_01G -DMSIPL=1"
-	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
-	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_01G -DMSIPL=1"
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_01G -DMSIPL=1"
 
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/ipl_01g.bin
 	dd if=500/ipl_01g.bin of=DC8/ipl_01g.bin bs=1 seek=12288
@@ -64,10 +60,10 @@ DC8/ipl_02g.bin:
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_02G -DMSIPL=1"
-	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
-	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_02G -DMSIPL=1"
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_02G -DMSIPL=1"
 
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/ipl_02g.bin
 	dd if=500/ipl_02g.bin of=DC8/ipl_02g.bin bs=1 seek=12288
@@ -79,70 +75,57 @@ DC8/ipl_03g.bin:
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_03G -DMSIPL=1"
-	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
-	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_03G -DMSIPL=1"
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_03G -DMSIPL=1"
 
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/ipl_03g.bin
 	dd if=500/ipl_03g.bin of=DC8/ipl_03g.bin bs=1 seek=12288
 
-ipl/nandipl/nandipl.bin:
-	make -C ipl/nandipl
-
-
-DC8/nandipl_01g.bin: ipl/nandipl/nandipl.bin
-	psptools/pack_ipl.py ipl/nandipl/nandipl.bin DC8/nandipl_01g.bin
-
+DC8/nandipl_01g.bin:
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_01G"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_01G"
-	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
-	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_01G"
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_01G"
 
-	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/nandipl_01g.bin bs=1 seek=4096
-	dd if=500/ipl_01g.bin of=DC8/nandipl_01g.bin bs=1 seek=16384
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 500/ipl_01g.bin@0x40f0000 DC8/nandipl_01g.bin 0x40e0000
 
 
-DC8/nandipl_02g.bin: ipl/nandipl/nandipl.bin
-	psptools/pack_ipl.py ipl/nandipl/nandipl.bin DC8/nandipl_02g.bin
-
+DC8/nandipl_02g.bin:
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_02G"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_02G"
-	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
-	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_02G"
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_02G"
 
-	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/nandipl_02g.bin bs=1 seek=4096
-	dd if=500/ipl_02g.bin of=DC8/nandipl_02g.bin bs=1 seek=16384
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 500/ipl_02g.bin@0x40f0000 DC8/nandipl_02g.bin 0x40e0000
 
 
-DC8/nandipl_03g.bin: ipl/nandipl/nandipl.bin
-	psptools/pack_ipl.py ipl/nandipl/nandipl.bin DC8/nandipl_03g.bin
-
+DC8/nandipl_03g.bin:
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_03G"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
 
 	make -C ipl/ipl_stage2_payload clean
 	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_03G"
-	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.s payload
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
-	make -C ipl/ipl_stage1_payload CFLAGS="-DIPL_03G"
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_03G"
 
-	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/nandipl_03g.bin bs=1 seek=4096
-	dd if=500/ipl_03g.bin of=DC8/nandipl_03g.bin bs=1 seek=16384
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 500/ipl_03g.bin@0x40f0000 DC8/nandipl_03g.bin 0x40e0000
 
 bootcnf/bootcnf:
 	make -C bootcnf
@@ -222,7 +205,6 @@ DC8/kd/ipl_update.prx:
 DC8/kd/resurrection.prx:
 	make -C modules/vunbricker
 	python3 psptools/pack_kernel_module.py modules/vunbricker/resurrection.prx DC8/kd/resurrection.prx --tag 0x38020af0
-
 
 DC8/kd/dcman.prx:
 	make -C modules/dcman
