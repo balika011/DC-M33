@@ -240,7 +240,7 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 			recovery = 1;
 		}
 #ifdef MSIPL
-		else if((ctrl & SYSCON_CTRL_LTRG) == 0)
+		else if((ctrl & SYSCON_CTRL_LTRG) == 0 && (ctrl & SYSCON_CTRL_HOME) == SYSCON_CTRL_HOME)
 		{
 			msboot = 1;
 		}

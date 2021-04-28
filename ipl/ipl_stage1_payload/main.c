@@ -188,11 +188,35 @@ int main()
 	
 	while (pspSyscon_driver_Unkonow_7bcc5eae(0) < 0);
 
+	u32 tachyon_version = GetTachyonVersion();
+
 #ifndef MSIPL
 #ifdef SET_SEED_ADDRESS
 	unlockSyscon();
 #endif
+
+	uint32_t keys = -1;
+	pspSysconGetCtrl1(&keys);
+	if ((keys & (SYSCON_CTRL_LTRG | SYSCON_CTRL_HOME)) == 0)
+	{
+		pspSysconCrlMsPower(1);
 	
+		_sw(0x00000000, 0x80010068);
+
+		if (tachyon_version >= 0x600000)
+		{
+			_sw(0x00000000, 0x80010A8C);
+		}
+		else
+		{
+			_sw(0x00000000, 0x8001080C);
+		}
+	
+		Dcache();
+		Icache();
+
+		return ((int (*)())0x80010000)();
+	}
 #endif
 
 #ifdef DEBUG
@@ -212,8 +236,6 @@ int main()
 	_putchar('r');
 	_putchar('\n');
 #endif
-
-	u32 tachyon_version = GetTachyonVersion();
 	
 	if (tachyon_version >= 0x600000)
 		_sw(0x20070910, 0xbfc00ffc);
