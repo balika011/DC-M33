@@ -26,12 +26,12 @@ clean:
 DC8:
 	mkdir DC8
 	cp -R 500/flash0/* DC8/
-	cp -R prebuilt/* DC8/
 	mkdir -p DC8/dic
 	mkdir -p DC8/gps
 	mkdir -p DC8/net/http
 	mkdir -p DC8/registry
 	mkdir -p DC8/vsh/theme
+	touch DC8/registry/init.dat
 
 DC8/msipl.bin:
 	make -C ipl/msipl

@@ -343,7 +343,7 @@ int app_main()
 	sceKernelUtilsMt19937Init(&ctx, md5[0] ^ md5[1] ^ md5[2] ^ md5[3]);
 	rnd = sceKernelUtilsMt19937UInt(&ctx) % 12;
 
-	void *data = ReadFileAllocEx("flash0:/vsh/resource/bg.bmp", rnd*6176, 6176, NULL);
+	void *data = ReadFileAllocEx("flash0:/vsh/resource/01-12_03g.bmp", rnd*6176, 6176, NULL);
 
 	if (!data || vlfGuiSetBackgroundFileBuffer(data, 6176) < 0)
 	{
