@@ -1,8 +1,3 @@
-/*
-	PSP SYSREG driver for IPL
-
-	alpha version
-*/
 #include <psptypes.h>
 //#include "kprintf.h"
 
@@ -35,4 +30,40 @@ u32 Sysreg_driver_Unkonow_8835d1e1(u32 bit)
 	if(a2) out |= mask;
 	REG32(0xbc100058) = out;
 	return in & mask;
+}
+
+void SysregReset(u32 mask, u32 enable)
+{
+	if (enable)
+		REG32(0xBC10004C) |= mask;
+	else
+		REG32(0xBC10004C) &= ~mask;
+}
+
+void SysregBusclk(u32 mask, u32 enable)
+{
+	if (enable)
+		REG32(0xBC100050) |= mask;
+	else
+		REG32(0xBC100050) &= ~mask;
+}
+
+void SysregResetKirkEnable()
+{
+	SysregReset(0x400, 1);
+}
+
+void SysregBusclkKirkEnable()
+{
+	SysregBusclk(0x80, 1);
+}
+
+void SysregBusclkKirkDisable()
+{
+	SysregBusclk(0x80, 0);
+}
+
+void SysregResetKirkDisable()
+{
+	SysregReset(0x400, 0);
 }

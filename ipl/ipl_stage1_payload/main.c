@@ -1,5 +1,8 @@
 #include <pspsdk.h>
 #include <string.h>
+
+#include "sysreg.h"
+#include "kirk.h"
 #include "syscon.h"
 
 #ifdef DEBUG
@@ -32,8 +35,7 @@
 #define STAGE2_PATCH_INJECTION_ADDRESS 0x400035C
 #define ENTRY_POINT_ADDRESS 0x400D534
 #define CLEAR_STRACHPAD_ADDRESS 0x40011E4
-#define SET_SEED_ADDRESS 0x4001144
-#define SET_SEED_RETURN 0x40011C8
+#define SET_SEED_ADDRESS 0x4001134
 
 #elif IPL_03G
 
@@ -44,8 +46,7 @@
 #define STAGE2_PATCH_INJECTION_ADDRESS 0x400035C
 #define ENTRY_POINT_ADDRESS 0x0400D534
 #define CLEAR_STRACHPAD_ADDRESS 0x4001218
-#define SET_SEED_ADDRESS 0x4001178
-#define SET_SEED_RETURN 0x40011FC
+#define SET_SEED_ADDRESS 0x4001168
 
 #else
 
@@ -53,15 +54,15 @@
 
 #endif
 
-extern uint32_t size_payload;
-extern uint8_t payload;
+extern u32 size_payload;
+extern u8 payload;
 void Dcache();
 void Icache();
 #define MAIN_BIN() ((void (*)()) 0x4000000)()
 
 void *memset(void *dest, int value, size_t size)
 {
-	uint32_t *d = (uint32_t *) dest;
+	u8 *d = (u8 *) dest;
 	
 	while (size--)
 		*(d++) = value;
@@ -71,10 +72,8 @@ void *memset(void *dest, int value, size_t size)
 
 void *memcpy(void *dest, const void *src, size_t size)
 {
-	uint32_t *d = (uint32_t *) dest;
-	uint32_t *s = (uint32_t *) src;
-	
-	size /= 4;
+	u8 *d = (u8 *) dest;
+	u8 *s = (u8 *) src;
 	
 	while (size--)
 		*(d++) = *(s++);
@@ -82,8 +81,30 @@ void *memcpy(void *dest, const void *src, size_t size)
 	return dest;
 }
 
+int unlockSyscon()
+{
+	KirkReset();
+	
+	KirkCmd15();
+	
+	u8 random_key[16];
+	u8 random_key_dec_resp_dec[16];
+	
+	int ret = seed_gen1(random_key, random_key_dec_resp_dec);
+	if (ret)
+		return ret;
+	
+	ret = seed_gen2(random_key, random_key_dec_resp_dec);
+	if (ret)
+		return ret;
+	
+	KirkReset();
+	
+	return 0;
+}
+
 #ifdef SET_SEED_ADDRESS
-uint8_t seed[] = {
+u8 seed[] = {
 #if IPL_02G
 	0xAD, 0x43, 0x2A, 0x80, 0x9A, 0xD7, 0x70, 0xA5, 0x87, 0x50, 0x0E, 0x89, 0xE5, 0x5F, 0x05, 0xC6,
 	0x56, 0x86, 0x55, 0xB7, 0x8B, 0x60, 0xD4, 0x89, 0xEA, 0x31, 0xD4, 0x83, 0x37, 0xC5, 0x9D, 0x46,
@@ -94,16 +115,16 @@ uint8_t seed[] = {
 };
 
 
-void set_seed()
+int set_seed(u8 *xor_key, u8 *random_key, u8 *random_key_dec_resp_dec)
 {
-	memcpy((uint8_t *) 0xBFC00200, seed, sizeof(seed));
+	memcpy((u8 *) 0xBFC00200, seed, sizeof(seed));
 	
-	((void (*)()) SET_SEED_RETURN)();
+	return 0;
 }
 #endif
 
 
-uint8_t rom_hmac[] =
+u8 rom_hmac[] =
 {
 #ifdef IPL_01G
 	0xc6, 0x32, 0xd1, 0xc9, 0xaa, 0x60, 0xbf, 0x39, 0x42, 0xeb, 0x0b, 0x1e, 0xaa, 0xc8, 0x27, 0x25,
@@ -117,7 +138,7 @@ uint8_t rom_hmac[] =
 #endif
 };
 
-void sha256hmacPatched(uint8_t *key, uint32_t keylen, uint8_t *data, uint32_t datalen, uint8_t *out)
+void sha256hmacPatched(u8 *key, u32 keylen, u8 *data, u32 datalen, u8 *out)
 {
 	memcpy(out, rom_hmac, sizeof(rom_hmac));
 }
@@ -125,7 +146,7 @@ void sha256hmacPatched(uint8_t *key, uint32_t keylen, uint8_t *data, uint32_t da
 void prestage2()
 {
 	// Copy stage 2 to scratchpad
-	memcpy((uint8_t *) 0x10000, &payload, size_payload);
+	memcpy((u8 *) 0x10000, &payload, size_payload);
 	
 	// Replace call to Dcache with jump to patch2
 	_sw(0x8004000, STAGE2_PATCH_INJECTION_ADDRESS); // j 0x00010000
@@ -138,8 +159,7 @@ void prestage2()
 	_sw(0, CLEAR_STRACHPAD_ADDRESS);
 
 #ifdef SET_SEED_ADDRESS
-	MAKE_JUMP(SET_SEED_ADDRESS, set_seed);
-	_sw(0, SET_SEED_ADDRESS + 4);
+	MAKE_CALL(SET_SEED_ADDRESS, set_seed);
 #endif
 	
 	Dcache();
@@ -149,9 +169,9 @@ void prestage2()
 	MAIN_BIN();
 }
 
-uint32_t GetTachyonVersion()
+u32 GetTachyonVersion()
 {
-	uint32_t ver = _lw(0xbc100040);
+	u32 ver = _lw(0xbc100040);
 	
 	if (ver & 0xFF000000)
 		return (ver >> 8);
@@ -161,12 +181,19 @@ uint32_t GetTachyonVersion()
 
 int main()
 {
-	// SYSCON SPI enable
-	REG32(0xbc100058) |= 0x02;
-	REG32(0xbc10007c) |= 0xc8;
-	asm("sync"::);
-	
 	pspSyscon_init();
+
+	u32 baryon_version = 0;
+	while (pspSysconGetBaryonVersion(&baryon_version) < 0);
+	
+	while (pspSyscon_driver_Unkonow_7bcc5eae(0) < 0);
+
+#ifndef MSIPL
+#ifdef SET_SEED_ADDRESS
+	unlockSyscon();
+#endif
+	
+#endif
 
 #ifdef DEBUG
 	pspSysconCrlHpPower(1);
@@ -185,9 +212,8 @@ int main()
 	_putchar('r');
 	_putchar('\n');
 #endif
-	uint32_t baryon_version = 0;
-	pspSysconGetBaryonVersion(&baryon_version);
-	uint32_t tachyon_version = GetTachyonVersion();
+
+	u32 tachyon_version = GetTachyonVersion();
 	
 	if (tachyon_version >= 0x600000)
 		_sw(0x20070910, 0xbfc00ffc);

@@ -172,5 +172,7 @@ static inline int pspSyscon_driver_Unkonow_4c0ee2fa(u32 *ptr){ return pspSyscon_
 // 74 :  3 :  6?: pspSyscon_driver_Unkonow_68ef0bef
 // 7f :  3 :  4 : pspSysconBatteryAuth
 
+int seed_gen1(u8 *random_key, u8 *random_key_dec_resp_dec);
+int seed_gen2(u8 *random_key, u8 *random_key_dec_resp_dec);
 
 

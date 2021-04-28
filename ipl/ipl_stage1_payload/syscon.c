@@ -1,16 +1,9 @@
-/*
-	PSP SYSCON driver for IPL
-
-	beta version
-*/
 #include <psptypes.h>
-//#include "kprintf.h"
+#include <string.h>
 
 #include "sysreg.h"
 #include "syscon.h"
-
-#define BYPASS_ERR_CHECK 1
-
+#include "kirk.h"
 
 int pspSyscon_init(void)
 {
@@ -32,8 +25,13 @@ int pspSyscon_init(void)
 
 	// GPIO3 OUT
 	REG32(0xbe240000) |= 0x08;
+	REG32(0xBE240040) &= ~0x08;
+	REG32(0xBC10007C) |= 0x08;
+	
 	// GPIO4 IN
 	REG32(0xbe240000) &= ~0x10;
+	REG32(0xBE240040) |= 0x10;
+	REG32(0xBC10007C) |= 0x10;
 
 	// GpioSetIntrMode(4,3)
 	REG32(0xbe240010) &= ~0x10;
@@ -41,27 +39,19 @@ int pspSyscon_init(void)
 	REG32(0xbe240018) |=  0x10;
 	REG32(0xbe240024) = 0x10;
 
-#if 0
-	pspSyscon_driver_Unkonow_7ec5a957(wram_0108);
-	sceSyscon_driver_Unkonow_7bcc5eae();
-	sceSysconGetPowerStatus(powersts);
-#endif
-
 	return 0;
 }
 
 int Syscon_cmd(u8 *tx_buf,u8 *rx_buf)
 {
-	volatile u16 dmy;
-	u8 *ptr;
-	int result;
+	vu32 dmy;
+	int result = 0;
 	u16 wdata;
 	u8 bdata;
 	int cnt;
 	u8 sum;
 	int i;
 
-// Kprintf("SYSCON CMD %02X,%02X\n",tx_buf[0],tx_buf[1]);
 retry:
 	// calc & set TX sum
 	sum = 0;
@@ -70,121 +60,69 @@ retry:
 		sum += tx_buf[i];
 	tx_buf[cnt] = ~sum;
 
-#if 1
-	tx_buf[cnt+1] = 0xff;
-#else
 	// padding TX buf
 	for(i=cnt+1;i<0x10;i++)
 		tx_buf[i] = 0xff;
-#endif
 
 	// clear RX buf
 	for(i=0x0f;i>=0;i--)
 		rx_buf[i]=0xff;
-//
-//wait 5usec after GPIO3.fall
-//
-//	Syscon_wait(5);
 
-	// sceKernelCpuSuspendIntr()
 
 	// sceGpioPortRead();
 	dmy = REG32(0xbe240004);
+
 	// sceGpioPortClear(8)
 	REG32(0xbe24000c) = 0x08;
 
 	if(REG32(0xbe58000c) & 4)
 	{
-//Kprintf("RX DUMMY:");
-		// clear prevouse data ?
-		while( REG32(0xbe58000c) & 4)
+		while(REG32(0xbe58000c) & 4)
 		{
 			dmy = REG32(0xbe580008);
-//Kprintf("%04X:",dmy);
 		}
-//Kprintf("\n");
 	}
+	
 	dmy = REG32(0xbe58000c);
-;
-	REG32(0xbe580020) = 3; // clear error status ?
-;
-	// TX data
-//	cnt = tx_buf[1];
-	ptr = tx_buf;
-//Kprintf("TX DATA (%d):",cnt);
+	REG32(0xbe580020) = 3;
 
 	for(i=0;i<(cnt+1);i+=2)
 	{
 		dmy = REG32(0xbe58000c);
-//Kprintf("%04X ",(ptr[0]<<8)|ptr[1] );
-		REG32(0xbe580008) = (ptr[0]<<8)|ptr[1];
-		ptr += 2;
+		REG32(0xbe580008) = (tx_buf[i]<<8) | tx_buf[i + 1];
 	}
-//Kprintf("\n");
+
 	REG32(0xbe580004) = 6; // RX mode ?
 
-//Kprintf("set GPIO3\n");
 	// sceGpioPortSet(8)
 	REG32(0xbe240008) = 0x08;
-//
-//wait 5usec after GPIO3.fall
-//
-//	Syscon_wait(5);
 
-//Kprintf("wait ACK %02X\n",REG32(0xbe240020)&0x18);
-//--------------------------------------------------------------
-//wait for GPIO4 raise
-//--------------------------------------------------------------
-// 		r2 = sceGpioQueryIntr(4)
-	while( (REG32(0xbe240020) & 0x10)==0)
-	{
-//Kprintf("%02X ",REG32(0xbe240004)&0x18);
-	}
+	while((REG32(0xbe240020) & 0x10) == 0);
 
-	// GpioAcquireIntr(4)
 	REG32(0xbe240024) = 0x10;
 
 //--------------------------------------------------------------
 //receive
 //--------------------------------------------------------------
 
-//Kprintf("receive\n");
-	result = 0;
-
-#if BYPASS_ERR_CHECK
-#else
-	// error check
 	if( (REG32(0xbe58000c) & 4)==0)
 	{
-//Kprintf("SYSCON err 1\n");
-		// error !
 		rx_buf[0] = 0xff;
 		result = -1;
 
-		// r16[$4] |= 0x00100000 // error
 		for(cnt=0x0f;cnt;cnt--);
 	}
 
-	// error check
 	if( (REG32(0xbe58000c) & 1)==0)
 	{
-//Kprintf("SYSCON err 2\n");
-		// r16[$4] |= $00200000 // error
 		result = -1;
 	}
 
-	// error check ?
 	if( REG32(0xbe580018) & 1)
 	{
-//Kprintf("SYSCON err 3\n");
 		REG32(0xbe580020) = 1;
-		// r16[$4] |= $00400000 // error
 	}
-#endif
 
-//Kprintf("RX data:");
-	// receive data
-	ptr = rx_buf;
 	for(i=0;i<0x10;i+=2)
 	{
 		if( (REG32(0xbe58000c) & 4)==0)
@@ -192,23 +130,18 @@ retry:
 
 		wdata = REG32(0xbe580008);
 		bdata = wdata>>8;
-		if(i==0)
+		if(i == 0)
 		{
-			result = bdata; // 1st RX data : result ?
+			result = bdata;
 		}
-		ptr[0] = bdata;
-		ptr[1] = wdata & 0xff;
-//Kprintf("%02X %02X ",ptr[0],ptr[1]);
-		ptr+=2;
+		rx_buf[i] = bdata;
+		rx_buf[i + 1] = wdata & 0xff;
 	}
-//Kprintf("\n");
+
 	REG32(0xbe580004) = 4;
-;
-	// sceGpioPortClear(8)
+
 	REG32(0xbe24000c) = 0x08;
-;
-//Kprintf("check sum\n");
-	// calc and check RX sum
+
 	if(result>0)
 	{
 		cnt = rx_buf[1];
@@ -218,20 +151,17 @@ retry:
 		}
 		else
 		{
-			ptr = rx_buf;
 			sum = 0;
 			for(i=0;i<cnt;i++)
-				sum += *ptr++;
+				sum += rx_buf[i];
 
 			if( (sum^0xff) != rx_buf[cnt])
 			{
-//Kprintf("SYSCON sum error %02X %02X\n",(sum^0xff),rx_buf[cnt]);
 				result = -2; // check sum error
 			}
 		}
 	}
 
-//Kprintf("SYSCON RESULT %02X\n",rx_buf[2]);
 	switch(rx_buf[2])
 	{
 	case 0x80:
@@ -264,7 +194,7 @@ int pspSyscon_rx_dword(u32 *param,u8 cmd)
 	tx_buf[1] = 2;
 
 	result = Syscon_cmd(tx_buf,rx_buf);
-	if(result>=0)
+	if(result >= 0 && param)
 	{
 		switch(rx_buf[1])
 		{
@@ -337,4 +267,147 @@ int pspSysconGetCtrl2(u32 *ctrl,u8 *vol1,u8 *vol2)
 	*vol1  = rx_buf[7];
 	*vol2  = rx_buf[8];
 	return result;
+}
+
+int pspSysconSendAuth(u8 key, u8 *data)
+{
+	u8 tx_buf[0x10],rx_buf[0x10];
+
+	tx_buf[0] = 0x30;
+	tx_buf[1] = 2 + 1 + 8;
+	tx_buf[2] = key;
+	memcpy(&tx_buf[3], data, 8);
+	int result = Syscon_cmd(tx_buf,rx_buf);
+	if (result < 0)
+		return result;
+
+	tx_buf[0] = 0x30;
+	tx_buf[1] = 2 + 1 + 8;
+	tx_buf[2] = key + 1;
+	memcpy(&tx_buf[3], &data[8], 8);
+	result = Syscon_cmd(tx_buf,rx_buf);
+	if (result < 0)
+		return result;
+		
+	return 0;
+	
+}
+
+int pspSysconRecvAuth(u8 key, u8 *data)
+{
+	u8 tx_buf[0x10],rx_buf[0x10];
+
+	tx_buf[0] = 0x30;
+	tx_buf[1] = 2 + 1;
+	tx_buf[2] = key;
+	int result = Syscon_cmd(tx_buf,rx_buf);
+	if (result < 0)
+		return result;
+	
+	memcpy(data, &rx_buf[4], 8);
+
+	tx_buf[0] = 0x30;
+	tx_buf[1] = 2 + 1;
+	tx_buf[2] = key + 1;
+	result = Syscon_cmd(tx_buf,rx_buf);
+	if (result < 0)
+		return result;
+	
+	memcpy(&data[8], &rx_buf[4], 8);
+		
+	return 0;
+}
+
+int seed_gen1(u8 *random_key, u8 *random_key_dec_resp_dec)
+{
+	memset(random_key, 0xAA, 16);
+	
+	u8 random_key_dec[16];
+	int ret = kirkDecryptAes(random_key_dec, random_key, 16, 0x69);
+	if (ret)
+		return ret;
+	
+	ret = pspSysconSendAuth(0x80, random_key_dec);
+	if (ret)
+		return ret;
+	
+	u8 random_key_dec_resp[16];
+	ret = pspSysconRecvAuth(0, random_key_dec_resp);
+	if (ret)
+		return ret;
+	
+	ret = kirkDecryptAes(random_key_dec_resp_dec, random_key_dec_resp, 16, 0x14);
+	if (ret)
+		return ret;
+		
+	u8 random_key_dec_resp_dec_swapped[16];
+	memcpy(random_key_dec_resp_dec_swapped, &random_key_dec_resp_dec[8], 8);
+	memcpy(&random_key_dec_resp_dec_swapped[8], random_key_dec_resp_dec, 8);
+	
+	u8 seed_dec_resp_dec_hi_low_swapped_dec[16];
+	ret = kirkDecryptAes(seed_dec_resp_dec_hi_low_swapped_dec, random_key_dec_resp_dec_swapped, 16, 0x69);
+	if (ret)
+		return ret;
+
+	ret = pspSysconSendAuth(0x82, seed_dec_resp_dec_hi_low_swapped_dec);
+	if (ret)
+		return ret;
+
+	return 0;
+}
+
+u8 rand_xor[] =
+{
+#ifdef IPL_02G
+	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06
+#elif IPL_03G
+	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+#endif
+};
+u8 key_86[] =
+{
+#ifdef IPL_02G
+	0x4D, 0xB8, 0x63, 0xF3, 0x60, 0x14, 0xF1, 0x5F, 0x91, 0xE8, 0x96, 0xE9, 0x99, 0xD1, 0x89, 0x0D
+#elif IPL_03G
+	0xB6, 0xEA, 0xC0, 0xBF, 0xC0, 0x95, 0xDB, 0x6A, 0xAD, 0xE1, 0xCD, 0xB1, 0xBD, 0x68, 0x8C, 0x5F
+#endif
+};
+
+void xor(u8 *dest, u8 *src_a, u8 *src_b)
+{
+	for (int i = 0; i < 16; i++)
+		dest[i] = src_a[i] ^ src_b[i];
+}
+
+int seed_gen2(u8 *random_key, u8 *random_key_dec_resp_dec)
+{
+	u8 random_key_xored[16];
+	xor(random_key_xored, random_key, rand_xor);
+	
+	int ret = kirkDecryptAes(random_key_xored, random_key_xored, 16, 0x15);
+	if (ret)
+		return ret;
+		
+	u8 random_key_dec_resp_dec_xored[16];
+	xor(random_key_dec_resp_dec_xored, random_key_dec_resp_dec, random_key_xored);
+	
+	ret = pspSysconSendAuth(0x84, random_key_dec_resp_dec_xored);
+	if (ret)
+		return ret;
+		
+	ret = pspSysconSendAuth(0x86, key_86);
+	if (ret)
+		return ret;
+
+	u8 resp_2[16];
+	ret = pspSysconRecvAuth(2, resp_2);
+	if (ret)
+		return ret;
+
+	u8 resp_4[16];
+	ret = pspSysconRecvAuth(4, resp_4);
+	if (ret)
+		return ret;
+	
+	return 0;
 }
