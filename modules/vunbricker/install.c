@@ -850,26 +850,9 @@ int install_thread(SceSize args, void *argp)
 	if (CreateFlash1Dirs() < 0)
 		InstallError(ofw, "Error creating flash1 directories.");
 
-	size = ReadFile("flash1:/registry/system.dreg", 0, sm_buffer1, SMALL_BUFFER_SIZE);
-	if (size <= 0)
+	if (WriteFile("flach1:/registry/init.dat", sm_buffer1, 0) < 0)
 	{
-		InstallError(ofw, "Cannot read system.dreg");
-	}
-
-	if (WriteFile("flach1:/registry/system.dreg", sm_buffer1, size) < size)
-	{
-		InstallError(ofw, "Cannot write system.dreg\n");
-	}
-
-	size = ReadFile("flash1:/registry/system.ireg", 0, sm_buffer1, SMALL_BUFFER_SIZE);
-	if (size <= 0)
-	{
-		InstallError(ofw, "Cannot read system.ireg\n");
-	}
-
-	if (WriteFile("flach1:/registry/system.ireg", sm_buffer1, size) < size)
-	{
-		InstallError(ofw, "Cannot write system.ireg\n");		
+		InstallError(ofw, "Cannot write init.dat\n");
 	}
 
 	res = ReadFile("flash2:/registry/act.dat", 0, sm_buffer1, SMALL_BUFFER_SIZE);
