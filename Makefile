@@ -9,7 +9,7 @@ clean:
 	make -C ipl/ipl_stage2_payload clean
 	rm -f ipl/ipl_stage2_payload/payloadex.s
 	make -C ipl/ipl_stage1_payload clean
-	rm -f ipl/ipl_stage1_payload/payload.s
+	rm -f ipl/ipl_stage1_payload/payload.S
 	make -C bootcnf clean
 	make -C ipl/rebootex clean
 	make -C modules/flashemu clean
@@ -130,50 +130,80 @@ DC8/nandipl_03g.bin:
 bootcnf/bootcnf:
 	make -C bootcnf
 
-DC8/kd/pspbtdnf.bin: bootcnf/bootcnf cfg/pspbtdnf.txt
-	./bootcnf/bootcnf -it cfg/pspbtdnf.txt -ob DC8/kd/pspbtdnf.bin
+DC8/kd/pspbtcnf_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_dc.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_dc.txt -ob pspbtcnf_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_dc.bin DC8/kd/pspbtcnf_dc.bin
+	rm pspbtcnf_dc.bin
 
-DC8/kd/pspbtjnf.bin: bootcnf/bootcnf cfg/pspbtjnf.txt
-	./bootcnf/bootcnf -it cfg/pspbtjnf.txt -ob DC8/kd/pspbtjnf.bin
+DC8/kd/pspbtcnf_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_umd.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_umd.txt -ob pspbtcnf_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_umd.bin DC8/kd/pspbtcnf_umd.bin
+	rm pspbtcnf_umd.bin
 
-DC8/kd/pspbtknf.bin: bootcnf/bootcnf cfg/pspbtknf.txt
-	./bootcnf/bootcnf -it cfg/pspbtknf.txt -ob DC8/kd/pspbtknf.bin
+DC8/kd/pspbtcnf_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_oe.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_oe.txt -ob pspbtcnf_oe.bin
+	psptools/pack_bootcfg.py pspbtcnf_oe.bin DC8/kd/pspbtcnf_oe.bin
+	rm pspbtcnf_oe.bin
 
-DC8/kd/pspbtlnf.bin: bootcnf/bootcnf cfg/pspbtlnf.txt
-	./bootcnf/bootcnf -it cfg/pspbtlnf.txt -ob DC8/kd/pspbtlnf.bin
+DC8/kd/pspbtcnf_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_m33.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_m33.txt -ob pspbtcnf_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_m33.bin DC8/kd/pspbtcnf_m33.bin
+	rm pspbtcnf_m33.bin
 
-DC8/kd/pspbtrnf.bin: bootcnf/bootcnf cfg/pspbtrnf.txt
-	./bootcnf/bootcnf -it cfg/pspbtrnf.txt -ob DC8/kd/pspbtrnf.bin
+DC8/kd/pspbtcnf_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_recovery.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_recovery.txt -ob pspbtcnf_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_recovery.bin DC8/kd/pspbtcnf_recovery.bin
+	rm pspbtcnf_recovery.bin
 
-DC8/kd/pspbtdnf_02g.bin: bootcnf/bootcnf cfg/pspbtdnf_02g.txt
-	./bootcnf/bootcnf -it cfg/pspbtdnf_02g.txt -ob DC8/kd/pspbtdnf_02g.bin
+DC8/kd/pspbtcnf_02g_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_dc.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_02g_dc.txt -ob pspbtcnf_02g_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_dc.bin DC8/kd/pspbtcnf_02g_dc.bin
+	rm pspbtcnf_02g_dc.bin
 
-DC8/kd/pspbtjnf_02g.bin: bootcnf/bootcnf cfg/pspbtjnf_02g.txt
-	./bootcnf/bootcnf -it cfg/pspbtjnf_02g.txt -ob DC8/kd/pspbtjnf_02g.bin
+DC8/kd/pspbtcnf_02g_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_umd.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_02g_umd.txt -ob pspbtcnf_02g_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_umd.bin DC8/kd/pspbtcnf_02g_umd.bin
+	rm pspbtcnf_02g_umd.bin
 
-DC8/kd/pspbtknf_02g.bin: bootcnf/bootcnf cfg/pspbtknf_02g.txt
-	./bootcnf/bootcnf -it cfg/pspbtknf_02g.txt -ob DC8/kd/pspbtknf_02g.bin
+DC8/kd/pspbtcnf_02g_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_oe.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_02g_oe.txt -ob pspbtcnf_02g_oe.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_oe.bin DC8/kd/pspbtcnf_02g_oe.bin
+	rm pspbtcnf_02g_oe.bin
 
-DC8/kd/pspbtlnf_02g.bin: bootcnf/bootcnf cfg/pspbtlnf_02g.txt
-	./bootcnf/bootcnf -it cfg/pspbtlnf_02g.txt -ob DC8/kd/pspbtlnf_02g.bin
+DC8/kd/pspbtcnf_02g_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_m33.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_02g_m33.txt -ob pspbtcnf_02g_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_m33.bin DC8/kd/pspbtcnf_02g_m33.bin
+	rm pspbtcnf_02g_m33.bin
 
-DC8/kd/pspbtrnf_02g.bin: bootcnf/bootcnf cfg/pspbtrnf_02g.txt
-	./bootcnf/bootcnf -it cfg/pspbtrnf_02g.txt -ob DC8/kd/pspbtrnf_02g.bin
+DC8/kd/pspbtcnf_02g_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_recovery.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_02g_recovery.txt -ob pspbtcnf_02g_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_recovery.bin DC8/kd/pspbtcnf_02g_recovery.bin
+	rm pspbtcnf_02g_recovery.bin
 
-DC8/kd/pspbtdnf_03g.bin: bootcnf/bootcnf cfg/pspbtdnf_03g.txt
-	./bootcnf/bootcnf -it cfg/pspbtdnf_03g.txt -ob DC8/kd/pspbtdnf_03g.bin
+DC8/kd/pspbtcnf_03g_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_dc.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_03g_dc.txt -ob pspbtcnf_03g_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_dc.bin DC8/kd/pspbtcnf_03g_dc.bin
+	rm pspbtcnf_03g_dc.bin
 
-DC8/kd/pspbtjnf_03g.bin: bootcnf/bootcnf cfg/pspbtjnf_03g.txt
-	./bootcnf/bootcnf -it cfg/pspbtjnf_03g.txt -ob DC8/kd/pspbtjnf_03g.bin
+DC8/kd/pspbtcnf_03g_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_umd.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_03g_umd.txt -ob pspbtcnf_03g_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_umd.bin DC8/kd/pspbtcnf_03g_umd.bin
+	rm pspbtcnf_03g_umd.bin
 
-DC8/kd/pspbtknf_03g.bin: bootcnf/bootcnf cfg/pspbtknf_03g.txt
-	./bootcnf/bootcnf -it cfg/pspbtknf_03g.txt -ob DC8/kd/pspbtknf_03g.bin
+DC8/kd/pspbtcnf_03g_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_oe.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_03g_oe.txt -ob pspbtcnf_03g_oe.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_oe.bin DC8/kd/pspbtcnf_03g_oe.bin
+	rm pspbtcnf_03g_oe.bin
 
-DC8/kd/pspbtlnf_03g.bin: bootcnf/bootcnf cfg/pspbtlnf_03g.txt
-	./bootcnf/bootcnf -it cfg/pspbtlnf_03g.txt -ob DC8/kd/pspbtlnf_03g.bin
+DC8/kd/pspbtcnf_03g_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_m33.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_03g_m33.txt -ob pspbtcnf_03g_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_m33.bin DC8/kd/pspbtcnf_03g_m33.bin
+	rm pspbtcnf_03g_m33.bin
 
-DC8/kd/pspbtrnf_03g.bin: bootcnf/bootcnf cfg/pspbtrnf_03g.txt
-	./bootcnf/bootcnf -it cfg/pspbtrnf_03g.txt -ob DC8/kd/pspbtrnf_03g.bin
+DC8/kd/pspbtcnf_03g_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_recovery.txt
+	bootcnf/bootcnf -it cfg/pspbtcnf_03g_recovery.txt -ob pspbtcnf_03g_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_recovery.bin DC8/kd/pspbtcnf_03g_recovery.bin
+	rm pspbtcnf_03g_recovery.bin
 	
 DC8/tmctrl500.prx:
 	make -C ipl/rebootex clean

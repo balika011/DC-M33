@@ -135,12 +135,9 @@ int sceBootLfatOpenPatched(char *file)
 	{
 		switch(_lw(0x88FB00C0))
 		{
-			case 1:
-				g_file[9] = 'k';
-			case 2:
-				g_file[9] = 'l';
-			default:
-				g_file[9] = 'j';
+			case 1: memcpy(&g_file[strlen(g_file) - 4], "_oe.bin", 8); break; // MODE_OE_LEGACY
+			case 2: memcpy(&g_file[strlen(g_file) - 4], "_m33.bin", 9); break; // MODE_MARCH33
+			default: memcpy(&g_file[strlen(g_file) - 4], "_umd.bin", 9);
 		}
 	}
 

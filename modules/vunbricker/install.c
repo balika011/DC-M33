@@ -398,28 +398,28 @@ const char *common_m33[] =
 
 const char *spec_01g_m33[] =
 {
-	"kd/pspbtjnf.bin",
-	"kd/pspbtknf.bin",
-	"kd/pspbtlnf.bin",
-	"kd/pspbtrnf.bin",
+	"kd/pspbtcnf_umd.bin",
+	"kd/pspbtcnf_oe.bin",
+	"kd/pspbtcnf_m33.bin",
+	"kd/pspbtcnf_recovery.bin",
 	"kd/systemctrl.prx"
 };
 
 const char *spec_02g_m33[] =
 {
-	"kd/pspbtjnf_02g.bin",
-	"kd/pspbtknf_02g.bin",
-	"kd/pspbtlnf_02g.bin",
-	"kd/pspbtrnf_02g.bin",
+	"kd/pspbtcnf_02g_umd.bin",
+	"kd/pspbtcnf_02g_oe.bin",
+	"kd/pspbtcnf_02g_m33.bin",
+	"kd/pspbtcnf_02g_recovery.bin",
 	"kd/systemctrl_02g.prx"
 };
 
 const char *spec_03g_m33[] =
 {
-	"kd/pspbtjnf_03g.bin",
-	"kd/pspbtknf_03g.bin",
-	"kd/pspbtlnf_03g.bin",
-	"kd/pspbtrnf_03g.bin",
+	"kd/pspbtcnf_03g_umd.bin",
+	"kd/pspbtcnf_03g_oe.bin",
+	"kd/pspbtcnf_03g_m33.bin",
+	"kd/pspbtcnf_03g_recovery.bin",
 	"kd/systemctrl_03g.prx"
 };
 

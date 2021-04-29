@@ -141,15 +141,15 @@ int sceBootLfatOpenPatched(char *file)
 	memcpy(g_file, file, 64);
 	
 	if (memcmp(g_file+4, "pspbtcnf", 8) == 0)
-	{
+	{		
 		if (recovery)
-			g_file[9] = 'r';
+			memcpy(&g_file[strlen(g_file) - 4], "_recovery.bin", 17);
 #ifdef MSIPL
 		else if (!msboot)
-			g_file[9] = 'd';
+			memcpy(&g_file[strlen(g_file) - 4], "_dc.bin", 8);
 #endif
 		else
-			g_file[9] = 'j';
+			memcpy(&g_file[strlen(g_file) - 4], "_umd.bin", 9);
 	}
 
 #ifdef MSIPL
