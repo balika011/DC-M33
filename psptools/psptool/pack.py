@@ -152,8 +152,7 @@ class PSPHeader:
     def pack(self):
         return struct.pack('<IHHBB28sBBIIIII4H4I4I5IIBxH48BII2I16BI88BII28B',
                            PSP_HEADER_MAGIC, self.attribute, self.comp_attribute, self.module_ver_lo, self.module_ver_hi,
-                           self.modname.encode(
-                               'ascii'), self.version, self.nsegments, self.elf_size, self.psp_size, self.entry,
+                           self.modname.encode('ascii'), self.version, self.nsegments, self.elf_size, self.psp_size, self.entry,
                            self.modinfo_offset, self.bss_size, *
                            self.seg_align, *self.seg_address, *self.seg_size,
                            *self.reserved, self.devkitversion, self.decrypt_mode, 0,
@@ -242,7 +241,7 @@ def pack_prx(executable, is_pbp, fix_relocs=True, psptag=psptag_default, oetag=o
     gzip = subprocess.Popen(["gzip"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     compressed_exec = gzip.communicate(executable)[0]
     
-    padding = padding = b'\x00' * \
+    padding = b'\x00' * \
         (0x10-(len(compressed_exec) % 16)) if len(compressed_exec) % 16 else b''
 
     psp_header.comp_size = len(compressed_exec)

@@ -859,13 +859,27 @@ int install_thread(SceSize args, void *argp)
 	SetStatus("Flashing IPL... ");
 	
 	const char *ipl_name = 0;
+	u16 ipl_key = 0;
 	
-	switch (model)
+	if (ofw)
 	{
-		case 0: ipl_name = "flash0:/nandipl_01g.bin"; break;
-		case 1: ipl_name = "flash0:/nandipl_02g.bin"; break;
-		case 2: ipl_name = "flash0:/nandipl_03g.bin"; break;
-		default: InstallError(ofw, "Unsupported model.");
+		switch (model)
+		{
+			case 0: ipl_name = "flash0:/nandipl_01g.bin"; break;
+			case 1: ipl_name = "flash0:/nandipl_02g.bin"; break;
+			case 2: ipl_name = "flash0:/nandipl_03g.bin"; ipl_key = 1; break;
+			default: InstallError(ofw, "Unsupported model.");
+		}
+	}
+	else
+	{
+		switch (model)
+		{
+			case 0: ipl_name = "flash0:/nandcipl_01g.bin"; break;
+			case 1: ipl_name = "flash0:/nandcipl_02g.bin"; break;
+			case 2: ipl_name = "flash0:/nandcipl_03g.bin"; break;
+			default: InstallError(ofw, "Unsupported model.");
+		}
 	}
 
 	size = ReadFile(ipl_name, 0, big_buffer, BIG_BUFFER_SIZE);
@@ -874,14 +888,12 @@ int install_thread(SceSize args, void *argp)
 		InstallError(ofw, "Cannot read nandipl\n");
 	}
 	
-	// TODO: ofw?
-	
 	dcPatchModuleString("IoPrivileged", "IoPrivileged", "IoPrivileged");
 
 	if (pspIplUpdateClearIpl() < 0)
 		InstallError(ofw, "Error in pspIplUpdateClearIpl");
 	
-	if (pspIplUpdateSetIpl(big_buffer, size) < 0)
+	if (pspIplUpdateSetIpl(big_buffer, size, ipl_key) < 0)
 		InstallError(ofw, "Error in pspIplUpdateSetIpl");
 
 	sceKernelDelayThread(900000);

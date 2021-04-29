@@ -132,7 +132,7 @@ int pspIplClearIpl()
 	return 0;
 }
 
-int pspIplSetIpl(u8 *buf, u32 size)
+int pspIplSetIpl(u8 *buf, u32 size, u16 key)
 {
 	int i, res, nblocks, written;
 	u32 block, ppn;
@@ -150,7 +150,7 @@ int pspIplSetIpl(u8 *buf, u32 size)
 	// Init spare data
 	for (i = 0, p = (u32 *)spare; i < PSP_NAND_PAGES_PER_BLOCK; i++, p += (PSP_NAND_PAGE_SPARE_SMALL_SIZE/4))
 	{
-		p[0] = 0x0000FFFF;
+		p[0] = 0xFFFF | key << 16;
 		p[1] = PSP_IPL_SIGNATURE;
 		p[2] = 0xFFFFFFFF;
 	}
@@ -274,14 +274,14 @@ int pspIplUpdateClearIpl()
 	return res;
 }
 
-int pspIplUpdateSetIpl(u8 *buf, u32 size)
+int pspIplUpdateSetIpl(u8 *buf, u32 size, u16 key)
 {
 	int k1 = pspSdkSetK1(0);
 	sceNandLock(1);
 	
 	SetScrambleZero();
 	
-	int res = pspIplSetIpl(buf, size);
+	int res = pspIplSetIpl(buf, size, key);
 
 	sceNandUnlock();
 	pspSdkSetK1(k1);
