@@ -436,11 +436,6 @@ int LoadUpdaterModules(int ofw)
 			return 2;
 	}
 
-	if (!ofw && kuKernelGetModel() == 0)
-		dcPatchModule("sceNAND_Updater_Driver", 1, 0x0D7E, 0xAC60);
-	else
-		dcPatchModule("sceNAND_Updater_Driver", 1, 0x0D7E, 0xAC64);
-
 	mod = sceKernelLoadModule("flash0:/kd/lfatfs_updater.prx", 0, NULL);
 	if (mod < 0 && mod != SCE_KERNEL_ERROR_EXCLUSIVE_LOAD)
 		return 3;
@@ -685,8 +680,8 @@ void CopyFileList(int ofw, const char **list, int file_count, int start_file_cou
 				break;
 		
 			if (!signechecked &&
-				memcmp(&list[i][strlen(list[i]) - 4], ".prx", 4) == 0 &&
-				memcmp(list[i], "kd/pspbtcnf", 12) != 0)
+				(memcmp(&list[i][strlen(list[i]) - 4], ".prx", 4) == 0 ||
+				memcmp(list[i], "kd/pspbtcnf", 11) == 0))
 			{
 				pspSignCheck(big_buffer);
 				signechecked = 1;

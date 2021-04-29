@@ -298,10 +298,6 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 #ifdef MSIPL
 		_sw(0x03e00008, NAND_ENCRYPTION);
 		_sw(0x1021, NAND_ENCRYPTION + 4);
-#else
-#ifdef IPL_01G
-		_sw(0xAC60, 0x8860E2D6);
-#endif
 #endif
 
 		// Clear Systemctrl vars
@@ -311,6 +307,7 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 #ifndef MSIPL
 	}
 #endif
+
 	return Ipl_Payload(a0, a1, a2, a3, t0, t1, t2);	
 }
 
