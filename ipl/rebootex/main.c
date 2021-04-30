@@ -1,7 +1,9 @@
 #include <pspsdk.h>
 #include <string.h>
 #include "syscon.h"
+#ifdef MSIPL
 #include "fat.h"
+#endif
 
 #ifdef DEBUG
 #include "printf.h"
@@ -16,10 +18,11 @@
 
 #ifdef IPL_01G
 
-int (* Ipl_Payload)(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) = (void *)0x88600000;
-int (* DcacheClear)(void) = (void *)0x886007C0;
-int (* IcacheClear)(void) = (void *)0x8860022C;
-int (* sceBootModuleLoad)(char *) = (void *)0x88604F34;
+#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(void *, void *, void *, void *, void *, void *, void *)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
+#define DcacheClear() ((int (*)(void)) 0x886007C0)()
+#define IcacheClear() ((int (*)(void)) 0x8860022C)()
+#define sceBootModuleLoad(str) ((int (*)(char *)) 0x88604F34)(str)
+#define sceBootLfatOpen(str) ((int (*)(char *)) 0x88607B10)(str)
 
 #define FAT_MOUNT_ADDR 0x88601F44
 #define FAT_OPEN_ADDR 0x88601F58
@@ -45,10 +48,11 @@ int (* sceBootModuleLoad)(char *) = (void *)0x88604F34;
 
 #elif IPL_02G
 
-int (* Ipl_Payload)(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) = (void *)0x88600000;
-int (* DcacheClear)(void) = (void *)0x886007C0;
-int (* IcacheClear)(void) = (void *)0x8860022C;
-int (* sceBootModuleLoad)(char *) = (void *)0x88604FFC;
+#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(void *, void *, void *, void *, void *, void *, void *)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
+#define DcacheClear() ((int (*)(void)) 0x886007C0)()
+#define IcacheClear() ((int (*)(void)) 0x8860022C)()
+#define sceBootModuleLoad(str) ((int (*)(char *)) 0x88604FFC)(str)
+#define sceBootLfatOpen(str) ((int (*)(char *)) 0x88607BE0)(str)
 
 #define FAT_MOUNT_ADDR 0x8860200C
 #define FAT_OPEN_ADDR 0x88602020
@@ -74,10 +78,11 @@ int (* sceBootModuleLoad)(char *) = (void *)0x88604FFC;
 
 #elif IPL_03G
 
-int (* Ipl_Payload)(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) = (void *)0x88600000;
-int (* DcacheClear)(void) = (void *)0x886007C0;
-int (* IcacheClear)(void) = (void *)0x8860022C;
-int (* sceBootModuleLoad)(char *) = (void *)0x88604FFC;
+#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(void *, void *, void *, void *, void *, void *, void *)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
+#define DcacheClear() ((int (*)(void)) 0x886007C0)()
+#define IcacheClear() ((int (*)(void)) 0x8860022C)()
+#define sceBootModuleLoad(str) ((int (*)(char *)) 0x88604FFC)(str)
+#define sceBootLfatOpen(str) ((int (*)(char *)) 0x88607BE0)(str)
 
 #define FAT_MOUNT_ADDR 0x8860200C
 #define FAT_OPEN_ADDR 0x88602020
@@ -113,6 +118,7 @@ void ClearCaches()
 	IcacheClear();
 }
 
+#ifdef MSIPL
 char g_filename[128];
 int BuildPath(char *path)
 {
@@ -120,6 +126,7 @@ int BuildPath(char *path)
 	strcat(g_filename, path);
 	return MsFatOpen(g_filename);
 }
+#endif
 
 char g_file[64];
 int sceBootLfatOpenPatched(char *file)
@@ -141,9 +148,14 @@ int sceBootLfatOpenPatched(char *file)
 		}
 	}
 
-	return BuildPath(g_file);	
+#ifdef MSIPL
+	return BuildPath(g_file);
+#else
+	return sceBootLfatOpen(g_file);
+#endif
 }
 
+#ifdef MSIPL
 char tmctrl[] = "/tmctrl500.prx";
 
 int sceBootModuleLoadPatched(char *file)
@@ -166,6 +178,7 @@ int sceBootModuleLoadPatched(char *file)
 	
 	return len;
 }
+#endif
 
 int PatchLoadCore(void *a0, void *a1, void *a2, int (* module_start)(void *, void *, void *))
 {
@@ -175,10 +188,12 @@ int PatchLoadCore(void *a0, void *a1, void *a2, int (* module_start)(void *, voi
 
 	u32 text_addr = ((u32)module_start) - 0xC74;
 
+#ifdef MSIPL
 	// disable unsign check
 	_sw(0x1021, text_addr + 0x691C);
 	_sw(0x1021, text_addr + 0x694C);
 	_sw(0x1021, text_addr + 0x69E4);
+#endif
 
 	ClearCaches();
 	
@@ -215,10 +230,14 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 #endif
 
 	// Patch sceBootLfatOpen, scebootLfatRead and sceBooLfatClose calls
+#ifdef MSIPL
 	MAKE_CALL(FAT_MOUNT_ADDR, MsFatMount);
+#endif
 	MAKE_CALL(FAT_OPEN_ADDR, sceBootLfatOpenPatched);
+#ifdef MSIPL
 	MAKE_CALL(FAT_READ_ADDR, MsFatRead);
 	MAKE_CALL(FAT_CLOSE_ADDR, MsFatClose);
+#endif
 
 	// Patch sceKernelCheckPspConfig to enable plain config 
 	// sw $a0, 0($sp) -> sw $a1, 0($sp) 
@@ -233,7 +252,9 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	_sw(0, RECOVERY_ERROR1);
 	_sw(0, RECOVERY_ERROR2);
 	
+#ifdef MSIPL
 	MAKE_CALL(MODULE_PATCH, sceBootModuleLoadPatched);
+#endif
 	
 #ifdef DEBUG
 	// patch point : removeByDebugSecion 
@@ -256,8 +277,10 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	_sw(0, PSP_CONFIG_HASH);
 
 	// Patch nand encryption
+#ifdef MSIPL
 	_sw(0x03e00008, NAND_ENCRYPTION);
 	_sw(0x1021, NAND_ENCRYPTION + 4);
+#endif
 
 	/*
 	rtm_module_after = _lw(0x88FB00D0);

@@ -1,4 +1,4 @@
-
+#ifdef MSIPL
 #include <pspkernel.h>
 
 #define IO_MEM_STICK_CMD *((volatile int*)(0xBD200030))
@@ -357,4 +357,4 @@ Kprintf("err:ms wait int\n");
 
   return 0;
 }
-
+#endif
