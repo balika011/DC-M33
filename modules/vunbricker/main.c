@@ -283,11 +283,11 @@ void MainMenu(int sel)
 {
 	char *items[] =
 	{
-		"Install 5.00 M33",
-		"Install 5.00 OFW",
+		"Install 5.00 M33-7",
+		"Install 5.00",
 		"NAND operations",
 		"Hardware Info",
-		"Test M33",
+		"Boot 5.00 M33-7 from MS",
 		"Shutdown",
 		"Reboot Device"
 	};
@@ -352,6 +352,9 @@ int app_main()
 
 	if (data)
 		free(data);
+		
+	vlfGuiSetLanguage(1);
+	vlfGuiSetButtonConfig(1);
 
 	vlfGuiChangeCharacterByButton('*', VLF_ENTER);
 	vlfGuiCacheResource("system_plugin");

@@ -38,7 +38,7 @@ void WriteFile(char *file, void *buf, int size)
 
 void BuildPath(const char *file)
 {
-	strcpy(path, "ms0:/TM/DC8");
+	strcpy(path, "ms0:/TM/DC9");
 	strcat(path, file);
 }
 
@@ -48,7 +48,7 @@ void WaitMS()
 	{
 		while (1)
 		{
-			SceUID fd = sceIoDopen("ms0:/TM/DC8/");
+			SceUID fd = sceIoDopen("ms0:/TM/DC9/");
 			if (fd >= 0)
 			{
 				sceIoDclose(fd);

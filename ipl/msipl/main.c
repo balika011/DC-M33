@@ -86,7 +86,7 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 		
 	char path[60];
 	
-	sprintf(path, "/TM/DC8/ipl_%02dg.bin", gen);
+	sprintf(path, "/TM/DC9/ipl_%02dg.bin", gen);
 	
 #ifdef DEBUG
 	printf("ipl: %s\n", path);

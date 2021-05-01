@@ -1,9 +1,9 @@
 PSPDEV=$(shell psp-config --pspdev-path)
 
-all: DC8 DC8/msipl.bin DC8/ipl_01g.bin DC8/ipl_02g.bin DC8/ipl_03g.bin DC8/nandcipl_01g.bin DC8/nandcipl_02g.bin DC8/nandcipl_03g.bin DC8/kd/pspbtcnf_dc.bin DC8/kd/pspbtcnf_umd.bin DC8/kd/pspbtcnf_oe.bin DC8/kd/pspbtcnf_m33.bin DC8/kd/pspbtcnf_recovery.bin DC8/kd/pspbtcnf_02g_dc.bin DC8/kd/pspbtcnf_02g_umd.bin DC8/kd/pspbtcnf_02g_oe.bin DC8/kd/pspbtcnf_02g_m33.bin DC8/kd/pspbtcnf_02g_recovery.bin DC8/kd/pspbtcnf_03g_dc.bin DC8/kd/pspbtcnf_03g_umd.bin DC8/kd/pspbtcnf_03g_oe.bin DC8/kd/pspbtcnf_03g_m33.bin DC8/kd/pspbtcnf_03g_recovery.bin DC8/tmctrl500.prx DC8/kd/ipl_update.prx DC8/kd/resurrection.prx DC8/kd/dcman.prx DC8/kd/iop.prx DC8/kd/lflash_fdisk.prx DC8/kd/idsregeneration.prx DC8/kd/emc_sm_updater.prx DC8/kd/lfatfs_updater.prx DC8/kd/lflash_fatfmt_updater.prx DC8/vsh/module/intraFont.prx DC8/vsh/module/vlf.prx DC8/kd/pspdecrypt.prx DC8/kd/galaxy.prx DC8/kd/idcanager.prx DC8/kd/march33.prx DC8/kd/popcorn.prx DC8/kd/systemctrl.prx DC8/kd/systemctrl_02g.prx DC8/kd/systemctrl_03g.prx DC8/kd/usbdevice.prx DC8/kd/vshctrl.prx DC8/vsh/module/recovery.prx DC8/vsh/module/satelite.prx
+all: TM/DC9 TM/msipl.bin TM/DC9/ipl_01g.bin TM/DC9/ipl_02g.bin TM/DC9/ipl_03g.bin TM/DC9/nandcipl_01g.bin TM/DC9/nandcipl_02g.bin TM/DC9/nandcipl_03g.bin TM/DC9/kd/pspbtcnf_dc.bin TM/DC9/kd/pspbtcnf_umd.bin TM/DC9/kd/pspbtcnf_oe.bin TM/DC9/kd/pspbtcnf_m33.bin TM/DC9/kd/pspbtcnf_recovery.bin TM/DC9/kd/pspbtcnf_02g_dc.bin TM/DC9/kd/pspbtcnf_02g_umd.bin TM/DC9/kd/pspbtcnf_02g_oe.bin TM/DC9/kd/pspbtcnf_02g_m33.bin TM/DC9/kd/pspbtcnf_02g_recovery.bin TM/DC9/kd/pspbtcnf_03g_dc.bin TM/DC9/kd/pspbtcnf_03g_umd.bin TM/DC9/kd/pspbtcnf_03g_oe.bin TM/DC9/kd/pspbtcnf_03g_m33.bin TM/DC9/kd/pspbtcnf_03g_recovery.bin TM/DC9/tmctrl500.prx TM/DC9/kd/ipl_update.prx TM/DC9/kd/resurrection.prx TM/DC9/kd/dcman.prx TM/DC9/kd/iop.prx TM/DC9/kd/lflash_fdisk.prx TM/DC9/kd/idsregeneration.prx TM/DC9/kd/emc_sm_updater.prx TM/DC9/kd/lfatfs_updater.prx TM/DC9/kd/lflash_fatfmt_updater.prx TM/DC9/vsh/module/intraFont.prx TM/DC9/vsh/module/vlf.prx TM/DC9/kd/pspdecrypt.prx TM/DC9/kd/galaxy.prx TM/DC9/kd/idcanager.prx TM/DC9/kd/march33.prx TM/DC9/kd/popcorn.prx TM/DC9/kd/systemctrl.prx TM/DC9/kd/systemctrl_02g.prx TM/DC9/kd/systemctrl_03g.prx TM/DC9/kd/usbdevice.prx TM/DC9/kd/vshctrl.prx TM/DC9/vsh/module/recovery.prx TM/DC9/vsh/module/satelite.prx
 
 clean:
-	rm -rf DC8
+	rm -rf TM
 	make -C ipl/msipl clean
 	make -C ipl/payloadex clean
 	make -C ipl/ipl_stage2_payload clean
@@ -23,23 +23,26 @@ clean:
 	make -C modules/lflash_fdisk clean
 	make -C modules/idsregeneration clean
 
-DC8:
-	mkdir DC8
-	cp -R 500/flash0/* DC8/
-	cp -R 500/nandipl*.bin DC8/
-	mkdir -p DC8/dic
-	mkdir -p DC8/gps
-	mkdir -p DC8/net/http
-	mkdir -p DC8/registry
-	mkdir -p DC8/vsh/theme
-	touch DC8/registry/init.dat
+TM:
+	mkdir TM
 
-DC8/msipl.bin:
+TM/DC9: TM
+	mkdir TM/DC9
+	cp -R 500/flash0/* TM/DC9/
+	cp -R 500/nandipl*.bin TM/DC9/
+	mkdir -p TM/DC9/dic
+	mkdir -p TM/DC9/gps
+	mkdir -p TM/DC9/net/http
+	mkdir -p TM/DC9/registry
+	mkdir -p TM/DC9/vsh/theme
+	touch TM/DC9/registry/init.dat
+
+TM/msipl.bin: TM
 	make -C ipl/msipl
 
-	psptools/pack_ipl.py ipl/msipl/msipl.bin@0x40c0000 DC8/msipl.bin 0x40c0000
+	psptools/pack_ipl.py ipl/msipl/msipl.bin@0x40c0000 TM/msipl.bin 0x40c0000
 
-DC8/ipl_01g.bin:
+TM/DC9/ipl_01g.bin: TM/DC9
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_01G -DMSIPL=1"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
@@ -51,13 +54,13 @@ DC8/ipl_01g.bin:
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_01G -DMSIPL=1"
 
-	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/ipl_01g.bin
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_01g.bin
 
 	psptools/unpack_ipl.py 500/nandipl_01g.bin ipl_01g.dec
-	dd if=ipl_01g.dec of=DC8/ipl_01g.bin bs=1 seek=12288
+	dd if=ipl_01g.dec of=TM/DC9/ipl_01g.bin bs=1 seek=12288
 	rm ipl_01g.dec
 	
-DC8/ipl_02g.bin:
+TM/DC9/ipl_02g.bin: TM/DC9
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_02G -DMSIPL=1"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
@@ -69,13 +72,13 @@ DC8/ipl_02g.bin:
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_02G -DMSIPL=1"
 
-	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/ipl_02g.bin
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_02g.bin
 
 	psptools/unpack_ipl.py 500/nandipl_02g.bin ipl_02g.dec
-	dd if=ipl_02g.dec of=DC8/ipl_02g.bin bs=1 seek=12288
+	dd if=ipl_02g.dec of=TM/DC9/ipl_02g.bin bs=1 seek=12288
 	rm ipl_02g.dec
 	
-DC8/ipl_03g.bin:
+TM/DC9/ipl_03g.bin: TM/DC9
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_03G -DMSIPL=1"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
@@ -87,12 +90,12 @@ DC8/ipl_03g.bin:
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_03G -DMSIPL=1"
 
-	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=DC8/ipl_03g.bin
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_03g.bin
 	psptools/unpack_ipl.py 500/nandipl_03g.bin ipl_03g.dec --xor 1
-	dd if=ipl_03g.dec of=DC8/ipl_03g.bin bs=1 seek=12288
+	dd if=ipl_03g.dec of=TM/DC9/ipl_03g.bin bs=1 seek=12288
 	rm ipl_03g.dec
 
-DC8/nandcipl_01g.bin:
+TM/DC9/nandcipl_01g.bin: TM/DC9
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_01G"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
@@ -105,11 +108,11 @@ DC8/nandcipl_01g.bin:
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_01G"
 
 	psptools/unpack_ipl.py 500/nandipl_01g.bin ipl_01g.dec
-	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_01g.dec@0x40f0000 DC8/nandcipl_01g.bin 0x40e0000
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_01g.dec@0x40f0000 TM/DC9/nandcipl_01g.bin 0x40e0000
 	rm ipl_01g.dec
 
 
-DC8/nandcipl_02g.bin:
+TM/DC9/nandcipl_02g.bin: TM/DC9
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_02G"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
@@ -122,10 +125,10 @@ DC8/nandcipl_02g.bin:
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_02G"
 
 	psptools/unpack_ipl.py 500/nandipl_02g.bin ipl_02g.dec
-	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_02g.dec@0x40f0000 DC8/nandcipl_02g.bin 0x40e0000
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_02g.dec@0x40f0000 TM/DC9/nandcipl_02g.bin 0x40e0000
 	rm ipl_02g.dec
 
-DC8/nandcipl_03g.bin:
+TM/DC9/nandcipl_03g.bin: TM/DC9
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_03G"
 	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
@@ -138,88 +141,88 @@ DC8/nandcipl_03g.bin:
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_03G"
 
 	psptools/unpack_ipl.py 500/nandipl_03g.bin ipl_03g.dec --xor 1
-	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_03g.dec@0x40f0000 DC8/nandcipl_03g.bin 0x40e0000
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_03g.dec@0x40f0000 TM/DC9/nandcipl_03g.bin 0x40e0000
 	rm ipl_03g.dec
 
 bootcnf/bootcnf:
 	make -C bootcnf
 
-DC8/kd/pspbtcnf_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_dc.txt
+TM/DC9/kd/pspbtcnf_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_dc.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_dc.txt -ob pspbtcnf_dc.bin
-	psptools/pack_bootcfg.py pspbtcnf_dc.bin DC8/kd/pspbtcnf_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_dc.bin TM/DC9/kd/pspbtcnf_dc.bin
 	rm pspbtcnf_dc.bin
 
-DC8/kd/pspbtcnf_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_umd.txt
+TM/DC9/kd/pspbtcnf_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_umd.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_umd.txt -ob pspbtcnf_umd.bin
-	psptools/pack_bootcfg.py pspbtcnf_umd.bin DC8/kd/pspbtcnf_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_umd.bin TM/DC9/kd/pspbtcnf_umd.bin
 	rm pspbtcnf_umd.bin
 
-DC8/kd/pspbtcnf_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_oe.txt
+TM/DC9/kd/pspbtcnf_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_oe.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_oe.txt -ob pspbtcnf_oe.bin
-	psptools/pack_bootcfg.py pspbtcnf_oe.bin DC8/kd/pspbtcnf_oe.bin
+	psptools/pack_bootcfg.py pspbtcnf_oe.bin TM/DC9/kd/pspbtcnf_oe.bin
 	rm pspbtcnf_oe.bin
 
-DC8/kd/pspbtcnf_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_m33.txt
+TM/DC9/kd/pspbtcnf_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_m33.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_m33.txt -ob pspbtcnf_m33.bin
-	psptools/pack_bootcfg.py pspbtcnf_m33.bin DC8/kd/pspbtcnf_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_m33.bin TM/DC9/kd/pspbtcnf_m33.bin
 	rm pspbtcnf_m33.bin
 
-DC8/kd/pspbtcnf_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_recovery.txt
+TM/DC9/kd/pspbtcnf_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_recovery.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_recovery.txt -ob pspbtcnf_recovery.bin
-	psptools/pack_bootcfg.py pspbtcnf_recovery.bin DC8/kd/pspbtcnf_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_recovery.bin TM/DC9/kd/pspbtcnf_recovery.bin
 	rm pspbtcnf_recovery.bin
 
-DC8/kd/pspbtcnf_02g_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_dc.txt
+TM/DC9/kd/pspbtcnf_02g_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_dc.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_02g_dc.txt -ob pspbtcnf_02g_dc.bin
-	psptools/pack_bootcfg.py pspbtcnf_02g_dc.bin DC8/kd/pspbtcnf_02g_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_dc.bin TM/DC9/kd/pspbtcnf_02g_dc.bin
 	rm pspbtcnf_02g_dc.bin
 
-DC8/kd/pspbtcnf_02g_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_umd.txt
+TM/DC9/kd/pspbtcnf_02g_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_umd.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_02g_umd.txt -ob pspbtcnf_02g_umd.bin
-	psptools/pack_bootcfg.py pspbtcnf_02g_umd.bin DC8/kd/pspbtcnf_02g_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_umd.bin TM/DC9/kd/pspbtcnf_02g_umd.bin
 	rm pspbtcnf_02g_umd.bin
 
-DC8/kd/pspbtcnf_02g_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_oe.txt
+TM/DC9/kd/pspbtcnf_02g_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_oe.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_02g_oe.txt -ob pspbtcnf_02g_oe.bin
-	psptools/pack_bootcfg.py pspbtcnf_02g_oe.bin DC8/kd/pspbtcnf_02g_oe.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_oe.bin TM/DC9/kd/pspbtcnf_02g_oe.bin
 	rm pspbtcnf_02g_oe.bin
 
-DC8/kd/pspbtcnf_02g_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_m33.txt
+TM/DC9/kd/pspbtcnf_02g_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_m33.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_02g_m33.txt -ob pspbtcnf_02g_m33.bin
-	psptools/pack_bootcfg.py pspbtcnf_02g_m33.bin DC8/kd/pspbtcnf_02g_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_m33.bin TM/DC9/kd/pspbtcnf_02g_m33.bin
 	rm pspbtcnf_02g_m33.bin
 
-DC8/kd/pspbtcnf_02g_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_recovery.txt
+TM/DC9/kd/pspbtcnf_02g_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_02g_recovery.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_02g_recovery.txt -ob pspbtcnf_02g_recovery.bin
-	psptools/pack_bootcfg.py pspbtcnf_02g_recovery.bin DC8/kd/pspbtcnf_02g_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_02g_recovery.bin TM/DC9/kd/pspbtcnf_02g_recovery.bin
 	rm pspbtcnf_02g_recovery.bin
 
-DC8/kd/pspbtcnf_03g_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_dc.txt
+TM/DC9/kd/pspbtcnf_03g_dc.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_dc.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_03g_dc.txt -ob pspbtcnf_03g_dc.bin
-	psptools/pack_bootcfg.py pspbtcnf_03g_dc.bin DC8/kd/pspbtcnf_03g_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_dc.bin TM/DC9/kd/pspbtcnf_03g_dc.bin
 	rm pspbtcnf_03g_dc.bin
 
-DC8/kd/pspbtcnf_03g_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_umd.txt
+TM/DC9/kd/pspbtcnf_03g_umd.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_umd.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_03g_umd.txt -ob pspbtcnf_03g_umd.bin
-	psptools/pack_bootcfg.py pspbtcnf_03g_umd.bin DC8/kd/pspbtcnf_03g_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_umd.bin TM/DC9/kd/pspbtcnf_03g_umd.bin
 	rm pspbtcnf_03g_umd.bin
 
-DC8/kd/pspbtcnf_03g_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_oe.txt
+TM/DC9/kd/pspbtcnf_03g_oe.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_oe.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_03g_oe.txt -ob pspbtcnf_03g_oe.bin
-	psptools/pack_bootcfg.py pspbtcnf_03g_oe.bin DC8/kd/pspbtcnf_03g_oe.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_oe.bin TM/DC9/kd/pspbtcnf_03g_oe.bin
 	rm pspbtcnf_03g_oe.bin
 
-DC8/kd/pspbtcnf_03g_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_m33.txt
+TM/DC9/kd/pspbtcnf_03g_m33.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_m33.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_03g_m33.txt -ob pspbtcnf_03g_m33.bin
-	psptools/pack_bootcfg.py pspbtcnf_03g_m33.bin DC8/kd/pspbtcnf_03g_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_m33.bin TM/DC9/kd/pspbtcnf_03g_m33.bin
 	rm pspbtcnf_03g_m33.bin
 
-DC8/kd/pspbtcnf_03g_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_recovery.txt
+TM/DC9/kd/pspbtcnf_03g_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_recovery.txt TM/DC9
 	bootcnf/bootcnf -it cfg/pspbtcnf_03g_recovery.txt -ob pspbtcnf_03g_recovery.bin
-	psptools/pack_bootcfg.py pspbtcnf_03g_recovery.bin DC8/kd/pspbtcnf_03g_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_03g_recovery.bin TM/DC9/kd/pspbtcnf_03g_recovery.bin
 	rm pspbtcnf_03g_recovery.bin
 	
-DC8/tmctrl500.prx:
+TM/DC9/tmctrl500.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_01G -DMSIPL=1"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
@@ -239,64 +242,63 @@ DC8/tmctrl500.prx:
 	rm rebootex_03g.bin.gz
 
 	make -C modules/flashemu
-	python3 psptools/pack_module.py modules/flashemu/flashemu.prx DC8/tmctrl500.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/flashemu/flashemu.prx TM/DC9/tmctrl500.prx --tag 0x4c9416f0
 	
-
-DC8/kd/ipl_update.prx:
+TM/DC9/kd/ipl_update.prx: TM/DC9
 	make -C modules/ipl_update
-	python3 psptools/pack_module.py modules/ipl_update/ipl_update.prx DC8/kd/ipl_update.prx --tag 0x4c9416f0
-	
-DC8/kd/resurrection.prx:
+	python3 psptools/pack_module.py modules/ipl_update/ipl_update.prx TM/DC9/kd/ipl_update.prx --tag 0x4c9416f0
+
+TM/DC9/kd/resurrection.prx: TM/DC9
 	make -C modules/vunbricker
-	python3 psptools/pack_module.py modules/vunbricker/resurrection.prx DC8/kd/resurrection.prx --tag 0x38020af0
+	python3 psptools/pack_module.py modules/vunbricker/resurrection.prx TM/DC9/kd/resurrection.prx --tag 0x38020af0
 
-DC8/kd/dcman.prx:
+TM/DC9/kd/dcman.prx: TM/DC9
 	make -C modules/dcman
-	python3 psptools/pack_module.py modules/dcman/dcman.prx DC8/kd/dcman.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/dcman/dcman.prx TM/DC9/kd/dcman.prx --tag 0x4c9416f0
 
-DC8/kd/iop.prx:
+TM/DC9/kd/iop.prx: TM/DC9
 	make -C modules/iop
-	python3 psptools/pack_module.py modules/iop/iop.prx DC8/kd/iop.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/iop/iop.prx TM/DC9/kd/iop.prx --tag 0x4c9416f0
 
-DC8/kd/lflash_fdisk.prx:
+TM/DC9/kd/lflash_fdisk.prx: TM/DC9
 	make -C modules/lflash_fdisk
-	python3 psptools/pack_module.py modules/lflash_fdisk/lflash_fdisk.prx DC8/kd/lflash_fdisk.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/lflash_fdisk/lflash_fdisk.prx TM/DC9/kd/lflash_fdisk.prx --tag 0x4c9416f0
 
-DC8/kd/idsregeneration.prx:
+TM/DC9/kd/idsregeneration.prx: TM/DC9
 	make -C modules/idsregeneration
-	python3 psptools/pack_module.py modules/idsregeneration/idsregeneration.prx DC8/kd/idsregeneration.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/idsregeneration/idsregeneration.prx TM/DC9/kd/idsregeneration.prx --tag 0x4c9416f0
 	
-DC8/kd/emc_sm_updater.prx:
-	python3 psptools/pack_module.py modules/emc_sm_updater.prx DC8/kd/emc_sm_updater.prx --tag 0x4c9416f0
+TM/DC9/kd/emc_sm_updater.prx: TM/DC9
+	python3 psptools/pack_module.py modules/emc_sm_updater.prx TM/DC9/kd/emc_sm_updater.prx --tag 0x4c9416f0
 
-DC8/kd/lfatfs_updater.prx:
-	python3 psptools/pack_module.py modules/lfatfs_updater.prx DC8/kd/lfatfs_updater.prx --tag 0x4c9416f0
+TM/DC9/kd/lfatfs_updater.prx: TM/DC9
+	python3 psptools/pack_module.py modules/lfatfs_updater.prx TM/DC9/kd/lfatfs_updater.prx --tag 0x4c9416f0
 
-DC8/kd/lflash_fatfmt_updater.prx:
-	python3 psptools/pack_module.py modules/lflash_fatfmt_updater.prx DC8/kd/lflash_fatfmt_updater.prx --tag 0x4c9416f0
+TM/DC9/kd/lflash_fatfmt_updater.prx: TM/DC9
+	python3 psptools/pack_module.py modules/lflash_fatfmt_updater.prx TM/DC9/kd/lflash_fatfmt_updater.prx --tag 0x4c9416f0
 
-DC8/vsh/module/intraFont.prx:
-	python3 psptools/pack_module.py modules/intraFont.elf DC8/vsh/module/intraFont.prx --tag 0x457b0af0
+TM/DC9/vsh/module/intraFont.prx: TM/DC9
+	python3 psptools/pack_module.py modules/intraFont.elf TM/DC9/vsh/module/intraFont.prx --tag 0x457b0af0
 
-DC8/vsh/module/vlf.prx:
-	python3 psptools/pack_module.py modules/vlf.elf DC8/vsh/module/vlf.prx --tag 0x457b0af0
+TM/DC9/vsh/module/vlf.prx: TM/DC9
+	python3 psptools/pack_module.py modules/vlf.elf TM/DC9/vsh/module/vlf.prx --tag 0x457b0af0
 
-DC8/kd/pspdecrypt.prx:
-	python3 psptools/pack_module.py modules/pspdecrypt.elf DC8/kd/pspdecrypt.prx --tag 0x4c9416f0
+TM/DC9/kd/pspdecrypt.prx: TM/DC9
+	python3 psptools/pack_module.py modules/pspdecrypt.elf TM/DC9/kd/pspdecrypt.prx --tag 0x4c9416f0
 
-DC8/kd/galaxy.prx:
-	python3 psptools/pack_module.py modules/galaxy.elf DC8/kd/galaxy.prx --tag 0x4c9416f0
+TM/DC9/kd/galaxy.prx: TM/DC9
+	python3 psptools/pack_module.py modules/galaxy.elf TM/DC9/kd/galaxy.prx --tag 0x4c9416f0
 
-DC8/kd/idcanager.prx:
-	python3 psptools/pack_module.py modules/idcanager.elf DC8/kd/idcanager.prx --tag 0x4c9416f0
+TM/DC9/kd/idcanager.prx: TM/DC9
+	python3 psptools/pack_module.py modules/idcanager.elf TM/DC9/kd/idcanager.prx --tag 0x4c9416f0
 	
-DC8/kd/march33.prx:
-	python3 psptools/pack_module.py modules/march33.elf DC8/kd/march33.prx --tag 0x4c9416f0
+TM/DC9/kd/march33.prx: TM/DC9
+	python3 psptools/pack_module.py modules/march33.elf TM/DC9/kd/march33.prx --tag 0x4c9416f0
 	
-DC8/kd/popcorn.prx:
-	python3 psptools/pack_module.py modules/popcorn.elf DC8/kd/popcorn.prx --tag 0x4c9416f0
+TM/DC9/kd/popcorn.prx: TM/DC9
+	python3 psptools/pack_module.py modules/popcorn.elf TM/DC9/kd/popcorn.prx --tag 0x4c9416f0
 	
-DC8/kd/systemctrl.prx:
+TM/DC9/kd/systemctrl.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_01G"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
@@ -307,10 +309,10 @@ DC8/kd/systemctrl.prx:
 	dd if=rebootex.bin.gz of=systemctrl.elf bs=1 seek=39924 conv=notrunc
 	rm rebootex.bin.gz
 
-	python3 psptools/pack_module.py systemctrl.elf DC8/kd/systemctrl.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py systemctrl.elf TM/DC9/kd/systemctrl.prx --tag 0x4c9416f0
 	rm systemctrl.elf
 	
-DC8/kd/systemctrl_02g.prx:
+TM/DC9/kd/systemctrl_02g.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_02G"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex_02g.bin.gz
@@ -321,10 +323,10 @@ DC8/kd/systemctrl_02g.prx:
 	dd if=rebootex_02g.bin.gz of=systemctrl_02g.elf bs=1 seek=41152 conv=notrunc
 	rm rebootex_02g.bin.gz
 
-	python3 psptools/pack_module.py systemctrl_02g.elf DC8/kd/systemctrl_02g.prx --tag 0x4C9417F0
+	python3 psptools/pack_module.py systemctrl_02g.elf TM/DC9/kd/systemctrl_02g.prx --tag 0x4C9417F0
 	rm systemctrl_02g.elf
 
-DC8/kd/systemctrl_03g.prx:
+TM/DC9/kd/systemctrl_03g.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_03G"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex_03g.bin.gz
@@ -335,19 +337,19 @@ DC8/kd/systemctrl_03g.prx:
 	dd if=rebootex_03g.bin.gz of=systemctrl_03g.elf bs=1 seek=41152 conv=notrunc
 	rm rebootex_03g.bin.gz
 
-	python3 psptools/pack_module.py systemctrl_03g.elf DC8/kd/systemctrl_03g.prx --tag 0x4C941FF0
+	python3 psptools/pack_module.py systemctrl_03g.elf TM/DC9/kd/systemctrl_03g.prx --tag 0x4C941FF0
 	rm systemctrl_03g.elf
 
-DC8/kd/usbdevice.prx:
-	python3 psptools/pack_module.py modules/usbdevice.elf DC8/kd/usbdevice.prx --tag 0x4c9416f0
+TM/DC9/kd/usbdevice.prx: TM/DC9
+	python3 psptools/pack_module.py modules/usbdevice.elf TM/DC9/kd/usbdevice.prx --tag 0x4c9416f0
 
-DC8/kd/vshctrl.prx:
-	python3 psptools/pack_module.py modules/vshctrl.elf DC8/kd/vshctrl.prx --tag 0x4c9416f0
+TM/DC9/kd/vshctrl.prx: TM/DC9
+	python3 psptools/pack_module.py modules/vshctrl.elf TM/DC9/kd/vshctrl.prx --tag 0x4c9416f0
 
-DC8/vsh/module/recovery.prx:
-	python3 psptools/pack_module.py modules/recovery.elf DC8/vsh/module/recovery.prx --tag 0x38020af0
+TM/DC9/vsh/module/recovery.prx: TM/DC9
+	python3 psptools/pack_module.py modules/recovery.elf TM/DC9/vsh/module/recovery.prx --tag 0x38020af0
 
-DC8/vsh/module/satelite.prx:
-	python3 psptools/pack_module.py modules/satelite.elf DC8/vsh/module/satelite.prx --tag 0x457b0af0
+TM/DC9/vsh/module/satelite.prx: TM/DC9
+	python3 psptools/pack_module.py modules/satelite.elf TM/DC9/vsh/module/satelite.prx --tag 0x457b0af0
 
 

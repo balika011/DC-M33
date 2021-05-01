@@ -112,7 +112,7 @@ int msboot = 0;
 char g_filename[128];
 int BuildPath(char *path)
 {
-	strcpy(g_filename, "/TM/DC8");
+	strcpy(g_filename, "/TM/DC9");
 	strcat(g_filename, path);
 	return MsFatOpen(g_filename);
 }
