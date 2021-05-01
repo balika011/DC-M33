@@ -32,14 +32,10 @@
 #define RECOVERY_ERROR1 0x886033EC
 #define RECOVERY_ERROR2 0x886033FC
 
-#define CHECK_PSP_CONFIG 0x8860A308
-
 #define MODULE_PATCH 0x88602AF8
 
 #define REMOVE_BY_DEBUG 0x8860C1A0
 #define KPRINTF_ADDR 0x886104E4
-
-#define INIT_ERROR 0x8860339C
 
 #define LOAD_CORE 0x88602910
 
@@ -63,14 +59,10 @@
 #define RECOVERY_ERROR1 0x886034C0
 #define RECOVERY_ERROR2 0x886034D0
 
-#define CHECK_PSP_CONFIG 0x8860A3DC
-
 #define MODULE_PATCH 0x88602BB4
 
 #define REMOVE_BY_DEBUG 0x8860C274
 #define KPRINTF_ADDR 0x886105D8
-
-#define INIT_ERROR 0x88603470
 
 #define LOAD_CORE 0x886029D8
 
@@ -94,14 +86,10 @@
 #define RECOVERY_ERROR1 0x886034EC
 #define RECOVERY_ERROR2 0x886034FC
 
-#define CHECK_PSP_CONFIG 0x8860A408
-
 #define MODULE_PATCH 0x88602BCC
 
 #define REMOVE_BY_DEBUG 0x8860C2A0
 #define KPRINTF_ADDR 0x88610654
-
-#define INIT_ERROR 0x8860349C
 
 #define LOAD_CORE 0x886029D8
 
@@ -259,13 +247,6 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 		// Two patches during file read to avoid possible fake recovery file error
 		_sw(0, RECOVERY_ERROR1);
 		_sw(0, RECOVERY_ERROR2);
-
-		// Patch sceKernelCheckPspConfig to enable plain config 
-		// sw $a0, 0($sp) -> sw $a1, 0($sp) 
-		// addiu v1, zero, $ffff -> addi	$v1, $a1, 0x0000
-		// return -1 -> return a1 (size)
-		_sw(0xafa50000, CHECK_PSP_CONFIG);	
-		_sw(0x20a30000, CHECK_PSP_CONFIG + 4);
 		
 #ifdef MSIPL
 		MAKE_CALL(MODULE_PATCH, sceBootModuleLoadPatched);
@@ -279,9 +260,6 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 
 		_sw((uint32_t) kprintf, KPRINTF_ADDR);
 #endif
-		
-		// patch init error
-		_sw(0, INIT_ERROR);
 
 		// Patch the call to LoadCore module_start 
 		// 88602910: jr $t7 -> mov $a3, $t7 // a3 = LoadCore module_start 

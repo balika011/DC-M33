@@ -29,14 +29,11 @@
 #define FAT_READ_ADDR 0x88601FC8
 #define FAT_CLOSE_ADDR 0x88601FF4
 
-#define CHECK_PSP_CONFIG 0x88604F68
-
 #define MODULE_PATCH 0x886069D0
 
 #define REMOVE_BY_DEBUG 0x88603018
 #define KPRINTF_ADDR 0x88612738
 
-#define INIT_ERROR 0x88601F50
 #define RECOVERY_ERROR1 0x88601FA4
 #define RECOVERY_ERROR2 0x88601FBC
 	
@@ -59,14 +56,11 @@
 #define FAT_READ_ADDR 0x88602090
 #define FAT_CLOSE_ADDR 0x886020BC
 
-#define CHECK_PSP_CONFIG 0x88605030
-
 #define MODULE_PATCH 0x88606A90
 
 #define REMOVE_BY_DEBUG 0x886030E0
 #define KPRINTF_ADDR 0x88612828
 
-#define INIT_ERROR 0x88602018
 #define RECOVERY_ERROR1 0x8860206C
 #define RECOVERY_ERROR2 0x88602084
 	
@@ -89,14 +83,11 @@
 #define FAT_READ_ADDR 0x88602090
 #define FAT_CLOSE_ADDR 0x886020BC
 
-#define CHECK_PSP_CONFIG 0x88605030
-
 #define MODULE_PATCH 0x88606AA0
 
 #define REMOVE_BY_DEBUG 0x886030E0
 #define KPRINTF_ADDR 0x88612828
 
-#define INIT_ERROR 0x88602018
 #define RECOVERY_ERROR1 0x8860206C
 #define RECOVERY_ERROR2 0x88602084
 	
@@ -239,15 +230,6 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	MAKE_CALL(FAT_CLOSE_ADDR, MsFatClose);
 #endif
 
-	// Patch sceKernelCheckPspConfig to enable plain config 
-	// sw $a0, 0($sp) -> sw $a1, 0($sp) 
-	// addiu v1, zero, $ffff -> addi	$v1, $a1, 0x0000
-	// return -1 -> return a1 (size)
-	_sw(0xafa50000, CHECK_PSP_CONFIG);	
-	_sw(0x20a30000, CHECK_PSP_CONFIG + 4);
-
-	// patch init error
-	_sw(0, INIT_ERROR);
 	// Two patches during file read to avoid possible fake recovery file error
 	_sw(0, RECOVERY_ERROR1);
 	_sw(0, RECOVERY_ERROR2);
