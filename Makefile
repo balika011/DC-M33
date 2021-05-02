@@ -22,6 +22,7 @@ clean:
 	make -C modules/iop clean
 	make -C modules/lflash_fdisk clean
 	make -C modules/idsregeneration clean
+	make -C modules/idcanager clean
 
 TM:
 	mkdir TM
@@ -290,7 +291,8 @@ TM/DC9/kd/galaxy.prx: TM/DC9
 	python3 psptools/pack_module.py modules/galaxy.elf TM/DC9/kd/galaxy.prx --tag 0x4c9416f0
 
 TM/DC9/kd/idcanager.prx: TM/DC9
-	python3 psptools/pack_module.py modules/idcanager.elf TM/DC9/kd/idcanager.prx --tag 0x4c9416f0
+	make -C modules/idcanager
+	python3 psptools/pack_module.py modules/idcanager/idcanager.prx TM/DC9/kd/idcanager.prx --tag 0x4c9416f0
 	
 TM/DC9/kd/march33.prx: TM/DC9
 	python3 psptools/pack_module.py modules/march33.elf TM/DC9/kd/march33.prx --tag 0x4c9416f0
