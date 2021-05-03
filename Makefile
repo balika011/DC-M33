@@ -23,6 +23,7 @@ clean:
 	make -C modules/lflash_fdisk clean
 	make -C modules/idsregeneration clean
 	make -C modules/idcanager clean
+	make -C modules/vshctrl clean
 
 TM:
 	mkdir TM
@@ -346,7 +347,8 @@ TM/DC9/kd/usbdevice.prx: TM/DC9
 	python3 psptools/pack_module.py modules/usbdevice.elf TM/DC9/kd/usbdevice.prx --tag 0x4c9416f0
 
 TM/DC9/kd/vshctrl.prx: TM/DC9
-	python3 psptools/pack_module.py modules/vshctrl.elf TM/DC9/kd/vshctrl.prx --tag 0x4c9416f0
+	make -C modules/vshctrl
+	python3 psptools/pack_module.py modules/vshctrl/vshctrl.prx TM/DC9/kd/vshctrl.prx --tag 0x4c9416f0
 
 TM/DC9/vsh/module/recovery.prx: TM/DC9
 	python3 psptools/pack_module.py modules/recovery.elf TM/DC9/vsh/module/recovery.prx --tag 0x38020af0
