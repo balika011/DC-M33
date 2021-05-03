@@ -17,12 +17,18 @@
 #define MAKE_DUMMY_FUNCTION0(a) _sw(0x03e00008, a); _sw(0x00001021, a+4);
 #define MAKE_DUMMY_FUNCTION1(a) _sw(0x03e00008, a); _sw(0x24020001, a+4);
 
+extern SEConfig config;
+extern u8 videoiso_mounted;
 
 void ClearCaches();
 u32  sctrlHENFindFunction(const char* szMod, const char* szLib, u32 nid);
 void PatchSyscall(u32 funcaddr, void *newfunc);
 void UndoSuperNoPlainModuleCheckPatch();
 int SetBootFile(int n);
+
+void ReturnToDisc();
+void Fix150Path(const char *file);
+void Fix5XXPath(const char *file);
 
 #define FindProc sctrlHENFindFunction
 
