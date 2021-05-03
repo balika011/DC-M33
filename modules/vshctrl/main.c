@@ -14,6 +14,7 @@
 #include <systemctrl.h>
 #include <systemctrl_se.h>
 #include <oe_malloc.h>
+#include <pspusbdevice.h>
 #include "main.h"
 
 #include <stdio.h>

@@ -24,6 +24,7 @@ clean:
 	make -C modules/idsregeneration clean
 	make -C modules/idcanager clean
 	make -C modules/vshctrl clean
+	make -C modules/usbdevice clean
 
 TM:
 	mkdir TM
@@ -344,7 +345,8 @@ TM/DC9/kd/systemctrl_03g.prx: TM/DC9
 	rm systemctrl_03g.elf
 
 TM/DC9/kd/usbdevice.prx: TM/DC9
-	python3 psptools/pack_module.py modules/usbdevice.elf TM/DC9/kd/usbdevice.prx --tag 0x4c9416f0
+	make -C modules/usbdevice
+	python3 psptools/pack_module.py modules/usbdevice/usbdevice.prx TM/DC9/kd/usbdevice.prx --tag 0x4c9416f0
 
 TM/DC9/kd/vshctrl.prx: TM/DC9
 	make -C modules/vshctrl

@@ -1,5 +1,5 @@
 /*
- * PSP Software Development Kit - http://www.pspdev.org
+ * PSP Software Development Kit - https://github.com/pspdev
  * -----------------------------------------------------------------------
  * Licensed under the BSD license, see LICENSE in PSPSDK root for details.
  *
@@ -9,7 +9,6 @@
  * Copyright (c) 2005 James Forshaw <tyranid@gmail.com>
  * Copyright (c) 2005 John Kelley <ps2dev@kelley.ca>
  *
- * $Id: psploadcore.h 1095 2005-09-27 21:02:16Z jim $
  */
 
 #ifndef PSPLOADCORE_H
@@ -25,7 +24,7 @@ extern "C" {
 #endif
 
 /** @addtogroup LoadCore Interface to the LoadCoreForKernel library. */
-/*@{*/
+/**@{*/
 
 /** Describes a module.  This structure could change in future firmware revisions. */
 typedef struct SceModule {
@@ -126,7 +125,7 @@ typedef struct SceLibraryStubTable {
 	/** Pointer to an array of NIDs. */
 	unsigned int *		nidtable;
 	/** Pointer to the imported function stubs. */
-	u32 *				stubtable;
+	void *				stubtable;
 	/** Pointer to the imported variable stubs. */
 	void *				vstubtable;
 } SceLibraryStubTable;
@@ -137,9 +136,8 @@ typedef struct SceLibraryStubTable {
  *
  * @param modname - The name of the module.
  *
- * @returns Pointer to the ::SceModule structure if found, otherwise NULL.
+ * @return Pointer to the ::SceModule structure if found, otherwise NULL.
  */
-//SceModule * sceKernelFindModuleByName(const char *modname);
 SceModule2 *sceKernelFindModuleByName(const char *modname);
 
 /**
@@ -147,9 +145,8 @@ SceModule2 *sceKernelFindModuleByName(const char *modname);
  *
  * @param addr - Address somewhere within the module.
  *
- * @returns Pointer to the ::SceModule structure if found, otherwise NULL.
+ * @return Pointer to the ::SceModule structure if found, otherwise NULL.
  */
-//SceModule * sceKernelFindModuleByAddress(unsigned int addr);
 SceModule2 *sceKernelFindModuleByAddress(unsigned int addr);
 
 /**
@@ -157,16 +154,14 @@ SceModule2 *sceKernelFindModuleByAddress(unsigned int addr);
  *
  * @param modid - The UID of the module.
  *
- * @returns Pointer to the ::SceModule structure if found, otherwise NULL.
+ * @return Pointer to the ::SceModule structure if found, otherwise NULL.
  */
-//SceModule * sceKernelFindModuleByUID(SceUID modid);
 SceModule2 *sceKernelFindModuleByUID(SceUID modid);
-
 
 /**
  * Return the count of loaded modules.
  *
- * @returns The count of loaded modules.
+ * @return The count of loaded modules.
  */
 int sceKernelModuleCount(void);
 
@@ -175,7 +170,7 @@ int sceKernelModuleCount(void);
  */
 void sceKernelIcacheClearAll(void);
 
-/*@}*/
+/**@}*/
 
 #ifdef __cplusplus
 }
