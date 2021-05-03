@@ -789,13 +789,13 @@ int SceLfatfsAssign()
 	sceIoAssign("flash0:", "lflash0:0,0", "flashfat0:", IOASSIGN_RDONLY, NULL, 0);
 	sceIoAssign("flash1:", "lflash0:0,1", "flashfat1:", IOASSIGN_RDWR, NULL, 0);
 
-	if (sceKernelInitKeyConfig() == 0x100)
+	if (sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_VSH)
 		sceIoAssign("flash2:", "lflash0:0,2", "flashfat2:", IOASSIGN_RDWR, NULL, 0);
 
 	if (sceKernelGetModel() == 1)
 	{
 		int ikc = sceKernelInitKeyConfig();
-		if (ikc == 0x100 || (ikc == 0x400 && sceKernelBootFrom() == 0x80))
+		if (ikc == PSP_INIT_KEYCONFIG_VSH || (ikc == PSP_INIT_KEYCONFIG_APP && sceKernelBootFrom() == PSP_BOOT_FLASH3))
 			sceIoAssign("flash3:", "lflash0:0,3", "flashfat3:", IOASSIGN_RDWR, NULL, 0);
 	}
 

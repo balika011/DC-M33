@@ -15,12 +15,7 @@ PSP_FW_VERSION=500
 
 LIBDIR = ../lib
 LDFLAGS = -nostartfiles
-
-LIBDIR = ../lib
-LDFLAGS = -nostartfiles
-LIBS = 
+LIBS = -lpspsystemctrl_kernel
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
-
-LIBS += -lpspsystemctrl_kernel
