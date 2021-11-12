@@ -122,7 +122,7 @@ char g_file[64];
 int sceBootLfatOpenPatched(char *file)
 {
 #ifdef DEBUG
-	printf("sceBootLfatOpenPatched(%s)\n", file);
+	printf("sceBootLfatOpenPatched(%s)", file);
 #endif
 	
 	// Copy to other buffer to avoid changing the string
@@ -139,6 +139,10 @@ int sceBootLfatOpenPatched(char *file)
 		else
 			memcpy(&g_file[strlen(g_file) - 4], "_umd.bin", 9);
 	}
+	
+#ifdef DEBUG
+	printf("-> %s\n", g_file);
+#endif
 
 #ifdef MSIPL
 	return BuildPath(g_file);
@@ -228,7 +232,7 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 			recovery = 1;
 		}
 #ifdef MSIPL
-		else if((ctrl & SYSCON_CTRL_START) == SYSCON_CTRL_START)
+		else if((ctrl & SYSCON_CTRL_START) == 0)
 		{
 			msboot = 1;
 		}
