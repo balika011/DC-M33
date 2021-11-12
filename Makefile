@@ -25,6 +25,8 @@ clean:
 	make -C modules/idcanager clean
 	make -C modules/vshctrl clean
 	make -C modules/usbdevice clean
+	make -C modules/systemctrl clean
+	rm -f modules/systemctrl/rebootex.S
 
 TM:
 	mkdir TM
@@ -306,43 +308,31 @@ TM/DC9/kd/systemctrl.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_01G"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
-
-	test `wc -c <rebootex.bin.gz` -lt 1533;
-
-	dd if=modules/systemctrl.elf of=systemctrl.elf
-	dd if=rebootex.bin.gz of=systemctrl.elf bs=1 seek=39924 conv=notrunc
+	$(PSPDEV)/bin/bin2s rebootex.bin.gz modules/systemctrl/rebootex.S rebootex
 	rm rebootex.bin.gz
-
-	python3 psptools/pack_module.py systemctrl.elf TM/DC9/kd/systemctrl.prx --tag 0x4c9416f0
-	rm systemctrl.elf
+	
+	make -C modules/systemctrl
+	python3 psptools/pack_module.py modules/systemctrl/systemctrl.prx TM/DC9/kd/systemctrl.prx --tag 0x4c9416f0
 	
 TM/DC9/kd/systemctrl_02g.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_02G"
-	cat ipl/rebootex/rebootex.bin | gzip > rebootex_02g.bin.gz
-
-	test `wc -c <rebootex_02g.bin.gz` -lt 1529;
-
-	dd if=modules/systemctrl_02g.elf of=systemctrl_02g.elf
-	dd if=rebootex_02g.bin.gz of=systemctrl_02g.elf bs=1 seek=41152 conv=notrunc
-	rm rebootex_02g.bin.gz
-
-	python3 psptools/pack_module.py systemctrl_02g.elf TM/DC9/kd/systemctrl_02g.prx --tag 0x4C9417F0
-	rm systemctrl_02g.elf
+	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
+	$(PSPDEV)/bin/bin2s rebootex.bin.gz modules/systemctrl/rebootex.S rebootex
+	rm rebootex.bin.gz
+	
+	make -C modules/systemctrl
+	python3 psptools/pack_module.py modules/systemctrl/systemctrl.prx TM/DC9/kd/systemctrl_02g.prx --tag 0x4c9417f0
 
 TM/DC9/kd/systemctrl_03g.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_03G"
-	cat ipl/rebootex/rebootex.bin | gzip > rebootex_03g.bin.gz
-
-	test `wc -c <rebootex_03g.bin.gz` -lt 1529;
-
-	dd if=modules/systemctrl_03g.elf of=systemctrl_03g.elf
-	dd if=rebootex_03g.bin.gz of=systemctrl_03g.elf bs=1 seek=41152 conv=notrunc
-	rm rebootex_03g.bin.gz
-
-	python3 psptools/pack_module.py systemctrl_03g.elf TM/DC9/kd/systemctrl_03g.prx --tag 0x4C941FF0
-	rm systemctrl_03g.elf
+	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
+	$(PSPDEV)/bin/bin2s rebootex.bin.gz modules/systemctrl/rebootex.S rebootex
+	rm rebootex.bin.gz
+	
+	make -C modules/systemctrl
+	python3 psptools/pack_module.py modules/systemctrl/systemctrl.prx TM/DC9/kd/systemctrl_03g.prx --tag 0x4c941ff0
 
 TM/DC9/kd/usbdevice.prx: TM/DC9
 	make -C modules/usbdevice

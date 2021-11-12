@@ -38,30 +38,17 @@ extern u8 rebootex;
 extern u8 rebootex_02g;
 extern u8 rebootex_03g;
 
-int sceKernelGzipDecompressPatched(u8 *dest, u32 destSize, const u8 *src, int unknown)
-{
-	switch(sceKernelGetModel())
-	{
-		case 0: src = &rebootex; break;
-		case 1: src = &rebootex_02g; break;
-		case 2: src = &rebootex_03g; break;
-	}
-	
-	return sceKernelGzipDecompress(dest, destSize, src, 0);
-}
-
 void SystemControlPatch()
 {
-	u32 text_addr = ((SceModule2 *)sceKernelFindModuleByName("SystemControl"))->text_addr;
+	const u8 *rbtx;
+	switch(sceKernelGetModel())
+	{
+		case 0: rbtx = &rebootex; break;
+		case 1: rbtx = &rebootex_02g; break;
+		case 2: rbtx = &rebootex_03g; break;
+	}
 	
-	u32 addr = text_addr + 0x27B8;
-	
-	if (sceKernelGetModel())
-		addr = text_addr + 0x2A68;
-	
-	MAKE_CALL(addr, sceKernelGzipDecompressPatched);
-
-	ClearCaches();
+	sctrlHENSetRebootexOverride(rbtx);
 }
 
 int sceMSFAT_IoOpenPatched(int type, void (*cb)(void *), void *arg)

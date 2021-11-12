@@ -35,10 +35,10 @@ enum SEUmdModes
 enum SESpeedUpMsModes
 {
 	SPEEDUPMS_NEVER = 0,
-	SPEEDUPMS_ALWAYS = 7,
 	SPEEDUPMS_VSH = 1,
 	SPEEDUPMS_GAME = 2,
 	SPEEDUPMS_POPS = 4,
+	SPEEDUPMS_ALWAYS = 7,
 };
 
 typedef struct
