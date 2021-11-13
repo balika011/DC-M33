@@ -855,7 +855,7 @@ void PatchLoadCore()
 	MAKE_CALL(text_addr + 0x49D8, sceKernelCheckExecFilePatched);
 
 	/* Change switch table */
-	_sw(_lw(text_addr + 0x8988), text_addr + 0x89A4);
+	_sw(_lw(text_addr + 0x89C0), text_addr + 0x89DC);
 
 	/* Patch 2 functions called by sceKernelProbeExecutableObject */
 	ProbeExec1 = (void *)(text_addr + 0x61D8);
@@ -869,7 +869,7 @@ void PatchLoadCore()
 	
 	/* Allow higher firmware modules to load */
 	// movz a0, zero, a1 -> mov a0, zero
-	_sw(0x00002021, text_addr + 0x7CD8);
+	_sw(0x00002021, text_addr + 0x7CF4);
 
 	// Allow ModuleMgrForKernel to load sdk kernel modules
 	_sw(0, text_addr + 0x6888);

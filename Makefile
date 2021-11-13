@@ -33,8 +33,8 @@ TM:
 
 TM/DC9: TM
 	mkdir TM/DC9
-	cp -R 500/flash0/* TM/DC9/
-	cp -R 500/nandipl*.bin TM/DC9/
+	cp -R 502/flash0/* TM/DC9/
+	cp -R 502/nandipl*.bin TM/DC9/
 	mkdir -p TM/DC9/dic
 	mkdir -p TM/DC9/gps
 	mkdir -p TM/DC9/net/http
@@ -61,7 +61,7 @@ TM/DC9/ipl_01g.bin: TM/DC9
 
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_01g.bin
 
-	psptools/unpack_ipl.py 500/nandipl_01g.bin ipl_01g.dec
+	psptools/unpack_ipl.py 502/nandipl_01g.bin ipl_01g.dec
 	dd if=ipl_01g.dec of=TM/DC9/ipl_01g.bin bs=1 seek=12288
 	rm ipl_01g.dec
 	
@@ -79,7 +79,7 @@ TM/DC9/ipl_02g.bin: TM/DC9
 
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_02g.bin
 
-	psptools/unpack_ipl.py 500/nandipl_02g.bin ipl_02g.dec
+	psptools/unpack_ipl.py 502/nandipl_02g.bin ipl_02g.dec
 	dd if=ipl_02g.dec of=TM/DC9/ipl_02g.bin bs=1 seek=12288
 	rm ipl_02g.dec
 	
@@ -96,7 +96,7 @@ TM/DC9/ipl_03g.bin: TM/DC9
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_03G -DMSIPL=1"
 
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_03g.bin
-	psptools/unpack_ipl.py 500/nandipl_03g.bin ipl_03g.dec --xor 1
+	psptools/unpack_ipl.py 502/nandipl_03g.bin ipl_03g.dec --xor 1
 	dd if=ipl_03g.dec of=TM/DC9/ipl_03g.bin bs=1 seek=12288
 	rm ipl_03g.dec
 
@@ -112,7 +112,7 @@ TM/DC9/nandcipl_01g.bin: TM/DC9
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_01G"
 
-	psptools/unpack_ipl.py 500/nandipl_01g.bin ipl_01g.dec
+	psptools/unpack_ipl.py 502/nandipl_01g.bin ipl_01g.dec
 	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_01g.dec@0x40f0000 TM/DC9/nandcipl_01g.bin 0x40e0000
 	rm ipl_01g.dec
 
@@ -129,7 +129,7 @@ TM/DC9/nandcipl_02g.bin: TM/DC9
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_02G"
 
-	psptools/unpack_ipl.py 500/nandipl_02g.bin ipl_02g.dec
+	psptools/unpack_ipl.py 502/nandipl_02g.bin ipl_02g.dec
 	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_02g.dec@0x40f0000 TM/DC9/nandcipl_02g.bin 0x40e0000
 	rm ipl_02g.dec
 
@@ -145,7 +145,7 @@ TM/DC9/nandcipl_03g.bin: TM/DC9
 	make -C ipl/ipl_stage1_payload clean
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_03G"
 
-	psptools/unpack_ipl.py 500/nandipl_03g.bin ipl_03g.dec --xor 1
+	psptools/unpack_ipl.py 502/nandipl_03g.bin ipl_03g.dec --xor 1
 	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_03g.dec@0x40f0000 TM/DC9/nandcipl_03g.bin 0x40e0000
 	rm ipl_03g.dec
 

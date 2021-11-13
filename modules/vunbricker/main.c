@@ -197,6 +197,8 @@ void HardwareInfo()
 		model_str = "(Phat)";
 	else if (model == 1)
 		model_str = "(Slim)";
+	else if (model == 2)
+		model_str = "(Brite)";
 	else
 		model_str = "";
 
@@ -283,11 +285,11 @@ void MainMenu(int sel)
 {
 	char *items[] =
 	{
-		"Install 5.00 M33-7",
-		"Install 5.00",
+		"Install 5.02 M33",
+		"Install 5.02",
 		"NAND operations",
 		"Hardware Info",
-		"Boot 5.00 M33-7 from MS",
+		"Boot 5.02 M33 from MS",
 		"Shutdown",
 		"Reboot Device"
 	};

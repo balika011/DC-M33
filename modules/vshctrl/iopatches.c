@@ -520,7 +520,7 @@ int sceIoReadPatched(SceUID fd, void *data, SceSize size)
 				{
 					if (strlen(data+i) == 4)
 					{
-						memcpy(data+i, "5.00", 4);
+						memcpy(data+i, "5.02", 4);
 						break;
 					}
 				}

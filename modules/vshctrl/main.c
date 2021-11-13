@@ -379,7 +379,7 @@ int GetVersionHook(void *buffer, int bufferlen, int *len)
 
 	int k1 = pspSdkSetK1(0);
 
-	if (strstr(buffer, "release:5.00"))
+	if (strstr(buffer, "release:5.02"))
 	{
 		int fd = sceIoOpen("flash0:/vsh/etc/version.txt", 1, 0);
 		if (fd < 0)
@@ -485,7 +485,7 @@ void PatchVshMain(u32 text_addr)
 	ClearCaches();	
 }
 
-wchar_t verinfo[] = L"5.00 M33  ";
+wchar_t verinfo[] = L"5.02 M33  ";
 void PatchSysconfPlugin(u32 text_addr)
 {	
 	int version = sctrlSEGetVersion() & 0xF;
