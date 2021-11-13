@@ -229,36 +229,55 @@ int OnMainMenuSelect(int sel)
 	{
 		case 0:
 			vlfGuiCancelBottomDialog();
-			return Install(0);
+			sctrlHENSetTestingTool(0);
+			return Install(FW_M33);
 		break;
 
 		case 1:
 			vlfGuiCancelBottomDialog();
-			return Install(1);
+			sctrlHENSetTestingTool(1);
+			return Install(FW_TT_M33);
 		break;
 
 		case 2:
+			vlfGuiCancelBottomDialog();
+			sctrlHENSetTestingTool(0);
+			return Install(FW_OFW);
+		break;
+
+		case 3:
 			vlfGuiCancelBottomDialog();
 			vlfGuiCancelCentralMenu();
 			NandOperationsMenu(0);
 			return VLF_EV_RET_NOTHING;
 		break;
 	
-		case 3:
+		case 4:
 			vlfGuiCancelBottomDialog();
 			HardwareInfo();
 		break;
 	
-		case 4:
+		case 5:
 		{
 			vlfGuiAddWaitIcon(&wi);
+			sctrlHENSetTestingTool(0);
 			sctrlKernelExitVSH(NULL);
 			return VLF_EV_RET_REMOVE_HANDLERS;
 		}
 
 		break;
 	
-		case 5:
+		case 6:
+		{
+			vlfGuiAddWaitIcon(&wi);
+			sctrlHENSetTestingTool(1);
+			sctrlKernelExitVSH(NULL);
+			return VLF_EV_RET_REMOVE_HANDLERS;
+		}
+
+		break;
+	
+		case 7:
 		{			
 			vlfGuiAddWaitIcon(&wi);
 			scePowerRequestStandby();
@@ -267,7 +286,7 @@ int OnMainMenuSelect(int sel)
 			
 		break;
 
-		case 6:
+		case 8:
 		{
 			
 			vlfGuiAddWaitIcon(&wi);
@@ -286,15 +305,17 @@ void MainMenu(int sel)
 	char *items[] =
 	{
 		"Install 5.02 M33",
+		"Install 5.02 TestingTool M33",
 		"Install 5.02",
 		"NAND operations",
 		"Hardware Info",
 		"Boot 5.02 M33 from MS",
+		"Boot 5.02 TestingTool M33 from MS",
 		"Shutdown",
 		"Reboot Device"
 	};
 
-	vlfGuiCentralMenu(7, items, sel, OnMainMenuSelect, 0, 0);
+	vlfGuiCentralMenu(9, items, sel, OnMainMenuSelect, 0, 0);
 	vlfGuiBottomDialog(-1, VLF_DI_ENTER, 1, 0, VLF_DEFAULT, NULL);
 }
 

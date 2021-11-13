@@ -10,6 +10,8 @@
 
 #include "flashemu.h"
 
+#define DC_PATH "ms0:/TM/DC9"
+
 char path[260];
 SceUID flashemu_sema = -1;
 SceUID assign_thread = -1;
@@ -36,19 +38,13 @@ void WriteFile(char *file, void *buf, int size)
 	sceIoClose(fd);
 }
 
-void BuildPath(const char *file)
-{
-	strcpy(path, "ms0:/TM/DC9");
-	strcat(path, file);
-}
-
 void WaitMS()
 {
 	if (need_wait)
 	{
 		while (1)
 		{
-			SceUID fd = sceIoDopen("ms0:/TM/DC9/");
+			SceUID fd = sceIoDopen(DC_PATH "/");
 			if (fd >= 0)
 			{
 				sceIoDclose(fd);
@@ -183,7 +179,8 @@ static int open_main(int *argv)
 	SceMode mode = (SceMode)argv[3];
 
 	Lock();
-	BuildPath(file);
+	strcpy(path, DC_PATH);
+	strcat(path, file);
 	
 	int slot = SlotGetFree();
 	if (slot < 0)
@@ -195,11 +192,20 @@ static int open_main(int *argv)
 	int ret = SlotOpen(slot, path, flags, mode);
 	if (ret < 0)
 	{
-		//Kprintf("Error 0x%08X in IoOpen, file %s\n", fd, path);
-		UnLock();
-		return ret;
-	}
+		if (sctrlHENIsTestingTool())
+			strcpy(path, DC_PATH "/testingtool");
+		else
+			strcpy(path, DC_PATH "/retail");
+		strcat(path, file);
 
+		ret = SlotOpen(slot, path, flags, mode);
+		if (ret < 0)
+		{
+			//Kprintf("Error 0x%08X in IoOpen, file %s\n", fd, path);
+			UnLock();
+			return ret;
+		}
+	}
 	
 	arg->arg = (void *) slot;
 	UnLock();
@@ -393,7 +399,8 @@ static int remove_main(int *argv)
 	const char *name = (const char *)argv[1];
 
 	Lock();
-	BuildPath(name);
+	strcpy(path, DC_PATH);
+	strcat(path, name);
 
 	WaitMS();
 	int res = sceIoRemove(path);
@@ -418,7 +425,8 @@ static int mkdir_main(int *argv)
 	SceMode mode = (SceMode)argv[2];
 
 	Lock();
-	BuildPath(name);
+	strcpy(path, DC_PATH);
+	strcat(path, name);
 
 	WaitMS();
 	int res = sceIoMkdir(path, mode);
@@ -443,7 +451,8 @@ static int rmdir_main(int *argv)
 	const char *name = (const char *)argv[1];
 	
 	Lock();
-	BuildPath(name);
+	strcpy(path, DC_PATH);
+	strcat(path, name);
 
 	WaitMS();
 	int res = sceIoRmdir(path);
@@ -468,7 +477,8 @@ static int dopen_main(int *argv)
 	const char *dirname = (const char *)argv[1];
 	
 	Lock();
-	BuildPath(dirname);
+	strcpy(path, DC_PATH);
+	strcat(path, dirname);
 	
 	int slot = SlotGetFree();
 	if (slot < 0)
@@ -480,11 +490,20 @@ static int dopen_main(int *argv)
 	int ret = SlotOpen(slot, path, 0xD0D0, 0);
 	if (ret < 0)
 	{
-		//Kprintf("Error 0x%08X in IoOpen, file %s\n", fd, patemu_files[slot].fdh);
-		UnLock();
-		return ret;
-	}
+		if (sctrlHENIsTestingTool())
+			strcpy(path, DC_PATH "/testingtool");
+		else
+			strcpy(path, DC_PATH "/retail");
+		strcat(path, dirname);
 
+		ret = SlotOpen(slot, path, 0xD0D0, 0);
+		if (ret < 0)
+		{
+			//Kprintf("Error 0x%08X in IoOpen, file %s\n", fd, patemu_files[slot].fdh);
+			UnLock();
+			return ret;
+		}
+	}
 	
 	arg->arg = (void *) slot;
 	UnLock();
@@ -565,10 +584,21 @@ static int getstat_main(int *argv)
 	SceIoStat *stat = (SceIoStat *)argv[2];
 	
 	Lock();
-	BuildPath(file);
+	strcpy(path, DC_PATH);
+	strcat(path, file);
 
 	WaitMS();
 	int res = sceIoGetstat(path, stat);
+	if (res < 0)
+	{
+		if (sctrlHENIsTestingTool())
+			strcpy(path, DC_PATH "/testingtool");
+		else
+			strcpy(path, DC_PATH "/retail");
+		strcat(path, file);
+
+		res = sceIoGetstat(path, stat);
+	}
 
 	UnLock();
 	return res;
@@ -592,7 +622,8 @@ static int chstat_main(int *argv)
 	int bits = (int)argv[3];
 	
 	Lock();
-	BuildPath(file);
+	strcpy(path, DC_PATH);
+	strcat(path, file);
 
 	WaitMS();
 	int res = sceIoChstat(path, stat, bits);
@@ -619,7 +650,8 @@ static int rename_main(int *argv)
 	const char *newname = (const char *)argv[2];	
 	
 	Lock();
-	BuildPath(oldname);
+	strcpy(path, DC_PATH);
+	strcat(path, oldname);
 	
 	WaitMS();
 	int res = sceIoRename(oldname, newname);
@@ -644,7 +676,8 @@ static int chdir_main(int *argv)
 	const char *dir = (const char *)argv[1];
 	
 	Lock();
-	BuildPath(dir);
+	strcpy(path, DC_PATH);
+	strcat(path, dir);
 
 	WaitMS();
 	int res = sceIoChdir(path);
@@ -880,7 +913,7 @@ int sceLfatfsStop()
 
 int sceLFatFs_driver_51c7f7ae()
 {
-	return 0x5000010;
+	return 0x5000210;
 }
 
 int sceLFatFs_driver_f1fba85f()

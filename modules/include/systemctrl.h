@@ -283,8 +283,11 @@ void sctrlHENLoadModuleOnReboot(char *module_after, void *buf, int size, int fla
 */
 void sctrlHENPatchSyscall(u32 addr, void *newaddr);
 
-
 void sctrlHENSetRebootexOverride(const u8 *rebootex);
+
+void sctrlHENSetTestingTool(int tt);
+
+int sctrlHENIsTestingTool();
 
 #endif
 

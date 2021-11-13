@@ -456,9 +456,18 @@ int sceUsbStopPatched(const char* driverName, int size, void *args)
 void PatchVshMain(u32 text_addr)
 {
 	// Allow old sfo's.
-	_sw(NOP, text_addr+0xEE30);
-	_sw(NOP, text_addr+0xEE38);
-	_sw(0x10000023, text_addr+0xF0D8);
+	if (sctrlHENIsTestingTool())
+	{
+		_sw(NOP, text_addr + 0xF1EC);
+		_sw(NOP, text_addr + 0xF1F4);
+		_sw(0x10000023, text_addr + 0xFAB4);
+	}
+	else
+	{
+		_sw(NOP, text_addr + 0xEE30);
+		_sw(NOP, text_addr + 0xEE38);
+		_sw(0x10000023, text_addr + 0xF0D8);
+	}
  
 	IoPatches();
 
@@ -466,12 +475,19 @@ void PatchVshMain(u32 text_addr)
 
 	if (!config.novshmenu)
 	{
-		MAKE_CALL(mod->text_addr+0x264, sceCtrlReadBufferPositivePatched);
+		MAKE_CALL(mod->text_addr + 0x264, sceCtrlReadBufferPositivePatched);
 		PatchSyscall(FindProc("sceController_Service", "sceCtrl", 0x1F803938), sceCtrlReadBufferPositivePatched);
 	}
 	
 	// For umd video iso
-	MAKE_CALL(mod->text_addr+0x724, sceIoDevctlPatched);
+	if (sctrlHENIsTestingTool())
+	{
+		MAKE_CALL(mod->text_addr + 0x854, sceIoDevctlPatched);
+	}
+	else
+	{
+		MAKE_CALL(mod->text_addr + 0x724, sceIoDevctlPatched);
+	}
 
 	if (config.useversiontxt)
 	{
@@ -481,29 +497,58 @@ void PatchVshMain(u32 text_addr)
 
 	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xAE5DE6AF), sceUsbStartPatched);
 	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xC2464FA0), sceUsbStopPatched);
+ 
+	if (sctrlHENIsTestingTool())
+	{
+		// Fix UMD boot on TestingTool firmware
+		REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B));
+		REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE));
+	}
 
 	ClearCaches();	
 }
 
 wchar_t verinfo[] = L"5.02 M33  ";
+wchar_t verinfo_tt[] = L"5.02 TestingTool M33  ";
 void PatchSysconfPlugin(u32 text_addr)
 {	
 	int version = sctrlSEGetVersion() & 0xF;
-
 	if (version)
 	{
-		((char *)verinfo)[16] = '-';
-		((char *)verinfo)[18] = version+'1';
+		if (sctrlHENIsTestingTool())
+		{
+			((char *)verinfo_tt)[40] = '-';
+			((char *)verinfo_tt)[42] = '1' + version;
+		}
+		else
+		{
+			((char *)verinfo)[16] = '-';
+			((char *)verinfo)[18] = '1' + version;
+		}
 	}
 
-	u32 version_text = text_addr+0x23DE0;
+	if (sctrlHENIsTestingTool())
+	{
+		u32 version_text = text_addr + 0x24D0C;
 	
-	// lui v0, addrhigh
-	_sw(0x3c020000 | (version_text >> 16), text_addr+0x15EE0);
-	// ori v0, v0, addrlow
-	_sw(0x34420000 | (version_text & 0xFFFF), text_addr+0x15EE4);
+		// lui v0, addrhigh
+		_sw(0x3c020000 | (version_text >> 16), text_addr + 0x16EB4);
+		// ori v0, v0, addrlow
+		_sw(0x34420000 | (version_text & 0xFFFF), text_addr + 0x16EB8);
 	
-	memcpy((void *) version_text, verinfo, sizeof(verinfo));
+		memcpy((void *) version_text, verinfo_tt, sizeof(verinfo_tt));
+	}
+	else
+	{
+		u32 version_text = text_addr+0x23DE0;
+	
+		// lui v0, addrhigh
+		_sw(0x3c020000 | (version_text >> 16), text_addr + 0x15EE0);
+		// ori v0, v0, addrlow
+		_sw(0x34420000 | (version_text & 0xFFFF), text_addr + 0x15EE4);
+	
+		memcpy((void *) version_text, verinfo, sizeof(verinfo));
+	}
 
 	ClearCaches();
 }
@@ -531,16 +576,33 @@ void PatchMsVideoMainPlugin(u32 text_addr)
 
 void PatchGamePlugin(u32 text_addr)
 {
-	// New Patch (3.71+)	
-	_sw(0x03e00008, text_addr+0x11764);
-	_sw(0x00001021, text_addr+0x11768);	
-
-	if (config.hidepics)
+	if (sctrlHENIsTestingTool())
 	{
-		// Hide pic0.png+pic1.png
-		// mov v0, v1
-		_sw(0x00601021, text_addr+0xF7A8);
-		_sw(0x00601021, text_addr+0xF7B4);
+		// New Patch (3.71+)	
+		_sw(0x03e00008, text_addr + 0x14140);
+		_sw(0x00001021, text_addr + 0x14144);	
+
+		if (config.hidepics)
+		{
+			// Hide pic0.png+pic1.png
+			// mov v0, v1
+			_sw(0x00601021, text_addr + 0x12120);
+			_sw(0x00601021, text_addr + 0x1212C);
+		}
+	}
+	else
+	{
+		// New Patch (3.71+)	
+		_sw(0x03e00008, text_addr+0x11764);
+		_sw(0x00001021, text_addr+0x11768);	
+
+		if (config.hidepics)
+		{
+			// Hide pic0.png+pic1.png
+			// mov v0, v1
+			_sw(0x00601021, text_addr+0xF7A8);
+			_sw(0x00601021, text_addr+0xF7B4);
+		}
 	}
 	
 	ClearCaches();			

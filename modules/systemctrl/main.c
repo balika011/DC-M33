@@ -36,6 +36,9 @@ static LLE_HANDLER lle_handler = NULL;
 
 static int idle;
 
+extern int testingtool;
+extern int ram2, ram8;
+
 static int (* ProbeExec1)(void *buf, u32 *check);
 static int (* PartitionCheck)(void *st0, void *check);
 static int (* ProbeExec2)(u8 *buf, u32 *check);
@@ -693,6 +696,24 @@ int OnModuleStart(SceModule2 *mod)
 		PatchPower(text_addr);
 	}
 
+	else if (strcmp(modname, "sceVshBridge_Driver") == 0)
+	{
+		if (!testingtool)
+		{
+			int fd = sceIoOpen("flash0:/vsh/etc/version.txt", PSP_O_RDONLY, 0);
+			if (fd < 0)
+				while(1);
+
+			char buffer[1024];
+			int len = sceIoRead(fd, buffer, sizeof(buffer));
+			buffer[len] = 0;
+
+			sceIoClose(fd);
+
+			testingtool = strstr(buffer, "TestingTool") ? 2 : 1;
+		}
+	}
+
 	if (!idle)
 	{
 		if (sceKernelGetSystemStatus() == 0x20000)
@@ -1011,9 +1032,6 @@ void PatchMesgLed()
 	}
 }
 
-extern int booted150;
-extern int ram2, ram8;
-
 int module_start(SceSize args, void *argp)
 {	
 	PatchLoadCore();
@@ -1031,7 +1049,7 @@ int module_start(SceSize args, void *argp)
 	SetConfig((SEConfig *)0x88fb0050);	
 	sctrlSESetBootConfFileIndex(*(int *)0x88fb00c0);	
 	
-	booted150 = *(int *)0x88fb00cc;
+	testingtool = *(int *)0x88fb00cc;
 	ram2 = *(int *)0x88fb00c4;
 	ram8 = *(int *)0x88fb00c8;
 

@@ -1,0 +1,5 @@
+release:5.02:
+build:2821,0,6,1,0:builder@vsh-build6
+system:47715@release_502,0x05000210:
+vsh:p6294@release_502,v47476@release_502,20081128:
+target:A:TestingTool

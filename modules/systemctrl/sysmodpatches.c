@@ -26,7 +26,7 @@
 SEConfig config;
 int bootfile;
 int dummy[0x1C/4];
-int booted150;
+int testingtool;
 int ram2, ram8;
 
 void SetConfig(SEConfig *newconfig)
@@ -171,7 +171,7 @@ int LoadRebootex(u8 *dest, u32 destSize, const u8 *src, void *unk, void *unk2)
 
 	memcpy((void *)0x88fb0050, &config, sizeof(SEConfig));
 	_sw(bootfile, 0x88fb00c0);
-	_sw(booted150, 0x88fb00cc);
+	_sw(testingtool, 0x88fb00cc);
 	_sw(ram2, 0x88fb00c4);
 	_sw(ram8, 0x88fb00c8);
 
@@ -330,16 +330,7 @@ void PatchInitLoadExecAndMediaSync(u32 text_addr)
 	PatchLoadExec(mod->text_addr);
 	
 	PatchMesgLed();
-	ClearCaches();	
-
-	if (sceKernelGetModel() == 0 && booted150)
-	{
-		// Note: using new nid
-		
-		int (* sceClockgenAudioClkEnable) (void) = (void *)FindProc("sceClockgen_Driver", "sceClockgen_driver", 0x777FF2D9);
-	
-		sceClockgenAudioClkEnable();
-	}
+	ClearCaches();
 }
 
 //////////////////////////////////////////////////
@@ -642,5 +633,15 @@ void OnSystemStatusIdle()
 
 void sctrlHENLoadModuleOnReboot(char *module_after, void *buf, int size, int flags)
 {
+}
+
+int sctrlHENIsTestingTool()
+{
+	return testingtool == 2;
+}
+
+void sctrlHENSetTestingTool(int tt)
+{
+	testingtool = tt ? 2 : 1;
 }
 

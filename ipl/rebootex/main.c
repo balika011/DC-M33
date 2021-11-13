@@ -111,14 +111,7 @@ void ClearCaches()
 
 #ifdef MSIPL
 char g_filename[128];
-int BuildPath(char *path)
-{
-	strcpy(g_filename, "/TM/DC9");
-	strcat(g_filename, path);
-	return MsFatOpen(g_filename);
-}
 #endif
-
 char g_file[64];
 int sceBootLfatOpenPatched(char *file)
 {
@@ -140,7 +133,19 @@ int sceBootLfatOpenPatched(char *file)
 	}
 
 #ifdef MSIPL
-	return BuildPath(g_file);
+	strcpy(g_filename, "/TM/DC9");
+	strcat(g_filename, g_file);
+	int ret = MsFatOpen(g_filename);
+	if (ret < 0)
+	{
+		if (_lw(0x88FB00CC) == 2)
+			strcpy(g_filename, "/TM/DC9/testingtool");
+		else
+			strcpy(g_filename, "/TM/DC9/retail");
+		strcat(g_filename, g_file);
+		ret = MsFatOpen(g_filename);
+	}
+	return ret;
 #else
 	return sceBootLfatOpen(g_file);
 #endif
