@@ -498,7 +498,7 @@ int OnBackToMainMenuFromNO(int enter)
 	{
 		vlfGuiCancelCentralMenu();
 		vlfGuiCancelBottomDialog();
-		MainMenu(2);		
+		MainMenu(3);		
 	}
 
 	return VLF_EV_RET_NOTHING;

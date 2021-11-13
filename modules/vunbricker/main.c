@@ -136,7 +136,7 @@ int OnBackToMainMenuFromHI(int enter)
 		}
 
 		vlfGuiCancelBottomDialog();
-		MainMenu(3);		
+		MainMenu(4);		
 	}
 
 	return VLF_EV_RET_NOTHING;
