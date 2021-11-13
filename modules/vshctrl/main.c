@@ -113,24 +113,6 @@ void ReturnToDisc()
 	videoiso_mounted = 0;
 }
 
-#if 0
-char update_url[] = "http://updates.dark-alex.org/updatelist.txt";
-
-int up_url_offsets[16] = 
-{ 
-	0x0000ABD0, 0x0000AC14, 0x0000AC58, 0x0000AC9C,
-	0x0000ACE4, 0x0000AD2C, 0x0000AD74, 0x0000ADBC,
-	0x0000AE04, 0x0000AE4C, 0x0000AE94, 0x0000AEDC,
-	0x0000AF24, 0x0000AF6C, 0x0000AFB4, 0x0000AFFC
-};
-     
-	for(i = 0; i < 16; i++)
-	{
-		strcpy((char*)(text_addr+up_url_offsets[i]), update_url);
-	}
-
-#endif
-
 int LoadExecVSHCommonPatched(int apitype, char *file, struct SceKernelLoadExecVSHParam *param, int unk2)
 {
 	int k1 = pspSdkSetK1(0);
@@ -491,8 +473,6 @@ void PatchVshMain(u32 text_addr)
 	// For umd video iso
 	MAKE_CALL(mod->text_addr+0x724, sceIoDevctlPatched);
 
-	// PATCH UPDATE HERE
-	
 	if (config.useversiontxt)
 	{
 		getVersion = FindProc("sceMesgLed", "sceResmgr", 0x9DC14891);
@@ -566,24 +546,6 @@ void PatchGamePlugin(u32 text_addr)
 	ClearCaches();			
 }
 
-#if 0
-void PatchUpdatePlugin(u32 text_addr)
-{
-	int se_version, high, low;
-
-	se_version = sctrlSEGetVersion();
-	high = (se_version >> 16);
-	low = (se_version&0xFFFF);
-	
-	// lui a1, high
-	_sw(0x3C050000 | high, text_addr+0x1F44); 
-	// ori a0, a1, low
-	_sw(0x34A40000 | low, text_addr+0x210C); 
-
-	ClearCaches();
-}
-#endif
-
 STMOD_HANDLER previous;
 int OnModuleStart(SceModule2 *mod)
 {
@@ -610,14 +572,6 @@ int OnModuleStart(SceModule2 *mod)
 		PatchGamePlugin(text_addr);					
 	}
 
-#if 0
-	else if (strcmp(modname, "update_plugin_module") == 0)
-	{
-		if (!config.notusedaxupd)
-			PatchUpdatePlugin(text_addr);
-	}
-#endif
-
 	if (!previous)
 		return 0;
 
@@ -628,10 +582,10 @@ int module_start(SceSize args, void *argp)
 {
 	SceModule2 *mod = sceKernelFindModuleByName("sceLoadExec");
 	
-	MAKE_CALL(mod->text_addr+0x17FC, LoadExecVSHCommonPatched);
-	MAKE_CALL(mod->text_addr+0x1824, LoadExecVSHCommonPatched);
-	MAKE_CALL(mod->text_addr+0x1974, LoadExecVSHCommonPatched);
-	MAKE_CALL(mod->text_addr+0x199C, LoadExecVSHCommonPatched);
+	MAKE_CALL(mod->text_addr + 0x17FC, LoadExecVSHCommonPatched);
+	MAKE_CALL(mod->text_addr + 0x1824, LoadExecVSHCommonPatched);
+	MAKE_CALL(mod->text_addr + 0x1974, LoadExecVSHCommonPatched);
+	MAKE_CALL(mod->text_addr + 0x199C, LoadExecVSHCommonPatched);
 
 	PatchSyscall(FindProc("sceRTC_Service", "sceRtc", 0xE7C27D1B), sceRtcGetCurrentClockLocalTimePatched);
 
