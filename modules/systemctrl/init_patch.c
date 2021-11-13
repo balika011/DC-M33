@@ -45,7 +45,7 @@ void trim(char *str)
 	}
 }
 
-int ReadLine(char *buf, int size, char *str)
+int ReadLine(char *buf, int size, char *str, int *enabled)
 {
 	char ch = 0;
 	int n = 0;
@@ -59,7 +59,7 @@ int ReadLine(char *buf, int size, char *str)
 
 		ch = buf[i];
 
-		if (ch < 0x20)
+		if(ch < 0x20 && ch != '\t')
 		{
 			if (n != 0)
 			{
@@ -77,6 +77,21 @@ int ReadLine(char *buf, int size, char *str)
 	}
 
 	trim(s);
+
+	*enabled = 0;
+
+	if(i > 0)
+	{
+		char *p = strpbrk(s, " \t");
+		if(p)
+		{
+			char *q = p + 1;
+			while(*q < 0) q++;
+			if(strcmp(q, "1") == 0)
+				*enabled = 1;
+			*p = 0;
+		}   
+	}
 
 	return i;
 }
@@ -145,16 +160,11 @@ int sceKernelStartModulePatched(SceUID modid, SceSize argsize, void *argp, int *
 			}
 
 			if (sceKernelFindModuleByName(waitmodule))
-			{			
-				u8 plugcon[15];
-				char plugin[64];
-				int	nvsh = 0, ngame = 0;
-				int initmode, i, size;
+			{
 				SceUID fd;
-
-				memset(plugcon, 0, 15);	
+	
 				plugindone = 1;
-				initmode = sceKernelInitKeyConfig();	
+				int initmode = sceKernelInitKeyConfig();	
 				
 				if (initmode == PSP_INIT_KEYCONFIG_VSH && !sceKernelFindModuleByName("scePspNpDrm_Driver"))
 				{
@@ -163,9 +173,10 @@ int sceKernelStartModulePatched(SceUID modid, SceSize argsize, void *argp, int *
 				
 				if (!ms_status)
 				{				
-					if (sceIoDevctl("mscmhc0:", 0x02025806, NULL, 0, &i, sizeof(i)) >= 0)
+					int out;
+					if (sceIoDevctl("mscmhc0:", 0x02025806, NULL, 0, &out, sizeof(out)) >= 0)
 					{
-						if (i == 1)
+						if (out == 1)
 						{				
 							evflag = sceKernelCreateEventFlag("", 0, 0, NULL);
 							SceUID cb = sceKernelCreateCallback("", (void *)Ms_Callback, NULL);
@@ -186,24 +197,6 @@ int sceKernelStartModulePatched(SceUID modid, SceSize argsize, void *argp, int *
 				{
 					goto START_MODULE;
 				}
-				
-				for (i = 0; i < 0x10; i++)
-				{
-					fd = sceIoOpen("ms0:/seplugins/conf.bin", PSP_O_RDONLY, 0);
-				
-					if (fd >= 0 || fd == 0x8001002)
-					{
-						break;	
-					}
-
-					sceKernelDelayThread(20000);
-				}
-
-				if (fd < 0)
-					goto START_MODULE;
-				
-				sceIoRead(fd, plugcon, 15);
-				sceIoClose(fd);
 
 				fpl = sceKernelCreateFpl("", PSP_MEMORY_PARTITION_KERNEL, 0, 1024, 1, NULL);
 				if (fpl < 0)
@@ -214,20 +207,21 @@ int sceKernelStartModulePatched(SceUID modid, SceSize argsize, void *argp, int *
 				fd = sceIoOpen("ms0:/seplugins/vsh.txt", PSP_O_RDONLY, 0);
 				if (fd >= 0)
 				{
-					size = sceIoRead(fd, plug_buf, 1024);
+					int size = sceIoRead(fd, plug_buf, 1024);
 					p = plug_buf;
 					
-					for (i = 0; i < 5; i++)
+					for (int i = 0; i < 5; i++)
 					{
+						char plugin[64];
 						memset(plugin, 0, sizeof(plugin));
 						
-						res = ReadLine(p, size, plugin);
+						int enabled;
+						res = ReadLine(p, size, plugin, &enabled);
 						if (res > 0)
 						{
-							nvsh++;
 							if (initmode == PSP_INIT_KEYCONFIG_VSH)
 							{
-								if (plugcon[i])
+								if (enabled)
 								{
 									LoadStartModule(plugin);								
 								}
@@ -251,20 +245,22 @@ int sceKernelStartModulePatched(SceUID modid, SceSize argsize, void *argp, int *
 				fd= sceIoOpen("ms0:/seplugins/game.txt", PSP_O_RDONLY, 0);
 				if (fd >= 0)
 				{
-					size = sceIoRead(fd, plug_buf, 1024);
+					int size = sceIoRead(fd, plug_buf, 1024);
 					p = plug_buf;
 					
-					for (i = 0; i < 5; i++)
+					for (int i = 0; i < 5; i++)
 					{
+						char plugin[64];
 						memset(plugin, 0, sizeof(plugin));
-						res = ReadLine(p, size, plugin);
+
+						int enabled;
+						res = ReadLine(p, size, plugin, &enabled);
 
 						if (res > 0)
 						{
-							ngame++;
 							if (initmode == PSP_INIT_KEYCONFIG_GAME)
 							{
-								if (plugcon[i+nvsh])
+								if (enabled)
 								{
 									LoadStartModule(plugin);									
 								}
@@ -290,17 +286,19 @@ int sceKernelStartModulePatched(SceUID modid, SceSize argsize, void *argp, int *
 					fd = sceIoOpen("ms0:/seplugins/pops.txt", PSP_O_RDONLY, 0);
 					if (fd >= 0)
 					{
-						size = sceIoRead(fd, plug_buf, 1024);
+						int size = sceIoRead(fd, plug_buf, 1024);
 						p = plug_buf;
 						
-						for (i = 0; i < 5; i++)
+						for (int i = 0; i < 5; i++)
 						{
+							char plugin[64];
 							memset(plugin, 0, sizeof(plugin));
 							
-							res = ReadLine(p, size, plugin);
+							int enabled;
+							res = ReadLine(p, size, plugin, enabled);
 							if (res > 0)
 							{							
-								if (plugcon[i+nvsh+ngame])
+								if (enabled)
 								{
 									LoadStartModule(plugin);								
 								}
