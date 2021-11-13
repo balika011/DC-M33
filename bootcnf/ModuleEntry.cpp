@@ -40,7 +40,7 @@ int CModuleEntry::ParseBinary(char *buffer)
 	return 0;
 }
 
-int CModuleEntry::ParseText(char *file, char *key, char *flags, char *modNames, int &namePos)
+int CModuleEntry::ParseText(char *file, char *flags, char *modNames, int &namePos)
 {
 	char *str;
 
@@ -83,18 +83,6 @@ int CModuleEntry::ParseText(char *file, char *key, char *flags, char *modNames, 
 	{
 		mNameOffset = str - modNames;
 	}
-
-	int tmp[4];
-
-	sscanf(key, "%08X%08X%08X%08X\n", &tmp[0], 
-									  &tmp[1], 
-									  &tmp[2], 
-									  &tmp[3]);
-
-	mKey[0] = GetBigLong((unsigned char *)&tmp[0]);
-	mKey[1] = GetBigLong((unsigned char *)&tmp[1]);
-	mKey[2] = GetBigLong((unsigned char *)&tmp[2]);
-	mKey[3] = GetBigLong((unsigned char *)&tmp[3]);
 	
 	for (;*flags;++flags)
 	{
@@ -154,9 +142,6 @@ int CModuleEntry::WriteText(FILE *fd, char *modNames)
 
 	fprintf(fd, "%s ", modNames+mNameOffset);
 
-	fprintf(fd, "%08X%08X%08X%08X ", GetBigLong((unsigned char *)&mKey[0]), 
-									  GetBigLong((unsigned char *)&mKey[1]), 
-									  GetBigLong((unsigned char *)&mKey[2]), 							  GetBigLong((unsigned char *)&mKey[3]));
 	if(mFlags & 1)
 	{
 		fprintf(fd, "V");

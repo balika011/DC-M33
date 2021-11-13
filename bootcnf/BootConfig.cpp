@@ -125,14 +125,13 @@ int CBootConfig::ParseText(const char *file)
 		do
 		{
 			char file[255];
-			char key[255];
 			char flags[255];
-			int i = sscanf(linePtr, "%s %s %s", file, key, flags);
+			int i = sscanf(linePtr, "%s %s", file, flags);
 
 			if(i > 0)
 			{
 				CModuleEntry tmpEntry;
-				tmpEntry.ParseText(file, key, flags, textbuf, textPos);
+				tmpEntry.ParseText(file, flags, textbuf, textPos);
 
 				mModule.push_back(tmpEntry);
 
@@ -282,7 +281,7 @@ int CBootConfig::WriteBinary(const char *file)
 
 	// Write the header
 	hdr.FileHeader	= 0x0F803001;
-	hdr.devkit = 0x05000010;
+	hdr.devkit = 0x05000210;
 	hdr.unknown0[0] = 0x6B8B4567;
 	hdr.unknown0[1] = 0x327B23C6;
 	hdr.unknown1[0] = 0x643C9869;

@@ -9,7 +9,7 @@ public:
 	~CModuleEntry();
 
 	int ParseBinary(char *buffer);
-	int ParseText(char *file, char *key, char *flags, char *modNames, int &namePos);
+	int ParseText(char *file, char *flags, char *modNames, int &namePos);
 
 	int WriteBinary(FILE *fd);
 	int WriteText(FILE *fd, char *modNames);
