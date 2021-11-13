@@ -1,6 +1,6 @@
 PSPDEV=$(shell psp-config --pspdev-path)
 
-all: TM/DC9 TM/msipl.bin TM/DC9/ipl_01g.bin TM/DC9/ipl_02g.bin TM/DC9/ipl_03g.bin TM/DC9/nandcipl_01g.bin TM/DC9/nandcipl_02g.bin TM/DC9/nandcipl_03g.bin TM/DC9/kd/pspbtcnf_dc.bin TM/DC9/kd/pspbtcnf_umd.bin TM/DC9/kd/pspbtcnf_oe.bin TM/DC9/kd/pspbtcnf_m33.bin TM/DC9/kd/pspbtcnf_recovery.bin TM/DC9/kd/pspbtcnf_02g_dc.bin TM/DC9/kd/pspbtcnf_02g_umd.bin TM/DC9/kd/pspbtcnf_02g_oe.bin TM/DC9/kd/pspbtcnf_02g_m33.bin TM/DC9/kd/pspbtcnf_02g_recovery.bin TM/DC9/kd/pspbtcnf_03g_dc.bin TM/DC9/kd/pspbtcnf_03g_umd.bin TM/DC9/kd/pspbtcnf_03g_oe.bin TM/DC9/kd/pspbtcnf_03g_m33.bin TM/DC9/kd/pspbtcnf_03g_recovery.bin TM/DC9/tmctrl500.prx TM/DC9/kd/ipl_update.prx TM/DC9/kd/resurrection.prx TM/DC9/kd/dcman.prx TM/DC9/kd/iop.prx TM/DC9/kd/lflash_fdisk.prx TM/DC9/kd/idsregeneration.prx TM/DC9/kd/emc_sm_updater.prx TM/DC9/kd/lfatfs_updater.prx TM/DC9/kd/lflash_fatfmt_updater.prx TM/DC9/vsh/module/intraFont.prx TM/DC9/vsh/module/vlf.prx TM/DC9/kd/pspdecrypt.prx TM/DC9/kd/galaxy.prx TM/DC9/kd/idcanager.prx TM/DC9/kd/march33.prx TM/DC9/kd/popcorn.prx TM/DC9/kd/systemctrl.prx TM/DC9/kd/systemctrl_02g.prx TM/DC9/kd/systemctrl_03g.prx TM/DC9/kd/usbdevice.prx TM/DC9/kd/vshctrl.prx TM/DC9/vsh/module/recovery.prx TM/DC9/vsh/module/satelite.prx
+all: TM/DC9 TM/msipl.bin TM/DC9/ipl_01g.bin TM/DC9/ipl_02g.bin TM/DC9/ipl_03g.bin TM/DC9/nandcipl_01g.bin TM/DC9/nandcipl_02g.bin TM/DC9/nandcipl_03g.bin TM/DC9/kd/pspbtcnf_dc.bin TM/DC9/kd/pspbtcnf_umd.bin TM/DC9/kd/pspbtcnf_oe.bin TM/DC9/kd/pspbtcnf_m33.bin TM/DC9/kd/pspbtcnf_recovery.bin TM/DC9/kd/pspbtcnf_02g_dc.bin TM/DC9/kd/pspbtcnf_02g_umd.bin TM/DC9/kd/pspbtcnf_02g_oe.bin TM/DC9/kd/pspbtcnf_02g_m33.bin TM/DC9/kd/pspbtcnf_02g_recovery.bin TM/DC9/kd/pspbtcnf_03g_dc.bin TM/DC9/kd/pspbtcnf_03g_umd.bin TM/DC9/kd/pspbtcnf_03g_oe.bin TM/DC9/kd/pspbtcnf_03g_m33.bin TM/DC9/kd/pspbtcnf_03g_recovery.bin TM/DC9/tmctrl.prx TM/DC9/kd/ipl_update.prx TM/DC9/kd/resurrection.prx TM/DC9/kd/dcman.prx TM/DC9/kd/iop.prx TM/DC9/kd/lflash_fdisk.prx TM/DC9/kd/idsregeneration.prx TM/DC9/kd/emc_sm_updater.prx TM/DC9/kd/lfatfs_updater.prx TM/DC9/kd/lflash_fatfmt_updater.prx TM/DC9/vsh/module/intraFont.prx TM/DC9/vsh/module/vlf.prx TM/DC9/kd/pspdecrypt.prx TM/DC9/kd/galaxy.prx TM/DC9/kd/idcanager.prx TM/DC9/kd/march33.prx TM/DC9/kd/popcorn.prx TM/DC9/kd/systemctrl.prx TM/DC9/kd/systemctrl_02g.prx TM/DC9/kd/systemctrl_03g.prx TM/DC9/kd/usbdevice.prx TM/DC9/kd/vshctrl.prx TM/DC9/vsh/module/recovery.prx TM/DC9/vsh/module/satelite.prx
 
 clean:
 	rm -rf TM
@@ -227,7 +227,7 @@ TM/DC9/kd/pspbtcnf_03g_recovery.bin: bootcnf/bootcnf cfg/pspbtcnf_03g_recovery.t
 	psptools/pack_bootcfg.py pspbtcnf_03g_recovery.bin TM/DC9/kd/pspbtcnf_03g_recovery.bin
 	rm pspbtcnf_03g_recovery.bin
 	
-TM/DC9/tmctrl500.prx: TM/DC9
+TM/DC9/tmctrl.prx: TM/DC9
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_01G -DMSIPL=1"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
@@ -247,7 +247,7 @@ TM/DC9/tmctrl500.prx: TM/DC9
 	rm rebootex_03g.bin.gz
 
 	make -C modules/flashemu
-	python3 psptools/pack_module.py modules/flashemu/flashemu.prx TM/DC9/tmctrl500.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/flashemu/flashemu.prx TM/DC9/tmctrl.prx --tag 0x4c9416f0
 	
 TM/DC9/kd/ipl_update.prx: TM/DC9
 	make -C modules/ipl_update

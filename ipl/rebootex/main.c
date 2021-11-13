@@ -147,7 +147,7 @@ int sceBootLfatOpenPatched(char *file)
 }
 
 #ifdef MSIPL
-char tmctrl[] = "/tmctrl500.prx";
+char tmctrl[] = "/tmctrl.prx";
 
 int sceBootModuleLoadPatched(char *file)
 {
