@@ -540,7 +540,7 @@ void PatchSysconfPlugin(u32 text_addr)
 	}
 	else
 	{
-		u32 version_text = text_addr+0x23DE0;
+		u32 version_text = text_addr + 0x23DE0;
 	
 		// lui v0, addrhigh
 		_sw(0x3c020000 | (version_text >> 16), text_addr + 0x15EE0);

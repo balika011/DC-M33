@@ -712,16 +712,14 @@ void sctrlSESetDiscType(int type)
 
 void DoAnyUmd()
 {
-	u32 *mod, text_addr;
-	
 	umd_init(NULL);
 	sceKernelSetQTGP3(dummy_umd_id);
 
-	mod = (u32 *)sceKernelFindModuleByName("sceUmd9660_driver");
+	SceModule2 *mod = sceKernelFindModuleByName("sceUmd9660_driver");
 	if (!mod)
 		return;
 
-	text_addr = *(mod+27);
+	u32 text_addr = mod->text_addr;
 
 	address[0] = text_addr + 0x1F58;
 	restore[0] = _lw(text_addr + 0x1F58);
@@ -731,8 +729,8 @@ void DoAnyUmd()
 	restore[1] = _lw(text_addr + 0x6A5C);
 	MAKE_JUMP(text_addr + 0x6A5C, sceUmdManGetUmdDiscInfoPatched);
 
-	mod = (u32 *)sceKernelFindModuleByName("sceUmdMan_driver");
-	text_addr = *(mod+27);
+	mod = sceKernelFindModuleByName("sceUmdMan_driver");
+	text_addr = mod->text_addr;
 
 	address[2] = text_addr + 0xC018;
 	restore[2] = _lw(text_addr + 0xC018);
