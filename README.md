@@ -13,11 +13,11 @@ The psptools folder is used to encrypt and sign the built modules, a modified ve
 
 - **R Trigger**: Recovery
 
-- **L Trigger** + **HOME**: Boot from MemoryStick without service mode battery
+- **L Trigger** + **HOME**: Boot from Memory Stick without service mode battery
 
 - **HOME** + **TRIANGLE** + **UP**: OFW boot, only on non-TestingTool M33
 
-### Booting from **MemoryStrick**:
+### Booting from **Memory Stick**:
 
 - **START**: Direct boot into M33, skipping Despertar del Cementerio menu
 

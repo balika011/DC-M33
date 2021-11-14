@@ -309,8 +309,8 @@ void MainMenu(int sel)
 		"Install 5.02",
 		"NAND operations",
 		"Hardware Info",
-		"Boot 5.02 M33 from MS",
-		"Boot 5.02 TestingTool M33 from MS",
+		"Boot 5.02 M33 from MemoryStick",
+		"Boot 5.02 TestingTool M33 from MemoryStick",
 		"Shutdown",
 		"Reboot Device"
 	};
