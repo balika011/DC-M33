@@ -59,7 +59,7 @@ int sctrlHENGetVersion()
 
 int sctrlSEGetVersion()
 {
-	return 0x00020001;
+	return 0x00020002;
 }
 
 int sctrlKernelLoadExecVSHDisc(const char *file, struct SceKernelLoadExecVSHParam *param)
@@ -157,7 +157,6 @@ int sctrlSEMountUmdFromFile(char *file, int noumd, int isofs)
 	{
 		DoAnyUmd();
 	}
-
 	else
 	{
 		int res;

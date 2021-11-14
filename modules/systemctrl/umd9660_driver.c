@@ -215,27 +215,6 @@ int umd_init(PspIoDrvArg* arg)
 		}
 	}
 
-	/*umd_s1 = sceKernelCreateSema("s1", 0, 0, 1, NULL);
-	if (umd_s1 < 0)
-	{
-		return umd_s1;
-	}	
-
-	umd_s2 = sceKernelCreateSema("s2", 0, 0, 1, NULL);
-	if (umd_s2 < 0)
-	{
-		return umd_s2;
-	}	
-
-	umdthread = sceKernelCreateThread("Umd9660Worker", umd_thread, 0x18, 0x20000, 0, NULL);
-
-	if (umdthread < 0)
-	{
-		return umdthread;
-	}
-
-	sceKernelStartThread(umdthread, 0, NULL);*/
-
 	return 0;
 }
 
@@ -255,16 +234,6 @@ int umd_exit(PspIoDrvArg* arg)
 		umdsema = -1;		
 	}
 
-	return 0;
-}
-
-int umd_mount(PspIoDrvFileArg *arg)
-{
-	return 0;
-}
-
-int umd_umount(PspIoDrvFileArg *arg)
-{
 	return 0;
 }
 
@@ -373,44 +342,8 @@ int umd_devctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void
 
 	sceKernelWaitSema(umdsema, 1, NULL);
 
-	//Kprintf("umd_devctl: %08X\n", cmd);
-
 	switch (cmd)
 	{
-		/*case 0x01e380c0: case 0x01f200a1: case 0x01f200a2:
-		{			
-			if (!indata ||!outdata)
-			{
-				return SCE_ERROR_ERRNO_EINVAL;
-			}
-
-			res = ProcessDevctlRead(indata, outdata, outlen);
-			sceKernelSignalSema(umdsema, 1);
-			
-			return res;
-		}	*/	
-
-		/*case 0x01e18030:
-		{
-			// region related
-			sceKernelSignalSema(umdsema, 1);
-			return 1; 
-		}
-		
-		case 0x01e38012:
-		{
-			if (outlen < 0)
-				outlen += 3;
-
-			memset(outdata32, 0, outlen);
-			outdata32[0] = 0xe0000800;
-			outdata32[7] = outdata32[9] = discsize;
-			outdata32[2] = 0;
-
-			sceKernelSignalSema(umdsema, 1);
-			return 0;
-		}*/
-
 		case 0x01f20001: /* get disc type */
 		{
 			outdata32[1] = 0x10; /* game */
@@ -433,9 +366,6 @@ int umd_devctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void
 			return 0;
 		}
 	}
-
-	sceKernelDelayThread(3000000);
-	while (1) _sw(0, 0);
 
 	sceKernelSignalSema(umdsema, 1);
 	return -1;
@@ -461,8 +391,8 @@ PspIoDrvFuncs umd_funcs =
 	NULL,
 	NULL,
 	NULL,
-	NULL,/*umd_mount,*/
-	NULL,/*umd_umount,*/
+	NULL,
+	NULL,
 	umd_devctl,
 	NULL
 };
@@ -484,23 +414,15 @@ static const u8 dummy_umd_id[16] =
 static int *sceUmdManGetUmdDiscInfoPatched()
 {
 	int *(* sceUmdManGetUmdDiscInfo)(void);
-
-	// New nid
-	sceUmdManGetUmdDiscInfo = (void *)FindProc("sceUmdMan_driver", "sceUmdMan_driver", 0xA47D28AE);
-	
+	sceUmdManGetUmdDiscInfo = (void *)FindProc("sceUmdMan_driver", "sceUmdMan_driver", 0xB5A7A399);
 	int *lp = sceUmdManGetUmdDiscInfo();
 
-// patch DISK INFO
-
-	int result;
-
 	sceKernelWaitSema(umdsema, 1, NULL);
-	result = discsize; // UmdGetCapacity();
+	int result = discsize;
 	sceKernelSignalSema(umdsema, 1);
 
-	if( result > 0)
+	if(result > 0)
 	{
-//Kprintf("Patch Info\n");
 		lp[0x64/4] = 0xe0000800;        // 00
 		lp[0x68/4] = 0;                 // ?
 		lp[0x6c/4] = 0x00000000;        // 08
@@ -520,8 +442,8 @@ static int UmdRead_secbuf(int lba)
 	if(lba != lastLBA)	
 	{
 		result = Umd9660ReadSectors2(lba, 1, umdsector); //UmdRead(iso_sector_buf,lba,0x800);
-		if(result < 0 ) return result;
-		//if(result != 0x800) return 0x80010163;
+		if(result < 0)
+			return result;
 	}
 
 	return 0;
@@ -614,8 +536,6 @@ static int read_umd_iso_file_core(int *argv)
 
 static int UmdReadPatched(int *drvWork,void *buf,int len,u32 unk01,u32 *param)
 {
-	int result;
-
 	// UMD EMU
 	//result = umd_read_block(drvWork,buf,len,param);
 	int argv[4];
@@ -623,14 +543,12 @@ static int UmdReadPatched(int *drvWork,void *buf,int len,u32 unk01,u32 *param)
 	argv[1] = (int)buf;
 	argv[2] = (int)len;
 	argv[3] = (int)param;
-	result = (int)sceKernelExtendKernelStack(0x2000,(void *)read_umd_iso_file_core,(void *)&argv);
-
-	return result;
+	return (int)sceKernelExtendKernelStack(0x2000,(void *)read_umd_iso_file_core,(void *)&argv);
 }
 
 u32 sceGpioPortReadPatched()
 {
-	u32 gpio = *(u32 *)0xbe240004;
+	u32 gpio = *(u32 *) 0xbe240004;
 
 	if(discout)
 	{
