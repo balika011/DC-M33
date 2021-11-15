@@ -27,6 +27,7 @@ clean:
 	make -C modules/usbdevice clean
 	make -C modules/systemctrl clean
 	rm -f modules/systemctrl/rebootex.S
+	make -C modules/satelite clean
 
 TM:
 	mkdir TM
@@ -422,6 +423,7 @@ TM/DC9/vsh/module/recovery.prx: TM/DC9
 	python3 psptools/pack_module.py modules/recovery.elf TM/DC9/vsh/module/recovery.prx --tag 0x38020af0
 
 TM/DC9/vsh/module/satelite.prx: TM/DC9
-	python3 psptools/pack_module.py modules/satelite.elf TM/DC9/vsh/module/satelite.prx --tag 0x457b0af0
+	make -C modules/satelite
+	python3 psptools/pack_module.py modules/satelite/satelite.prx TM/DC9/vsh/module/satelite.prx --tag 0x457b0af0
 
 

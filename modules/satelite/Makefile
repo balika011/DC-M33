@@ -1,5 +1,5 @@
-TARGET = vshctrl
-OBJS = main.o iopatches.o virtualpbpmgr.o exports.o
+TARGET = satelite
+OBJS = main.o blit.o font.o menu.o videoiso.o
 
 INCDIR = ../include
 CFLAGS = -O2 -Os -G0 -Wall -fshort-wchar -fno-pic -mno-check-zero-division
@@ -9,12 +9,13 @@ ASFLAGS = $(CFLAGS)
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp
 
-USE_KERNEL_LIBC = 1
-USE_KERNEL_LIBS = 1
+USE_USER_LIBS = 1
+USE_PSPSDK_LIBC=1
 PSP_FW_VERSION = 500
 
 LIBDIR = ../lib
-LIBS = -lpspsystemctrl_kernel -lpsprtc_driver -lpspusb_driver -lpspusbdevice_driver -lpsppower_driver
+LIBS = -lpspsystemctrl_user -lpspvshctrl -lpsppaf -lpsppower
+LDFLAGS = -nostartfiles
 
 PSPSDK=$(shell psp-config --pspsdk-path)
-include $(PSPSDK)/lib/build_prx.mak
+include $(PSPSDK)/lib/build.mak

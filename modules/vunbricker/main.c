@@ -40,9 +40,6 @@ extern int PhysicalFormatCallback(int count, u32 arg, void *param);
 int progress_text = -1, progress_bar = -1;
 int status = -1;
 
-int scePower_0442D852(int);
-#define scePowerRequestColdReset scePower_0442D852
-
 
 int last_percentage = -1;
 int last_time;
