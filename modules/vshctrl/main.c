@@ -160,7 +160,7 @@ int LoadExecVSHCommonPatched(int apitype, char *file, struct SceKernelLoadExecVS
 	{
 		reboot150 = 1;
 		KXploitString(file);
-		KXploitString(param->argp);		
+		KXploitString(param->argp);
 	}
 
 	else if (strstr(file, "ms0:/PSP/GAME/") == file && !strstr(file, "ms0:/PSP/GAME/UPDATE/"))
