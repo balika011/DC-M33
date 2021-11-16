@@ -91,7 +91,10 @@ int OpenIso()
 		umdfd = sceIoOpen(umdfile, PSP_O_RDONLY | 0x000f0000, 0);
 		if (umdfd > 0)
 		{
-			_sw(umdfd, text_addr + 0x5BA4);
+			if (sctrlHENIsTestingTool())
+				_sw(umdfd, text_addr + 0x5BC4);
+			else
+				_sw(umdfd, text_addr + 0x5BA4);
 		
 			cso = 0;
 			if (CisoOpen(umdfd) >= 0)
@@ -122,11 +125,22 @@ int OpenUmdImage()
 
 	int intr = sceKernelCpuSuspendIntr();
 
-	_sw(0xE0000800, text_addr + 0x5BB4);
-	_sw(9, text_addr + 0x5BBC);
-	_sw(discsize, text_addr + 0x5BD0);
-	_sw(discsize, text_addr + 0x5BD8);
-	_sw(0, text_addr + 0x5B60);
+	if (sctrlHENIsTestingTool())
+	{
+		_sw(0xE0000800, text_addr + 0x5BD4);
+		_sw(9, text_addr + 0x5BDC);
+		_sw(discsize, text_addr + 0x5BF0);
+		_sw(discsize, text_addr  + 0x5BF8);
+		_sw(0, text_addr + 0x5B80);
+	}
+	else
+	{
+		_sw(0xE0000800, text_addr + 0x5BB4);
+		_sw(9, text_addr + 0x5BBC);
+		_sw(discsize, text_addr + 0x5BD0);
+		_sw(discsize, text_addr + 0x5BD8);
+		_sw(0, text_addr + 0x5B60);
+	}
 
 	sceKernelCpuResumeIntr(intr);
 
@@ -216,7 +230,10 @@ int sceIoClosePatched(SceUID fd)
 	if (fd == umdfd)
 	{
 		umdfd = -1;
-		_sw(umdfd, text_addr + 0x5BA4);
+		if (sctrlHENIsTestingTool())
+			_sw(umdfd, text_addr + 0x5BC4);
+		else
+			_sw(umdfd, text_addr + 0x5BA4);
 
 		ClearCaches();
 	}
@@ -243,14 +260,28 @@ int sceKernelStartThreadPatched(SceUID thid, SceSize arglen, void *argp)
 	{
 		text_addr = sceKernelFindModuleByName("sceNp9660_driver")->text_addr;
 
-		_sw(0x3c028000, text_addr + 0x32E8);
-		MAKE_CALL(text_addr + 0x32FC, OpenUmdImage);
-		MAKE_CALL(text_addr + 0x3918, ReadUmdFile);
-		MAKE_CALL(text_addr + 0x4DDC, ReadUmdFile);
-		MAKE_JUMP(text_addr + 0x51DC, sceIoClosePatched);
-		WaitMemStick = (void *)(text_addr + 0x2F30);
-		LockFdMutex = (void *)(text_addr + 0x4494);
-		UnlockFdMutex = (void *)(text_addr + 0x44EC);			
+		if (sctrlHENIsTestingTool())
+		{
+			_sw(0x3c028000, text_addr + 0x3308);
+			MAKE_CALL(text_addr + 0x331C, OpenUmdImage);
+			MAKE_CALL(text_addr + 0x3938, ReadUmdFile);
+			MAKE_CALL(text_addr + 0x4DFC, ReadUmdFile);
+			MAKE_JUMP(text_addr + 0x51FC, sceIoClosePatched);
+			WaitMemStick = (void *)(text_addr + 0x2F50);
+			LockFdMutex = (void *)(text_addr + 0x44B4);
+			UnlockFdMutex = (void *)(text_addr + 0x450C);
+		}
+		else
+		{
+			_sw(0x3c028000, text_addr + 0x32E8);
+			MAKE_CALL(text_addr + 0x32FC, OpenUmdImage);
+			MAKE_CALL(text_addr + 0x3918, ReadUmdFile);
+			MAKE_CALL(text_addr + 0x4DDC, ReadUmdFile);
+			MAKE_JUMP(text_addr + 0x51DC, sceIoClosePatched);
+			WaitMemStick = (void *)(text_addr + 0x2F30);
+			LockFdMutex = (void *)(text_addr + 0x4494);
+			UnlockFdMutex = (void *)(text_addr + 0x44EC);
+		}
 
 		ClearCaches();
 	}
