@@ -59,7 +59,7 @@ int sctrlHENGetVersion()
 
 int sctrlSEGetVersion()
 {
-	return 0x00020003;
+	return 0x00020004;
 }
 
 int sctrlKernelLoadExecVSHDisc(const char *file, struct SceKernelLoadExecVSHParam *param)

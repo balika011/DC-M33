@@ -497,12 +497,27 @@ void PatchVshMain(u32 text_addr)
 
 	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xAE5DE6AF), sceUsbStartPatched);
 	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xC2464FA0), sceUsbStopPatched);
- 
+
+	u32 baryon = 0;
+	sceSysconGetBaryonVersion(&baryon);
+
 	if (sctrlHENIsTestingTool())
 	{
-		// Fix UMD boot on TestingTool firmware
-		REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B));
-		REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE));
+		if (!(baryon & 1))
+		{
+			// Fix UMD boot on TestingTool firmware on retail hardware
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B));
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE));
+		}
+	}
+	else
+	{
+		if ((baryon & 1))
+		{
+			// Fix UMD boot on retail firmware on TestingTool hardware
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1));
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE), FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993));
+		}
 	}
 
 	ClearCaches();	
