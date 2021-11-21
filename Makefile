@@ -29,6 +29,7 @@ clean:
 	rm -f modules/systemctrl/rebootex.S
 	make -C modules/satelite clean
 	make -C modules/galaxy clean
+	make -C modules/popcorn clean
 
 TM:
 	mkdir TM
@@ -381,7 +382,8 @@ TM/DC9/kd/march33.prx: TM/DC9
 	python3 psptools/pack_module.py modules/march33.elf TM/DC9/kd/march33.prx --tag 0x4c9416f0
 	
 TM/DC9/kd/popcorn.prx: TM/DC9
-	python3 psptools/pack_module.py modules/popcorn.elf TM/DC9/kd/popcorn.prx --tag 0x4c9416f0
+	make -C modules/popcorn
+	python3 psptools/pack_module.py modules/popcorn/popcorn.prx TM/DC9/kd/popcorn.prx --tag 0x4c9416f0
 	
 TM/DC9/kd/systemctrl.prx: TM/DC9
 	make -C ipl/rebootex clean
