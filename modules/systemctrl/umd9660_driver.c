@@ -20,6 +20,7 @@
 #include "umd9660_driver.h"
 #include "isoread.h"
 #include "csoread.h"
+#include "pspmediaman.h"
 
 char umdfile[72];
 SceUID umdsema = -1;
@@ -28,8 +29,8 @@ SceUID umdthread = -1;
 SceUID umd_s1 = -1, umd_s2 = -1;
 
 int discpointer;
-int discsize=0x7FFFFFFF;
-u16 disctype = 0x10;
+int discsize = 0x7FFFFFFF;
+u16 disctype = SCE_UMD_FMT_GAME;
 int discout = 1;
 
 int lastLBA = -1;
@@ -346,7 +347,7 @@ int umd_devctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void
 	{
 		case 0x01f20001: /* get disc type */
 		{
-			outdata32[1] = 0x10; /* game */
+			outdata32[1] = SCE_UMD_FMT_GAME; /* game */
 			outdata32[0] = 0xFFFFFFFF; 
 			
 			sceKernelSignalSema(umdsema, 1);

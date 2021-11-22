@@ -3,6 +3,7 @@
 #include <psppaf.h>
 
 #include "videoiso.h"
+#include "pspmediaman.h"
 
 VideoIso cache[32];
 VideoIso iso;
@@ -114,11 +115,11 @@ static int CheckIso(VideoIso *videoiso)
 		{
 			if (paf_memcmp(p+8, "UMD_VIDEO", 9) == 0)
 			{
-				videoiso->disctype |= 0x20;
+				videoiso->disctype |= SCE_UMD_FMT_VIDEO;
 			}
 			else if (paf_memcmp(p+8, "UMD_AUDIO", 9) == 0)
 			{
-				videoiso->disctype |= 0x40;
+				videoiso->disctype |= SCE_UMD_FMT_AUDIO;
 			}
 		}
 
