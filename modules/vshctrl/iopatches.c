@@ -20,11 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
-
-
-SceUID gamedfd = -1, game150dfd = -1, game5xxdfd = -1, isodfd = -1, over5xx = 0, overiso = 0, paramsfo = -1;
+SceUID gamedfd = -1, isodfd = -1, overiso = 0, paramsfo = -1;
 int vpbpinited = 0, isoindex = 0, cachechanged = 0;
 VirtualPbp vpbp;
 VirtualPbp *cache = NULL;
@@ -48,21 +44,12 @@ int GetIsoIndex(const char *file)
 	return strtol(number, NULL, 10);	
 }
 
-int CorruptIconPatch(char *name, int g150)
+int CorruptIconPatch(char *name)
 {
 	char path[256];
+	sprintf(path, "ms0:/PSP/GAME/%s%%/EBOOT.PBP", name);
+	
 	SceIoStat stat;
-
-	if (g150)
-	{
-		sprintf(path, "ms0:/PSP/GAME150/%s%%/EBOOT.PBP", name);
-	}
-
-	else
-	{
-		sprintf(path, "ms0:/PSP/GAME/%s%%/EBOOT.PBP", name);
-	}
-
 	memset(&stat, 0, sizeof(stat));
 	
 	if (sceIoGetstat(path, &stat) >= 0)
@@ -73,25 +60,6 @@ int CorruptIconPatch(char *name, int g150)
 	}
 	
 	return 0;
-}
-
-void ApplyNamePatch(SceIoDirent *dir, char *patch)
-{
-	if (dir->d_name[0] != '.')
-	{
-		int patchname = 1;
-
-		if (config.hidecorrupt)
-		{
-			if (CorruptIconPatch(dir->d_name, 1))
-				patchname = 0;
-		}
-
-		if (patchname)
-		{
-			strcat(dir->d_name, patch);
-		}
-	}
 }
 
 void ApplyIsoNamePatch(SceIoDirent *dir)
@@ -215,11 +183,8 @@ int Cache(VirtualPbp *pbp)
 
 SceUID sceIoDopenPatched(const char *dirname)
 {
-	int res, g150 = 0, index;
+	int res, game = 0, index;
 	int k1 = pspSdkSetK1(0);
-
-	Fix150Path(dirname);
-	Fix5XXPath(dirname);	
 
 	index = GetIsoIndex(dirname);
 	if (index >= 0)
@@ -232,18 +197,16 @@ SceUID sceIoDopenPatched(const char *dirname)
 
 	if (strcmp(dirname, "ms0:/PSP/GAME") == 0)
 	{
-		g150 = 1;		
+		game = 1;		
 	}
 
 	pspSdkSetK1(k1);
 	res = sceIoDopen(dirname);
 	pspSdkSetK1(0);
 
-	if (g150)
+	if (game)
 	{
 		gamedfd = res;
-		game150dfd = sceIoDopen("ms0:/PSP/GAME150");
-		over5xx = 0;
 		overiso = 0;				
 	}	
 
@@ -270,47 +233,7 @@ int sceIoDreadPatched(SceUID fd, SceIoDirent *dir)
 	{
 		if (fd == gamedfd)
 		{
-			if (game150dfd >= 0)
-			{
-				if ((res = sceIoDread(game150dfd, dir)) > 0)
-				{
-					ApplyNamePatch(dir, "__150");					
-					pspSdkSetK1(k1);
-					return res;
-				}
-				else
-				{
-					sceIoDclose(game150dfd);
-					game150dfd = -1;					
-				}
-			}
-
-			if (game150dfd < 0 && game5xxdfd < 0 && isodfd < 0 && !over5xx)
-			{
-				game5xxdfd = sceIoDopen("ms0:/PSP/GAME5XX");
-				if (game5xxdfd < 0)
-				{
-					over5xx = 1;
-				}
-			}
-			
-			if (game5xxdfd >= 0)
-			{
-				if ((res = sceIoDread(game5xxdfd, dir)) > 0)
-				{
-					ApplyNamePatch(dir, "__5XX");					
-					pspSdkSetK1(k1);
-					return res;
-				}
-				else
-				{
-					sceIoDclose(game5xxdfd);
-					game5xxdfd = -1;
-					over5xx = 1;
-				}
-			}
-
-			if (game150dfd < 0 && game5xxdfd < 0 && isodfd < 0 && !overiso)
+			if (isodfd < 0 && !overiso)
 			{
 				isodfd = sceIoDopen("ms0:/ISO");
 				
@@ -365,7 +288,7 @@ NEXT:
 							ApplyIsoNamePatch(dir);
 
 							// Fake the entry from file to directory
-							dir->d_stat.st_mode = 0x11FF;
+							dir->d_stat.st_mode = 010777;
 							dir->d_stat.st_attr = 0x0010;
 							dir->d_stat.st_size = 0;	
 							
@@ -405,7 +328,7 @@ NEXT:
 	if (res > 0)
 	{
 		if (config.hidecorrupt)
-			CorruptIconPatch(dir->d_name, 0);
+			CorruptIconPatch(dir->d_name);
 	}
 
 	pspSdkSetK1(k1);
@@ -430,7 +353,6 @@ int sceIoDclosePatched(SceUID fd)
 	if (fd == gamedfd)
 	{
 		gamedfd = -1;
-		over5xx = 0;
 		overiso = 0;		
 		SaveCache();		
 	}
@@ -441,13 +363,9 @@ int sceIoDclosePatched(SceUID fd)
 
 SceUID sceIoOpenPatched(const char *file, int flags, SceMode mode)
 {
-	u32 k1 = pspSdkSetK1(0);	
-	int index;
-		
-	Fix150Path(file);
-	Fix5XXPath(file);
+	u32 k1 = pspSdkSetK1(0);
 
-	index = GetIsoIndex(file);
+	int index = GetIsoIndex(file);
 	if (index >= 0)
 	{
 		if (videoiso_mounted)
@@ -578,12 +496,8 @@ int sceIoLseek32Patched(SceUID fd, int offset, int whence)
 int sceIoGetstatPatched(const char *file, SceIoStat *stat)
 {
 	u32 k1 = pspSdkSetK1(0);
-	int index;
 
-	Fix150Path(file);
-	Fix5XXPath(file);
-
-	index = GetIsoIndex(file);
+	int index = GetIsoIndex(file);
 	if (index >= 0)
 	{
 		int res = virtualpbp_getstat(index, stat);
@@ -600,12 +514,8 @@ int sceIoGetstatPatched(const char *file, SceIoStat *stat)
 int sceIoChstatPatched(const char *file, SceIoStat *stat, int bits)
 {
 	u32 k1 = pspSdkSetK1(0);
-	int index;
 
-	Fix150Path(file);
-	Fix5XXPath(file);
-
-	index = GetIsoIndex(file);
+	int index = GetIsoIndex(file);
 	if (index >= 0)
 	{
 		int res = virtualpbp_chstat(index, stat, bits);
@@ -622,12 +532,8 @@ int sceIoChstatPatched(const char *file, SceIoStat *stat, int bits)
 int sceIoRemovePatched(const char *file)
 {
 	u32 k1 = pspSdkSetK1(0);
-	int index;
 
-	Fix150Path(file);
-	Fix5XXPath(file);
-
-	index = GetIsoIndex(file);
+	int index = GetIsoIndex(file);
 	if (index >= 0)
 	{
 		int res = virtualpbp_remove(index);
@@ -644,12 +550,8 @@ int sceIoRemovePatched(const char *file)
 int sceIoRmdirPatched(const char *path)
 {
 	u32 k1 = pspSdkSetK1(0);
-	int index;
 
-	Fix150Path(path);
-	Fix5XXPath(path);
-
-	index = GetIsoIndex(path);
+	int index = GetIsoIndex(path);
 	if (index >= 0)
 	{
 		int res = virtualpbp_rmdir(index);
@@ -669,8 +571,6 @@ int sceIoMkdirPatched(const char *dir, SceMode mode)
 
 	if (strcmp(dir, "ms0:/PSP/GAME") == 0)
 	{
-		sceIoMkdir("ms0:/PSP/GAME150", mode);
-		sceIoMkdir("ms0:/PSP/GAME5XX", mode);
 		sceIoMkdir("ms0:/ISO", mode);
 		sceIoMkdir("ms0:/ISO/VIDEO", mode);
 		sceIoMkdir("ms0:/seplugins", mode);
@@ -689,17 +589,17 @@ void IoPatches()
 	text_addr = mod->text_addr;
 
 	// Patcth IoFileMgrForUser syscalls
-	PatchSyscall(text_addr+0x144C, sceIoDopenPatched);
-	PatchSyscall(text_addr+0x15CC, sceIoDreadPatched);
-	PatchSyscall(text_addr+0x167C, sceIoDclosePatched);
-	PatchSyscall(text_addr+0x3CD0, sceIoOpenPatched);
-	PatchSyscall(text_addr+0x3C90, sceIoClosePatched);
-	PatchSyscall(text_addr+0x3DE8, sceIoReadPatched);
-	PatchSyscall(text_addr+0x3E58, sceIoLseekPatched);
-	PatchSyscall(text_addr+0x3E90, sceIoLseek32Patched);
-	PatchSyscall(text_addr+0x3F84, sceIoGetstatPatched);
-	PatchSyscall(text_addr+0x3FA4, sceIoChstatPatched);
-	PatchSyscall(text_addr+0x171C, sceIoRemovePatched);
-	PatchSyscall(text_addr+0x3F44, sceIoRmdirPatched);
-	PatchSyscall(text_addr+0x3F28, sceIoMkdirPatched);
+	PatchSyscall(text_addr + 0x144C, sceIoDopenPatched);
+	PatchSyscall(text_addr + 0x15CC, sceIoDreadPatched);
+	PatchSyscall(text_addr + 0x167C, sceIoDclosePatched);
+	PatchSyscall(text_addr + 0x3CD0, sceIoOpenPatched);
+	PatchSyscall(text_addr + 0x3C90, sceIoClosePatched);
+	PatchSyscall(text_addr + 0x3DE8, sceIoReadPatched);
+	PatchSyscall(text_addr + 0x3E58, sceIoLseekPatched);
+	PatchSyscall(text_addr + 0x3E90, sceIoLseek32Patched);
+	PatchSyscall(text_addr + 0x3F84, sceIoGetstatPatched);
+	PatchSyscall(text_addr + 0x3FA4, sceIoChstatPatched);
+	PatchSyscall(text_addr + 0x171C, sceIoRemovePatched);
+	PatchSyscall(text_addr + 0x3F44, sceIoRmdirPatched);
+	PatchSyscall(text_addr + 0x3F28, sceIoMkdirPatched);
 }

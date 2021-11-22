@@ -40,72 +40,6 @@ void ClearCaches()
 	sceKernelIcacheClearAll();
 }
 
-int LoadReboot(char *file)
-{
-	SceUID mod = sceKernelLoadModule("flash0:/kd/reboot150.prx", 0, NULL);
-
-	if (mod < 0)
-	{
-		mod = sceKernelLoadModule("ms0:/seplugins/reboot150.prx", 0, NULL);
-	}
-
-	if (mod < 0)
-		return mod;
-
-	return sceKernelStartModule(mod, 0, NULL, NULL, NULL);
-}
-
-void KXploitString(char *str)
-{
-	if (str)
-	{
-		char *perc = strchr(str, '%');
-
-		if (perc)
-		{
-			strcpy(perc, perc+1);
-		}
-	}
-}
-
-void Fix150Path(const char *file)
-{
-	char str[256];
-
-	if (strstr(file, "ms0:/PSP/GAME/") == file)
-	{
-		strcpy(str, (char *)file);
-
-		char *p = strstr(str, "__150");
-		
-		if (p)
-		{
-			strcpy((char *)file+13, "150/");
-			strncpy((char *)file+17, str+14, p-(str+14));
-			strcpy((char *)file+17+(p-(str+14)), p+5);		
-		}
-	}
-}
-
-void Fix5XXPath(const char *file)
-{
-	char str[256];
-
-	if (strstr(file, "ms0:/PSP/GAME/") == file)
-	{
-		strcpy(str, (char *)file);
-
-		char *p = strstr(str, "__5XX");
-		
-		if (p)
-		{
-			strcpy((char *)file+13, "5XX/");
-			strncpy((char *)file+17, str+14, p-(str+14));
-			strcpy((char *)file+17+(p-(str+14)), p+5);		
-		}
-	}
-}
-
 void ReturnToDisc()
 {
 	sctrlSEUmountUmd();
@@ -116,7 +50,6 @@ void ReturnToDisc()
 int LoadExecVSHCommonPatched(int apitype, char *file, struct SceKernelLoadExecVSHParam *param, int unk2)
 {
 	int k1 = pspSdkSetK1(0);
-	int reboot150 = 0;
 
 	SetUmdFile("");
 
@@ -149,28 +82,6 @@ int LoadExecVSHCommonPatched(int apitype, char *file, struct SceKernelLoadExecVS
 
 		pspSdkSetK1(k1);
 		return sctrlKernelLoadExecVSHWithApitype(0x120, file, param);	
-	}
-
-	Fix150Path(file);
-	Fix150Path(param->argp);
-	Fix5XXPath(file);
-	Fix5XXPath(param->argp);	
-
-	if (strstr(file, "ms0:/PSP/GAME150/"))
-	{
-		reboot150 = 1;
-		KXploitString(file);
-		KXploitString(param->argp);
-	}
-
-	else if (strstr(file, "ms0:/PSP/GAME/") == file && !strstr(file, "ms0:/PSP/GAME/UPDATE/"))
-	{
-		if (config.gamekernel150)
-		{
-			reboot150 = 1;
-			KXploitString(file);
-			KXploitString(param->argp);	
-		}
 	}	
 
 	else if (strstr(file, "EBOOT.BIN"))
@@ -183,11 +94,6 @@ int LoadExecVSHCommonPatched(int apitype, char *file, struct SceKernelLoadExecVS
 	}
 
 	param->args = strlen(param->argp) + 1; // update length
-
-	if (reboot150 == 1)
-	{
-		LoadReboot(file);		
-	}
 
 	pspSdkSetK1(k1);
 
