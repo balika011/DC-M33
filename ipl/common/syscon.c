@@ -5,11 +5,11 @@
 #include "syscon.h"
 #include "kirk.h"
 
-int pspSyscon_init(void)
+int sceSysconInit(void)
 {
-	Sysreg_driver_Unkonow_d6628a48(0,1);
+	sceSysregSpiClkSelect(0,1);
 
-	Sysreg_driver_Unkonow_8835d1e1(0);
+	sceSysregSpiClkEnable(0);
 
 	//sceSysregSpiIoEnable(0)
 	REG32(0xbc100078) |= (0x1000000<<0);
@@ -172,7 +172,7 @@ retry:
 	return result;
 }
 
-int pspSyscon_tx_dword(u32 param,u8 cmd,u8 tx_len)
+int sceSysconCommonWrite(u32 param,u8 cmd,u8 tx_len)
 {
 	u8 tx_buf[0x10],rx_buf[0x10];
 
@@ -185,7 +185,7 @@ int pspSyscon_tx_dword(u32 param,u8 cmd,u8 tx_len)
 	return Syscon_cmd(tx_buf,rx_buf);
 }
 
-int pspSyscon_rx_dword(u32 *param,u8 cmd)
+int sceSysconCommonRead(u32 *param,u8 cmd)
 {
 	u8 tx_buf[0x10],rx_buf[0x10];
 	int result;
@@ -208,12 +208,6 @@ int pspSyscon_rx_dword(u32 *param,u8 cmd)
 	return result;
 }
 
-int pspSyscon_tx_noparam(u8 cmd)
-{
-	return pspSyscon_tx_dword(0,cmd,2);
-}
-
-
 u32 Syscon_wait(u32 usec)
 {
 	u32 i;
@@ -233,7 +227,7 @@ u32 Syscon_wait(u32 usec)
   LED power controll
 
 */
-int pspSysconCtrlLED(int sel,int is_on)
+int sceSysconCtrlLED(int sel,int is_on)
 {
 	u32 param;
 
@@ -252,7 +246,7 @@ int pspSysconCtrlLED(int sel,int is_on)
 			param += 0x30;
 		}
 	}
-	return pspSyscon_tx_dword(param,0x47,0x03);
+	return sceSysconCommonWrite(param,0x47,0x03);
 }
 
 int pspSysconGetCtrl2(u32 *ctrl,u8 *vol1,u8 *vol2)
@@ -356,30 +350,13 @@ int seed_gen1(u8 *random_key, u8 *random_key_dec_resp_dec)
 	return 0;
 }
 
-u8 rand_xor[] =
-{
-#ifdef IPL_02G
-	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06
-#elif IPL_03G
-	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
-#endif
-};
-u8 key_86[] =
-{
-#ifdef IPL_02G
-	0x4D, 0xB8, 0x63, 0xF3, 0x60, 0x14, 0xF1, 0x5F, 0x91, 0xE8, 0x96, 0xE9, 0x99, 0xD1, 0x89, 0x0D
-#elif IPL_03G
-	0xB6, 0xEA, 0xC0, 0xBF, 0xC0, 0x95, 0xDB, 0x6A, 0xAD, 0xE1, 0xCD, 0xB1, 0xBD, 0x68, 0x8C, 0x5F
-#endif
-};
-
 void xor(u8 *dest, u8 *src_a, u8 *src_b)
 {
 	for (int i = 0; i < 16; i++)
 		dest[i] = src_a[i] ^ src_b[i];
 }
 
-int seed_gen2(u8 *random_key, u8 *random_key_dec_resp_dec)
+int seed_gen2(u8 *rand_xor, u8 *key_86, u8 *random_key, u8 *random_key_dec_resp_dec)
 {
 	u8 random_key_xored[16];
 	xor(random_key_xored, random_key, rand_xor);

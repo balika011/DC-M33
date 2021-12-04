@@ -4,10 +4,11 @@ all: TM/DC9 TM/msipl.bin TM/DC9/ipl_01g.bin TM/DC9/ipl_02g.bin TM/DC9/ipl_03g.bi
 
 clean:
 	rm -rf TM
+	make -C ipl/common clean
 	make -C ipl/msipl clean
 	make -C ipl/payloadex clean
 	make -C ipl/ipl_stage2_payload clean
-	rm -f ipl/ipl_stage2_payload/payloadex.s
+	rm -f ipl/ipl_stage2_payload/payloadex.S
 	make -C ipl/ipl_stage1_payload clean
 	rm -f ipl/ipl_stage1_payload/payload.S
 	make -C bootcnf clean
@@ -46,18 +47,21 @@ TM/DC9: TM
 	mkdir -p TM/DC9/vsh/theme
 	touch TM/DC9/registry/init.dat
 
-TM/msipl.bin: TM
+ipl/common/libiplsdk.a:
+	make -C ipl/common
+
+TM/msipl.bin: TM ipl/common/libiplsdk.a
 	make -C ipl/msipl
 
 	psptools/pack_ipl.py ipl/msipl/msipl.bin@0x40c0000 TM/msipl.bin 0x40c0000
 
-TM/DC9/ipl_01g.bin: TM/DC9
+TM/DC9/ipl_01g.bin: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_01G -DMSIPL=1"
-	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
 
 	make -C ipl/ipl_stage2_payload clean
-	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_01G -DMSIPL=1"
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_01G -DMSIPL=1"
 	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
@@ -69,13 +73,13 @@ TM/DC9/ipl_01g.bin: TM/DC9
 	dd if=ipl_01g.dec of=TM/DC9/ipl_01g.bin bs=1 seek=12288
 	rm ipl_01g.dec
 	
-TM/DC9/ipl_02g.bin: TM/DC9
+TM/DC9/ipl_02g.bin: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_02G -DMSIPL=1"
-	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
 
 	make -C ipl/ipl_stage2_payload clean
-	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_02G -DMSIPL=1"
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_02G -DMSIPL=1"
 	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
@@ -87,13 +91,13 @@ TM/DC9/ipl_02g.bin: TM/DC9
 	dd if=ipl_02g.dec of=TM/DC9/ipl_02g.bin bs=1 seek=12288
 	rm ipl_02g.dec
 	
-TM/DC9/ipl_03g.bin: TM/DC9
+TM/DC9/ipl_03g.bin: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_03G -DMSIPL=1"
-	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
 
 	make -C ipl/ipl_stage2_payload clean
-	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_03G -DMSIPL=1"
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_03G -DMSIPL=1"
 	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
@@ -104,13 +108,13 @@ TM/DC9/ipl_03g.bin: TM/DC9
 	dd if=ipl_03g.dec of=TM/DC9/ipl_03g.bin bs=1 seek=12288
 	rm ipl_03g.dec
 
-TM/DC9/nandcipl_01g.bin: TM/DC9
+TM/DC9/nandcipl_01g.bin: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_01G"
-	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
 
 	make -C ipl/ipl_stage2_payload clean
-	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_01G"
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_01G"
 	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
@@ -121,13 +125,13 @@ TM/DC9/nandcipl_01g.bin: TM/DC9
 	rm ipl_01g.dec
 
 
-TM/DC9/nandcipl_02g.bin: TM/DC9
+TM/DC9/nandcipl_02g.bin: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_02G"
-	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
 
 	make -C ipl/ipl_stage2_payload clean
-	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_02G"
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_02G"
 	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean
@@ -137,13 +141,13 @@ TM/DC9/nandcipl_02g.bin: TM/DC9
 	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_02g.dec@0x40f0000 TM/DC9/nandcipl_02g.bin 0x40e0000
 	rm ipl_02g.dec
 
-TM/DC9/nandcipl_03g.bin: TM/DC9
+TM/DC9/nandcipl_03g.bin: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
 	make -C ipl/payloadex BFLAGS="-DIPL_03G"
-	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.s payloadex
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
 
 	make -C ipl/ipl_stage2_payload clean
-	make -C ipl/ipl_stage2_payload CFLAGS="-DIPL_03G"
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_03G"
 	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
 
 	make -C ipl/ipl_stage1_payload clean

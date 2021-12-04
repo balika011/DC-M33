@@ -1,5 +1,4 @@
 #ifndef __FAT_H__
-
 #define __FAT_H__
 
 #define FAT_TYPE_12	0

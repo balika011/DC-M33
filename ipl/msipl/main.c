@@ -1,5 +1,6 @@
 #include <pspsdk.h>
 #include <string.h>
+#include <sysreg.h>
 #include "syscon.h"
 #include "fat.h"
 
@@ -36,27 +37,29 @@ uint32_t GetTachyonVersion()
 int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 {
 	// SYSCON SPI enable
-	REG32(0xbc100058) |= 0x02;
+	SYSREG_CLK2_ENABLE_REG |= 0x02;
 	REG32(0xbc10007c) |= 0xc8;
 	
 	asm("sync"::);
 
-	pspSyscon_init();
-	pspSysconCrlMsPower(1);
+	sceSysconInit();
+	sceSysconCtrlMsPower(1);
 	
 #ifdef DEBUG
-	pspSysconCrlHpPower(1);
+	sceSysconCtrlHRPower(1);
 	
 	uart_init();
 
 	printf("msipl starting...\n");
 #endif
 	uint32_t baryon_version = 0;
-	pspSysconGetBaryonVersion(&baryon_version);
+	sceSysconGetBaryonVersion(&baryon_version);
 	uint32_t tachyon_version = GetTachyonVersion();
 	
+#ifdef DEBUG
 	printf("Tachyon: %x\n", tachyon_version);
 	printf("Baryon: %x\n", baryon_version);
+#endif
 	
 	if (tachyon_version >= 0x600000)
 		_sw(0x20070910, 0xbfc00ffc);

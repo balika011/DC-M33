@@ -46,6 +46,27 @@ void KirkReset()
 	SysregBusclkKirkEnable();
 }
 
+int KirkCmd1(void *dest, void *src)
+{
+	g_KIRK->Command = 1;
+	g_KIRK->SourceAddr = PHYS_TO_HW(src);
+	g_KIRK->DestAddr = PHYS_TO_HW(dest);
+
+	g_KIRK->StartProcessing = 1;
+	while ((g_KIRK->Pattern & 0x11) == 0);
+	g_KIRK->PatternEnd = g_KIRK->Pattern & 0x11;
+	if ((g_KIRK->Pattern & 0x10) == 0)
+		return g_KIRK->Result;
+
+	g_KIRK->StartProcessing = 2;
+	while ((g_KIRK->Pattern & 2) == 0);
+	g_KIRK->PatternEnd = g_KIRK->Pattern & 2;
+	
+	asm("sync");
+
+	return -1;
+}
+
 void KirkCmd15()
 {
 	g_KIRK->Command = 15;

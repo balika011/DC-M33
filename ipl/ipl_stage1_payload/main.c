@@ -58,7 +58,6 @@ extern u32 size_payload;
 extern u8 payload;
 void Dcache();
 void Icache();
-#define MAIN_BIN() ((void (*)()) 0x4000000)()
 
 void *memset(void *dest, int value, size_t size)
 {
@@ -81,6 +80,24 @@ void *memcpy(void *dest, const void *src, size_t size)
 	return dest;
 }
 
+
+u8 rand_xor[] =
+{
+#ifdef IPL_02G
+	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06
+#elif IPL_03G
+	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+#endif
+};
+u8 key_86[] =
+{
+#ifdef IPL_02G
+	0x4D, 0xB8, 0x63, 0xF3, 0x60, 0x14, 0xF1, 0x5F, 0x91, 0xE8, 0x96, 0xE9, 0x99, 0xD1, 0x89, 0x0D
+#elif IPL_03G
+	0xB6, 0xEA, 0xC0, 0xBF, 0xC0, 0x95, 0xDB, 0x6A, 0xAD, 0xE1, 0xCD, 0xB1, 0xBD, 0x68, 0x8C, 0x5F
+#endif
+};
+
 int unlockSyscon()
 {
 	KirkReset();
@@ -94,7 +111,7 @@ int unlockSyscon()
 	if (ret)
 		return ret;
 	
-	ret = seed_gen2(random_key, random_key_dec_resp_dec);
+	ret = seed_gen2(rand_xor, key_86, random_key, random_key_dec_resp_dec);
 	if (ret)
 		return ret;
 	
@@ -148,8 +165,7 @@ void prestage2()
 	memcpy((u8 *) 0x10000, &payload, size_payload);
 	
 	// Replace call to Dcache with jump to patch2
-	_sw(0x8004000, STAGE2_PATCH_INJECTION_ADDRESS); // j 0x00010000
-	_sw(0, STAGE2_PATCH_INJECTION_ADDRESS + 4);
+	MAKE_CALL(STAGE2_PATCH_INJECTION_ADDRESS, 0x00010000);
 	
 	// Change payload entrypoint to 0x88fc0000
 	_sw(0x3C1988FC, ENTRY_POINT_ADDRESS); // lui t9, 0x88fc
@@ -165,7 +181,7 @@ void prestage2()
 	Icache();
 	
 	// Execute main.bin
-	MAIN_BIN();
+	((void (*)()) 0x4000000)();
 }
 
 u32 GetTachyonVersion()
@@ -180,12 +196,12 @@ u32 GetTachyonVersion()
 
 int main()
 {
-	pspSyscon_init();
+	sceSysconInit();
 
 	u32 baryon_version = 0;
-	while (pspSysconGetBaryonVersion(&baryon_version) < 0);
+	while (sceSysconGetBaryonVersion(&baryon_version) < 0);
 	
-	while (pspSyscon_driver_Unkonow_7bcc5eae(0) < 0);
+	while (sceSysconGetTimeStamp(0) < 0);
 
 	u32 tachyon_version = GetTachyonVersion();
 
@@ -198,7 +214,7 @@ int main()
 	pspSysconGetCtrl1(&keys);
 	if ((keys & (SYSCON_CTRL_LTRG | SYSCON_CTRL_HOME)) == 0)
 	{
-		pspSysconCrlMsPower(1);
+		sceSysconCtrlMsPower(1);
 	
 		_sw(0x00000000, 0x80010068);
 
@@ -219,7 +235,7 @@ int main()
 #endif
 
 #ifdef DEBUG
-	pspSysconCrlHpPower(1);
+	sceSysconCtrlHRPower(1);
 	
 	uart_init();
 	
@@ -248,7 +264,7 @@ int main()
 	
 	MAKE_JUMP(PRE_STAGE2_ADDR, prestage2);
 	_sw(0, PRE_STAGE2_ADDR + 4);
-	
+
 	Dcache();
 	Icache();
 	

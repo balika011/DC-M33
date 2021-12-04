@@ -1,10 +1,9 @@
-#include <psptypes.h>
-//#include "kprintf.h"
+#include "sysreg.h"
 
 #define REG32(ADDR) (*(vu32*)(ADDR))
 #define SYNC() asm(" sync; nop"::)
 
-u32 Sysreg_driver_Unkonow_d6628a48(int a1,int a2)
+u32 sceSysregSpiClkSelect(int a1,int a2)
 {
 	u32 shift;
 	u32 in,out;
@@ -18,17 +17,20 @@ u32 Sysreg_driver_Unkonow_d6628a48(int a1,int a2)
 	return (in>shift) & 7;
 }
 
-u32 Sysreg_driver_Unkonow_8835d1e1(u32 bit)
+u32 sceSysregSpiClkEnable(u32 bit)
 {
 	u32 in , out;
 	u32 mask = (1<<bit);
-	u32 a2 = 1;
+	u32 enable = 1;
 
-	// 1128(mask,1)
-	in = REG32(0xbc100058);
-	out = (in & (~mask) );
-	if(a2) out |= mask;
-	REG32(0xbc100058) = out;
+	in = SYSREG_CLK2_ENABLE_REG;
+
+	out = (in & (~mask));
+	if(enable)
+		out |= mask;
+
+	SYSREG_CLK2_ENABLE_REG = out;
+
 	return in & mask;
 }
 
@@ -43,9 +45,9 @@ void SysregReset(u32 mask, u32 enable)
 void SysregBusclk(u32 mask, u32 enable)
 {
 	if (enable)
-		REG32(0xBC100050) |= mask;
+		SYSREG_BUSCLK_ENABLE_REG |= mask;
 	else
-		REG32(0xBC100050) &= ~mask;
+		SYSREG_BUSCLK_ENABLE_REG &= ~mask;
 }
 
 void SysregResetKirkEnable()

@@ -1,5 +1,5 @@
-TARGET = ipl_stage1_payload
-OBJS = crt0.o main.o payload.o
+TARGET = iplsdk
+OBJS = fat.o kirk.o ms.o printf.o syscon.o sysreg.o uart.o
 
 INCDIR = 
 CFLAGS = -Os -G0 -Wall -fno-pic $(BFLAGS) -fdata-sections -ffunction-sections -Wl,--gc-sections
@@ -8,7 +8,7 @@ ASFLAGS = $(CFLAGS)
 
 LIBS =
 LIBDIR =
-LDFLAGS = -nostartfiles  -T linkfile.l -fdata-sections -ffunction-sections -Wl,--gc-sections
+LDFLAGS = -fdata-sections -ffunction-sections -Wl,--gc-sections
 
 PSPSDK=$(shell psp-config --pspsdk-path)
-include ../common/build.mak
+include build_lib.mak

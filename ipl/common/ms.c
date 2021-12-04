@@ -1,4 +1,3 @@
-
 #include <pspkernel.h>
 
 #define IO_MEM_STICK_CMD *((volatile int*)(0xBD200030))
@@ -32,8 +31,6 @@
 ;CMD_NOT_EXE     = cmdnk
 */
 
-int ms_init_list=0;
-
 static u8 sts_buf[8];
 
 void ms_wait_unk1(void);
@@ -46,51 +43,43 @@ int ms_get_reg(int buffer, int reg);
 int ms_get_reg_int(void);
 
 void pspMsInit(void){
-  _ms_init();
+	_ms_init();
 }
 
 
 void ms_wait_unk1(void){
-  while(!(IO_MEM_STICK_STATUS & 0x2000)){};
+	while(!(IO_MEM_STICK_STATUS & 0x2000)){};
 }
 
-int parse_init_registers(int list)
+int parse_init_registers()
 {
 	*((volatile int*)(0xBC100054)) |= 0x00000100;
 	*((volatile int*)(0xBC100050)) |= 0x00000400;
 	*((volatile int*)(0xBC100078)) |= 0x00000010;
-	*((volatile int*)(0xBC10004C)) &= 0xFFFFFEFF;
+	*((volatile int*)(0xBC10004C)) &= ~0x100;
 
   return 0;
 }
 
-int _ms_init(void){
-  int ret;
+int _ms_init(void)
+{
+	//initialize the hardware
+	parse_init_registers();
 
-//Kprintf("Pre Init\n");
+	//reset the controller
+	IO_MEM_STICK_SYS = MSRST;
+	while(IO_MEM_STICK_SYS & MSRST){}
 
-  //initialize the hardware
-  parse_init_registers(ms_init_list);
+	ms_check_unk2();
 
-//Kprintf("reset\n");
+	ms_wait_ready();
 
-  //reset the controller
-  IO_MEM_STICK_SYS = MSRST;
-  while(IO_MEM_STICK_SYS & MSRST){}
+	int ret;
+	do{
+		ret = ms_get_reg_int();
+	}while((ret < 0) || ( (ret & INT_REG_CED) == 0));
 
-//Kprintf("unk2\n");
-
-  ms_check_unk2();
-
-//Kprintf("ready\n");
-  ms_wait_ready();
-
-//Kprintf("wait CED\n");
-  do{
-    ret = ms_get_reg_int();
-  }while((ret < 0) || ( (ret & INT_REG_CED) == 0));
-
-  return 0;
+	return 0;
 }
 
 int pspMsReadSector(int sector, void *addr){
@@ -357,4 +346,3 @@ Kprintf("err:ms wait int\n");
 
   return 0;
 }
-

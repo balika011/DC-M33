@@ -42,7 +42,6 @@ u32 MsFatGetNextCluster(u32 cluster)
 	switch (fat_type)
 	{
 		case FAT_TYPE_12:
-
 			offset = cluster + (cluster / 2);
 			local_offset = offset % 0x200;
 		
@@ -500,5 +499,4 @@ int MsFatClose()
 	// Implementation not needed
 	return 0;
 }
-
 

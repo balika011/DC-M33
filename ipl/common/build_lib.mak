@@ -18,15 +18,14 @@ endif
 CC       = psp-gcc
 CXX      = psp-g++
 AS       = psp-gcc
-#LD       = psp-gcc
 LD       = psp-ld
 AR       = psp-ar
 RANLIB   = psp-ranlib
 STRIP    = psp-strip
 
 # Add in PSPSDK includes and libraries.
-INCDIR   := $(INCDIR) . $(PSPSDK)/include
-LIBDIR   := $(LIBDIR) . $(PSPSDK)/lib
+INCDIR   := $(INCDIR) . $(PSPSDK)/include ../common/
+LIBDIR   := $(LIBDIR) . $(PSPSDK)/lib ../common/
 
 CFLAGS   := $(addprefix -I,$(INCDIR)) $(CFLAGS)
 CXXFLAGS := $(CFLAGS) $(CXXFLAGS)
@@ -34,35 +33,15 @@ ASFLAGS  := $(CFLAGS) $(ASFLAGS)
 
 LDFLAGS  := $(addprefix -L,$(LIBDIR)) $(LDFLAGS)
 
-# Library selection.  By default we link with PSPSDK's libc.  Allow the
-# user to link with Newlib's libc if USE_NEWLIB_LIBC is set to 1.
-#PSPSDK_LIBC_LIB = -lpsplibc
-#ifeq ($(USE_NEWLIB_LIBC),1)
-#PSPSDK_LIBC_LIB = -lc -lpspglue
-#endif
-
 # Link with following default libraries.  Other libraries should be specified in the $(LIBS) variable.
 # TODO: This library list needs to be generated at configure time.
-#PSPSDK_LIBS = -lpspdebug
-#LIBS     := $(LIBS) $(PSPSDK_LIBS) $(PSPSDK_LIBC_LIB) -lpspkernel
 #
-ifneq ($(TARGET_LIB),)
-FINAL_TARGET = $(TARGET_LIB)
-else
-FINAL_TARGET = $(TARGET).bin
-endif
+
+FINAL_TARGET = lib$(TARGET).a
 
 all: $(EXTRA_TARGETS) $(FINAL_TARGET)
 
-$(TARGET).bin: $(TARGET).elf
-	$(STRIP) -s -O binary $(TARGET).elf -o $(TARGET).bin
-	-rm -f $(TARGET).elf
-
-$(TARGET).elf: $(OBJS)
-	-rm -f $(TARGET).elf
-	$(LINK.c) $^ $(LIBS) -o $(TARGET).elf
-
-$(TARGET_LIB): $(OBJS)
+$(FINAL_TARGET): $(OBJS)
 	$(AR) cru $@ $(OBJS)
 
 clean: $(EXTRA_CLEAN)
