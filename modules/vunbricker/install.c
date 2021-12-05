@@ -538,7 +538,8 @@ const char *common_m33[] =
 	"kd/popcorn.prx",
 	"kd/march33.prx",
 	"kd/idcanager.prx",
-	"kd/galaxy.prx"
+	"kd/galaxy.prx",
+	"kd/systemctrl.prx"
 };
 
 const char *spec_01g_m33[] =
@@ -546,8 +547,7 @@ const char *spec_01g_m33[] =
 	"kd/pspbtcnf_umd.bin",
 	"kd/pspbtcnf_np.bin",
 	"kd/pspbtcnf_m33.bin",
-	"kd/pspbtcnf_recovery.bin",
-	"kd/systemctrl.prx"
+	"kd/pspbtcnf_recovery.bin"
 };
 
 const char *spec_02g_m33[] =
@@ -555,8 +555,7 @@ const char *spec_02g_m33[] =
 	"kd/pspbtcnf_02g_umd.bin",
 	"kd/pspbtcnf_02g_np.bin",
 	"kd/pspbtcnf_02g_m33.bin",
-	"kd/pspbtcnf_02g_recovery.bin",
-	"kd/systemctrl_02g.prx"
+	"kd/pspbtcnf_02g_recovery.bin"
 };
 
 const char *spec_03g_m33[] =
@@ -564,8 +563,7 @@ const char *spec_03g_m33[] =
 	"kd/pspbtcnf_03g_umd.bin",
 	"kd/pspbtcnf_03g_np.bin",
 	"kd/pspbtcnf_03g_m33.bin",
-	"kd/pspbtcnf_03g_recovery.bin",
-	"kd/systemctrl_03g.prx"
+	"kd/pspbtcnf_03g_recovery.bin"
 };
 
 int LoadUpdaterModules()

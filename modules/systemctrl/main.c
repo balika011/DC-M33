@@ -589,7 +589,7 @@ int aLinkLibEntriesPatched(SceLibraryStubTable *imports, SceSize size)
 		{
 			if (power_driver->nidtable[i] == 0x737486F2)
 			{
-				u32 func = FindPowerFunction(0x737486F2);
+				u32 func = FindPowerFunction(power_driver->nidtable[i]);
 
 				if (func)
 				{
@@ -908,15 +908,6 @@ void PatchLoadCore()
 	MAKE_CALL(text_addr + 0x1E5C, PatchInit);
 	// li a0, 4 -> mov a0, s7
 	_sw(0x02e02021, text_addr + 0x1E60);
-
-	u32 addr = FindProc("sceMemlmd", "memlmd", 0x2159F4BB);
-	MAKE_CALL(text_addr + 0x691C, addr);
-	MAKE_CALL(text_addr + 0x694C, addr);
-	MAKE_CALL(text_addr + 0x69E4, addr);
-
-	addr = FindProc("sceMemlmd", "memlmd", 0xB05E960B);
-	MAKE_CALL(text_addr + 0x41D0, addr);
-	MAKE_CALL(text_addr + 0x68F8, addr);
 }
 
 void PatchModuleMgr()
@@ -985,19 +976,6 @@ void PatchMemlmd()
 	}
 }
 
-void PatchInterruptMgr()
-{
-	SceModule2 *mod = sceKernelFindModuleByName("sceInterruptManager");
-	u32 text_addr = mod->text_addr;
-
-	// Allow execution of syscalls in kmode
-	_sw(0, text_addr + 0x145C);
-
-	// Stop kmem protection regeneration
-	_sw(0, text_addr + 0x150C);
-	_sw(0, text_addr + 0x1510);
-}
-
 void PatchMesgLed()
 {
 	SceModule2 *mod = sceKernelFindModuleByName("sceMesgLed");
@@ -1030,6 +1008,19 @@ void PatchMesgLed()
 		MAKE_CALL(text_addr + 0x202C, MDecryptPatched);
 		MDecrypt = (void *)(text_addr + 0xE0);
 	}
+}
+
+void PatchInterruptMgr()
+{
+	SceModule2 *mod = sceKernelFindModuleByName("sceInterruptManager");
+	u32 text_addr = mod->text_addr;
+
+	// Allow execution of syscalls in kmode
+	_sw(0, text_addr + 0x145C);
+
+	// Stop kmem protection regeneration
+	_sw(0, text_addr + 0x150C);
+	_sw(0, text_addr + 0x1510);
 }
 
 int module_start(SceSize args, void *argp)

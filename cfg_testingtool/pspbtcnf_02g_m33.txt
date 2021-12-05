@@ -9,7 +9,7 @@ $/kd/iofilemgr.prx VGUD
 $/kd/sm1.prx GD
 $/kd/memlmd_02g.prx VGUD
 $/kd/modulemgr.prx VGUD
-$/kd/systemctrl_02g.prx VGUD
+$/kd/systemctrl.prx VGUD
 $/kd/init.prx VGUD
 $/kd/bsod.prx GD
 $/kd/loadexec_02g.prx VGUD

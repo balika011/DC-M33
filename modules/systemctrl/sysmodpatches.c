@@ -154,6 +154,8 @@ void sctrlHENSetRebootexOverride(const u8 *rebootex)
 int (* reboot_decompress)(u8 *dest, u32 destSize, const u8 *src, void *unk, void *unk2);
 
 extern u8 rebootex;
+extern u8 rebootex_02g;
+extern u8 rebootex_03g;
 
 int LoadRebootex(u8 *dest, u32 destSize, const u8 *src, void *unk, void *unk2)
 {
@@ -174,8 +176,16 @@ int LoadRebootex(u8 *dest, u32 destSize, const u8 *src, void *unk, void *unk2)
 	_sw(testingtool, 0x88fb00cc);
 	_sw(ram2, 0x88fb00c4);
 	_sw(ram8, 0x88fb00c8);
+	
+	u8 *rebootex;
+	switch(sceKernelGetModel())
+	{
+		case 0: rebootex = &rebootex; break;
+		case 1: rebootex = &rebootex_02g; break;
+		case 2: rebootex = &rebootex_03g; break;
+	}
 
-	sceKernelGzipDecompress((void *)0x88fc0000, 0x4000, rebootex_override ? rebootex_override : &rebootex, 0);
+	sceKernelGzipDecompress((void *)0x88fc0000, 0x4000, rebootex_override ? rebootex_override : rebootex, 0);
 	return reboot_decompress(dest, destSize, src, unk, unk2);	
 }
 
