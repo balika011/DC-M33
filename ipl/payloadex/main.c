@@ -18,7 +18,7 @@
 
 #ifdef IPL_01G
 
-#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(void *, void *, void *, void *, void *, void *, void *)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
+#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(u32, u32, u32, u32, u32, u32, u32)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
 #define DcacheClear() ((int (*)(void)) 0x88601318)()
 #define IcacheClear() ((int (*)(void)) 0x88600D84)()
 #define sceBootModuleLoad(str) ((int (*)(char *)) 0x8860A2D4)(str)
@@ -34,9 +34,6 @@
 
 #define MODULE_PATCH 0x88602AF8
 
-#define REMOVE_BY_DEBUG 0x8860C1A0
-#define KPRINTF_ADDR 0x886104E4
-
 #define LOAD_CORE 0x88602910
 
 #define PSP_CONFIG_HASH 0x88602E68
@@ -45,7 +42,7 @@
 
 #elif IPL_02G
 
-#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(void *, void *, void *, void *, void *, void *, void *)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
+#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(u32, u32, u32, u32, u32, u32, u32)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
 #define DcacheClear() ((int (*)(void)) 0x886013E0)()
 #define IcacheClear() ((int (*)(void)) 0x88600E4C)()
 #define sceBootModuleLoad(str) ((int (*)(char *)) 0x8860A3A8)(str)
@@ -61,9 +58,6 @@
 
 #define MODULE_PATCH 0x88602BB4
 
-#define REMOVE_BY_DEBUG 0x8860C274
-#define KPRINTF_ADDR 0x886105D8
-
 #define LOAD_CORE 0x886029D8
 
 #define PSP_CONFIG_HASH 0x88602F3C
@@ -72,7 +66,7 @@
 
 #elif IPL_03G
 
-#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(void *, void *, void *, void *, void *, void *, void *)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
+#define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(u32, u32, u32, u32, u32, u32, u32)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
 #define DcacheClear() ((int (*)(void)) 0x886013E0)()
 #define IcacheClear() ((int (*)(void)) 0x88600E4C)()
 #define sceBootModuleLoad(str) ((int (*)(char *)) 0x8860A3D4)(str)
@@ -87,9 +81,6 @@
 #define RECOVERY_ERROR2 0x886034FC
 
 #define MODULE_PATCH 0x88602BCC
-
-#define REMOVE_BY_DEBUG 0x8860C2A0
-#define KPRINTF_ADDR 0x88610654
 
 #define LOAD_CORE 0x886029D8
 
@@ -117,7 +108,7 @@ int sceBootLfatOpenPatched(char *file)
 #ifdef DEBUG
 	printf("sceBootLfatOpenPatched(%s)", file);
 #endif
-	
+
 	// Copy to other buffer to avoid changing the string
 	memcpy(g_file, file, 64);
 	
@@ -157,7 +148,7 @@ int sceBootLfatOpenPatched(char *file)
 char tmctrl[] = "/tmctrl.prx";
 int sceBootModuleLoadPatched(char *file)
 {
-	int len = sceBootModuleLoad(file); // strlen?
+	int len = sceBootModuleLoad(file);
 	if (len >= 0)
 	{
 		if (len > 14)
@@ -203,16 +194,7 @@ int PatchLoadCore(void *a0, void *a1, void *a2, int (* module_start)(void *, voi
 	return module_start(a0, a1, a2);
 }
 
-#ifdef DEBUG
-int kprintf(uint32_t unk, char *fmt, va_list va)
-{
-	vprintf(fmt, va);
-
-	return 0;
-}
-#endif
-
-int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
+int entry(u32 a0, u32 a1, u32 dispsw_low32, u32 a3, u32 dispsw_high32, u32 t1, u32 t2)
 {
 #ifdef DEBUG
 	uart_init();
@@ -253,18 +235,9 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 		// Two patches during file read to avoid possible fake recovery file error
 		_sw(0, RECOVERY_ERROR1);
 		_sw(0, RECOVERY_ERROR2);
-		
+
 #ifdef MSIPL
 		MAKE_CALL(MODULE_PATCH, sceBootModuleLoadPatched);
-#endif
-		
-#ifdef DEBUG
-		// patch point : removeByDebugSecion 
-		// Dummy a function to make it return 1 
-		_sw(0x03e00008, REMOVE_BY_DEBUG);
-		_sw(0x24020001, REMOVE_BY_DEBUG + 4);
-
-		_sw((uint32_t) kprintf, KPRINTF_ADDR);
 #endif
 
 		// Patch the call to LoadCore module_start 
@@ -292,6 +265,10 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	}
 #endif
 
-	return Ipl_Payload(a0, a1, a2, a3, t0, t1, t2);	
+#ifdef DEBUG
+		dispsw_high32 |= 0x1000000;
+#endif
+
+	return Ipl_Payload(a0, a1, dispsw_low32, a3, dispsw_high32, t1, t2);	
 }
 

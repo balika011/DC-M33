@@ -67,16 +67,11 @@ def decrypt(prx, meta, **kwargs):
 
     p = prx_header_9(prx)
 
-    print(meta['pubkey'])
-    print(p.prx_ecdsa().hex())
-
     # check ECDSA signature
-    # kirk.kirk11(bytes.fromhex(meta['pubkey']), p.prx_ecdsa(
-    # ), prx[4:0x104] + b'\x00'*0x28 + prx[0x12C:])
+    # kirk.kirk11(bytes.fromhex(meta['pubkey']), p.prx_ecdsa(), prx[4:0x104] + b'\x00'*0x28 + prx[0x12C:])
 
     h2 = SHA1.new()
     h2.update(prx[4:0x104] + b'\x00'*0x28 + prx[0x12C:])
-    print(h2.hexdigest())
 
     # decrypt the header information
     p.decrypt_header(meta['key'])
@@ -87,10 +82,7 @@ def decrypt(prx, meta, **kwargs):
     h.update(xorbuf[:0x10])
     h.update(b'\x00'*0x58)
     h.update(p.btcnf_id())
-    h.update(p.kirk_aes_key())
-    h.update(p.kirk_cmac_key())
-    h.update(p.kirk_cmac_header_hash())
-    h.update(p.kirk_cmac_data_hash())
+    h.update(p.kirk_block())
     h.update(p.kirk_metadata())
     h.update(p.elf_info())
 

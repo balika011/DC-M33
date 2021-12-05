@@ -45,6 +45,10 @@ TM/DC9: TM
 	mkdir -p TM/DC9/registry
 	mkdir -p TM/DC9/vsh/module
 	mkdir -p TM/DC9/vsh/theme
+	mkdir -p TM/DC9/retail/kd
+	mkdir -p TM/DC9/retail/vsh
+	mkdir -p TM/DC9/testingtool/kd
+	mkdir -p TM/DC9/testingtool/vsh
 	touch TM/DC9/registry/init.dat
 
 ipl/common/libiplsdk.a:
@@ -123,7 +127,6 @@ TM/DC9/nandcipl_01g.bin: TM/DC9 ipl/common/libiplsdk.a
 	psptools/unpack_ipl.py 502/nandipl_01g.bin ipl_01g.dec
 	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_01g.dec@0x40f0000 TM/DC9/nandcipl_01g.bin 0x40e0000
 	rm ipl_01g.dec
-
 
 TM/DC9/nandcipl_02g.bin: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
@@ -310,7 +313,7 @@ TM/DC9/testingtool/kd/pspbtcnf_03g_recovery.bin: bootcnf/bootcnf cfg_testingtool
 	psptools/pack_bootcfg.py pspbtcnf_03g_recovery.bin TM/DC9/testingtool/kd/pspbtcnf_03g_recovery.bin
 	rm pspbtcnf_03g_recovery.bin
 
-TM/DC9/tmctrl.prx: TM/DC9
+TM/DC9/tmctrl.prx: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_01G -DMSIPL=1"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
@@ -389,7 +392,7 @@ TM/DC9/kd/popcorn.prx: TM/DC9
 	make -C modules/popcorn
 	python3 psptools/pack_module.py modules/popcorn/popcorn.prx TM/DC9/kd/popcorn.prx --tag 0x4c9416f0
 	
-TM/DC9/kd/systemctrl.prx: TM/DC9
+TM/DC9/kd/systemctrl.prx: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_01G"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
@@ -399,7 +402,7 @@ TM/DC9/kd/systemctrl.prx: TM/DC9
 	make -C modules/systemctrl
 	python3 psptools/pack_module.py modules/systemctrl/systemctrl.prx TM/DC9/kd/systemctrl.prx --tag 0x4c9416f0
 	
-TM/DC9/kd/systemctrl_02g.prx: TM/DC9
+TM/DC9/kd/systemctrl_02g.prx: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_02G"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz
@@ -409,7 +412,7 @@ TM/DC9/kd/systemctrl_02g.prx: TM/DC9
 	make -C modules/systemctrl
 	python3 psptools/pack_module.py modules/systemctrl/systemctrl.prx TM/DC9/kd/systemctrl_02g.prx --tag 0x4c9417f0
 
-TM/DC9/kd/systemctrl_03g.prx: TM/DC9
+TM/DC9/kd/systemctrl_03g.prx: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_03G"
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex.bin.gz

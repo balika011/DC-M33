@@ -16,36 +16,36 @@
 #define MAKE_JUMP(a, f) _sw(J_OPCODE | (((u32)(f) & 0x0ffffffc) >> 2), a); 
 #define MAKE_CALL(a, f) _sw(JAL_OPCODE | (((u32)(f) >> 2)  & 0x03ffffff), a); 
 
-#ifdef IPL_01G
+#if IPL_01G
 
-#define RESET_VECTOR_ADDRESS 0x040f0118
-#define ROM_HMAC_ADDRESS 0x40f0fe4
+#define RESET_VECTOR_ADDRESS 0x40f0118
 #define PRE_STAGE2_ADDR 0x40f02a8
+#define ROM_HMAC_ADDRESS 0x40f0fe4
 
 #define STAGE2_PATCH_INJECTION_ADDRESS 0x400035C
-#define ENTRY_POINT_ADDRESS 0x400C534
 #define CLEAR_STRACHPAD_ADDRESS 0x4001100
+#define ENTRY_POINT_ADDRESS 0x400C534
 
 #elif IPL_02G
 
-#define RESET_VECTOR_ADDRESS 0x040f0118
-#define ROM_HMAC_ADDRESS 0x40f0fe4
+#define RESET_VECTOR_ADDRESS 0x40f0118
 #define PRE_STAGE2_ADDR 0x40f02a8
+#define ROM_HMAC_ADDRESS 0x40f0fe4
 
 #define STAGE2_PATCH_INJECTION_ADDRESS 0x400035C
-#define ENTRY_POINT_ADDRESS 0x400D534
 #define CLEAR_STRACHPAD_ADDRESS 0x40011E4
+#define ENTRY_POINT_ADDRESS 0x400D534
 #define SET_SEED_ADDRESS 0x4001134
 
 #elif IPL_03G
 
-#define RESET_VECTOR_ADDRESS 0x040f0118
-#define ROM_HMAC_ADDRESS 0x40f0fe4
+#define RESET_VECTOR_ADDRESS 0x40f0118
 #define PRE_STAGE2_ADDR 0x40f02a8
+#define ROM_HMAC_ADDRESS 0x40f0fe4
 
 #define STAGE2_PATCH_INJECTION_ADDRESS 0x400035C
-#define ENTRY_POINT_ADDRESS 0x0400D534
 #define CLEAR_STRACHPAD_ADDRESS 0x4001218
+#define ENTRY_POINT_ADDRESS 0x0400D534
 #define SET_SEED_ADDRESS 0x4001168
 
 #else
@@ -83,7 +83,7 @@ void *memcpy(void *dest, const void *src, size_t size)
 
 u8 rand_xor[] =
 {
-#ifdef IPL_02G
+#if IPL_02G
 	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06
 #elif IPL_03G
 	0x61, 0x7A, 0x56, 0x42, 0xF8, 0xED, 0xC5, 0xE4, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
@@ -91,7 +91,7 @@ u8 rand_xor[] =
 };
 u8 key_86[] =
 {
-#ifdef IPL_02G
+#if IPL_02G
 	0x4D, 0xB8, 0x63, 0xF3, 0x60, 0x14, 0xF1, 0x5F, 0x91, 0xE8, 0x96, 0xE9, 0x99, 0xD1, 0x89, 0x0D
 #elif IPL_03G
 	0xB6, 0xEA, 0xC0, 0xBF, 0xC0, 0x95, 0xDB, 0x6A, 0xAD, 0xE1, 0xCD, 0xB1, 0xBD, 0x68, 0x8C, 0x5F
@@ -121,7 +121,8 @@ int unlockSyscon()
 }
 
 #ifdef SET_SEED_ADDRESS
-u8 seed_xor[] = {
+u8 seed_xor[] =
+{
 #if IPL_02G
 	0xae, 0xfa, 0xba, 0xcf, 0x1c, 0x5f, 0x88, 0x7e, 0xf1, 0x5d, 0xe4, 0xaf, 0xe1, 0xab, 0x51, 0xf6
 #elif IPL_03G
@@ -142,7 +143,7 @@ int set_seed(u8 *xor_key, u8 *random_key, u8 *random_key_dec_resp_dec)
 
 u8 rom_hmac[] =
 {
-#ifdef IPL_01G
+#if IPL_01G
 	0xc6, 0x32, 0xd1, 0xc9, 0xaa, 0x60, 0xbf, 0x39, 0x42, 0xeb, 0x0b, 0x1e, 0xaa, 0xc8, 0x27, 0x25,
 	0xc7, 0x68, 0x95, 0xee, 0x01, 0xc0, 0xe9, 0xc1, 0x28, 0x8a, 0x2d, 0xe1, 0x00, 0x00, 0x00, 0x00
 #elif IPL_02G
@@ -166,12 +167,12 @@ void prestage2()
 	
 	// Replace call to Dcache with jump to patch2
 	MAKE_CALL(STAGE2_PATCH_INJECTION_ADDRESS, 0x00010000);
-	
-	// Change payload entrypoint to 0x88fc0000
-	_sw(0x3C1988FC, ENTRY_POINT_ADDRESS); // lui t9, 0x88fc
 
 	// Nullify memset to scratch pad
 	_sw(0, CLEAR_STRACHPAD_ADDRESS);
+	
+	// Change payload entrypoint to 0x88fc0000
+	_sw(0x3C1988FC, ENTRY_POINT_ADDRESS); // lui t9, 0x88fc
 
 #ifdef SET_SEED_ADDRESS
 	MAKE_CALL(SET_SEED_ADDRESS, set_seed);
@@ -239,10 +240,6 @@ int main()
 	
 	uart_init();
 	
-	_putchar('n');
-	_putchar('a');
-	_putchar('n');
-	_putchar('d');
 	_putchar('i');
 	_putchar('p');
 	_putchar('l');
@@ -260,10 +257,11 @@ int main()
 		_sw(0x20040420, 0xbfc00ffc);
 
 	_sw(0x3c08bfc0, RESET_VECTOR_ADDRESS);
-	MAKE_CALL(ROM_HMAC_ADDRESS, sha256hmacPatched);
 	
 	MAKE_JUMP(PRE_STAGE2_ADDR, prestage2);
 	_sw(0, PRE_STAGE2_ADDR + 4);
+
+	MAKE_CALL(ROM_HMAC_ADDRESS, sha256hmacPatched);
 
 	Dcache();
 	Icache();

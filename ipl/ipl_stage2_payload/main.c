@@ -5,24 +5,6 @@
 #include <printf.h>
 #endif
 
-#ifdef IPL_01G
-
-#define return_to_payload() ((void (*)()) 0x4000364)()
-
-#elif IPL_02G
-
-#define return_to_payload() ((void (*)()) 0x4000364)()
-
-#elif IPL_03G
-
-#define return_to_payload() ((void (*)()) 0x4000364)()
-
-#else
-
-#error Define IPL
-
-#endif
-
 extern uint32_t size_payloadex;
 extern uint8_t payloadex;
 void Dcache();
@@ -59,6 +41,4 @@ int main()
 
 	Dcache();
 	Icache();
-
-	return_to_payload();
 }
