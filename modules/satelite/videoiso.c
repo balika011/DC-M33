@@ -217,12 +217,12 @@ void GetVideoIsos(VideoIso **isos, int *n)
 	{
 		if (!FIO_S_ISDIR(dir.d_stat.st_mode))
 		{
-			if (!IsCached(dir.d_name, &dir.d_stat.st_mtime))
+			if (!IsCached(dir.d_name, &dir.d_stat.sce_st_mtime))
 			{
 				paf_strcpy(iso.filename, dir.d_name);
 				if (CheckIso(&iso))
 				{
-					paf_memcpy(&iso.mtime, &dir.d_stat.st_mtime, sizeof(ScePspDateTime));
+					paf_memcpy(&iso.mtime, &dir.d_stat.sce_st_mtime, sizeof(ScePspDateTime));
 					Cache(&iso);
 				}
 			}			

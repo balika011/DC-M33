@@ -16,7 +16,7 @@ USE_KERNEL_LIBS = 1
 
 LDFLAGS = -nostdlib -nodefaultlibs
 LIBDIR = ../lib
-LIBS = -lpspnand_driver -lpspsystemctrl_kernel -lpsplflash_fatfmt -lpspsyscon_driver -lpspsysreg_driver -lpspsemaphore
+LIBS = -lpspnand_driver -lpspsystemctrl_kernel -lpsplflash_fatfmt -lpspsemaphore
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include ./build.mak

@@ -937,12 +937,12 @@ int isofs_getstat2()
 		}
 
 		getstat_params.stat->st_size = record.lsbDataLength;
-		getstat_params.stat->st_ctime.year = getstat_params.stat->st_mtime.year = record.year;
-		getstat_params.stat->st_ctime.month = getstat_params.stat->st_mtime.month = record.month;
-		getstat_params.stat->st_ctime.day = getstat_params.stat->st_mtime.day = record.day;
-		getstat_params.stat->st_ctime.hour = getstat_params.stat->st_mtime.hour = record.hour;
-		getstat_params.stat->st_ctime.minute = getstat_params.stat->st_mtime.minute = record.minute;
-		getstat_params.stat->st_ctime.second = getstat_params.stat->st_mtime.second = record.second;
+		getstat_params.stat->sce_st_ctime.year = getstat_params.stat->sce_st_mtime.year = record.year;
+		getstat_params.stat->sce_st_ctime.month = getstat_params.stat->sce_st_mtime.month = record.month;
+		getstat_params.stat->sce_st_ctime.day = getstat_params.stat->sce_st_mtime.day = record.day;
+		getstat_params.stat->sce_st_ctime.hour = getstat_params.stat->sce_st_mtime.hour = record.hour;
+		getstat_params.stat->sce_st_ctime.minute = getstat_params.stat->sce_st_mtime.minute = record.minute;
+		getstat_params.stat->sce_st_ctime.second = getstat_params.stat->sce_st_mtime.second = record.second;
 		getstat_params.stat->st_private[0] = lba;
 	}
 	else
@@ -1186,12 +1186,12 @@ int isofs_dread2()
 		}
 
 		dread_params.dirent->d_stat.st_size = record->lsbDataLength;
-		dread_params.dirent->d_stat.st_ctime.year = dread_params.dirent->d_stat.st_mtime.year = record->year;
-		dread_params.dirent->d_stat.st_ctime.month = dread_params.dirent->d_stat.st_mtime.month = record->month;
-		dread_params.dirent->d_stat.st_ctime.day = dread_params.dirent->d_stat.st_mtime.day = record->day;
-		dread_params.dirent->d_stat.st_ctime.hour = dread_params.dirent->d_stat.st_mtime.hour = record->hour;
-		dread_params.dirent->d_stat.st_ctime.minute = dread_params.dirent->d_stat.st_mtime.minute = record->minute;
-		dread_params.dirent->d_stat.st_ctime.second = dread_params.dirent->d_stat.st_mtime.second = record->second;
+		dread_params.dirent->d_stat.sce_st_ctime.year = dread_params.dirent->d_stat.sce_st_mtime.year = record->year;
+		dread_params.dirent->d_stat.sce_st_ctime.month = dread_params.dirent->d_stat.sce_st_mtime.month = record->month;
+		dread_params.dirent->d_stat.sce_st_ctime.day = dread_params.dirent->d_stat.sce_st_mtime.day = record->day;
+		dread_params.dirent->d_stat.sce_st_ctime.hour = dread_params.dirent->d_stat.sce_st_mtime.hour = record->hour;
+		dread_params.dirent->d_stat.sce_st_ctime.minute = dread_params.dirent->d_stat.sce_st_mtime.minute = record->minute;
+		dread_params.dirent->d_stat.sce_st_ctime.second = dread_params.dirent->d_stat.sce_st_mtime.second = record->second;
 		dread_params.dirent->d_stat.st_private[0] = record->lsbStart;
 
 		if (record->fi == 0)

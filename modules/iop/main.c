@@ -16,8 +16,6 @@
 
 PSP_MODULE_INFO("IoPrivileged", 0x1007, 1, 0);
 
-void (* PatchSyscall)(u32 funcaddr, void *newfunc);
-
 
 SceUID sceIoOpenPrivileged(const char *file, int flags, SceMode mode)
 {
@@ -273,6 +271,7 @@ int sceIoUnassignPrivileged(const char *dev)
 
 int module_start(SceSize args, void *argp)
 {
+	void (* PatchSyscall)(u32 funcaddr, void *newfunc);
 	PatchSyscall = (void *)sctrlHENFindFunction("SystemControl", "SystemCtrlForKernel", 0x826668E9);
 	
 	if (!PatchSyscall)

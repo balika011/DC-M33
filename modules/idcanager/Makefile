@@ -15,7 +15,7 @@ USE_KERNEL_LIBC = 1
 USE_KERNEL_LIBS = 1
 
 LIBDIR = ../lib
-LIBS = -lpspsysmem_kernel -lpspnpdrm_kernel
+LIBS = -lpspnpdrm_kernel
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build_prx.mak

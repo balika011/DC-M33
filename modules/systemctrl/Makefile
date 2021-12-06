@@ -15,7 +15,7 @@ PSP_FW_VERSION=500
 
 LIBDIR = ../lib
 LDFLAGS = -nostartfiles
-LIBS = -lpspsysmem_kernel
+LIBS = 
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

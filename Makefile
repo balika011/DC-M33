@@ -28,6 +28,8 @@ clean:
 	make -C modules/usbdevice clean
 	make -C modules/systemctrl clean
 	rm -f modules/systemctrl/rebootex.S
+	rm -f modules/systemctrl/rebootex_02g.S
+	rm -f modules/systemctrl/rebootex_03g.S
 	make -C modules/satelite clean
 	make -C modules/galaxy clean
 	make -C modules/popcorn clean

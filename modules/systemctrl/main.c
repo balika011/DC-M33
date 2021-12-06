@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <pspsysmem_kernel.h>
-
 #include <oe_malloc.h>
 
 #include "main.h"
@@ -488,7 +487,6 @@ u32 sctrlHENFindFunction(const char* szMod, const char* szLib, u32 nid)
 	if (data)
 	{
 		u32 nnid = FindNewNid(data, nid);
-		
 		if (nnid)
 			nid = nnid;
 	}
@@ -1024,7 +1022,7 @@ void PatchInterruptMgr()
 }
 
 int module_start(SceSize args, void *argp)
-{	
+{
 	PatchLoadCore();
 	PatchModuleMgr();
 
