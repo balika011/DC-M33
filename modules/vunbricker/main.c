@@ -301,13 +301,13 @@ void MainMenu(int sel)
 {
 	char *items[] =
 	{
-		"Install 5.02 M33-5",
-		"Install 5.02 TestingTool M33-5",
+		"Install 5.02 M33-6",
+		"Install 5.02 TestingTool M33-6",
 		"Install 5.02",
 		"NAND operations",
 		"Hardware Info",
-		"Boot 5.02 M33-5 from MemoryStick",
-		"Boot 5.02 TestingTool M33-5 from MemoryStick",
+		"Boot 5.02 M33-6 from MemoryStick",
+		"Boot 5.02 TestingTool M33-6 from MemoryStick",
 		"Shutdown",
 		"Reboot Device"
 	};
