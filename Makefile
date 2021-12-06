@@ -76,7 +76,7 @@ TM/DC9/ipl_01g.bin: TM/DC9 ipl/common/libiplsdk.a
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_01g.bin
 
 	psptools/unpack_ipl.py 502/nandipl_01g.bin ipl_01g.dec
-	dd if=ipl_01g.dec of=TM/DC9/ipl_01g.bin bs=1 seek=12288
+	dd if=ipl_01g.dec of=TM/DC9/ipl_01g.bin bs=1 seek=49152
 	rm ipl_01g.dec
 	
 TM/DC9/ipl_02g.bin: TM/DC9 ipl/common/libiplsdk.a
@@ -94,7 +94,7 @@ TM/DC9/ipl_02g.bin: TM/DC9 ipl/common/libiplsdk.a
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_02g.bin
 
 	psptools/unpack_ipl.py 502/nandipl_02g.bin ipl_02g.dec
-	dd if=ipl_02g.dec of=TM/DC9/ipl_02g.bin bs=1 seek=12288
+	dd if=ipl_02g.dec of=TM/DC9/ipl_02g.bin bs=1 seek=49152
 	rm ipl_02g.dec
 	
 TM/DC9/ipl_03g.bin: TM/DC9 ipl/common/libiplsdk.a
@@ -111,7 +111,7 @@ TM/DC9/ipl_03g.bin: TM/DC9 ipl/common/libiplsdk.a
 
 	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC9/ipl_03g.bin
 	psptools/unpack_ipl.py 502/nandipl_03g.bin ipl_03g.dec --xor 1
-	dd if=ipl_03g.dec of=TM/DC9/ipl_03g.bin bs=1 seek=12288
+	dd if=ipl_03g.dec of=TM/DC9/ipl_03g.bin bs=1 seek=49152
 	rm ipl_03g.dec
 
 TM/DC9/nandcipl_01g.bin: TM/DC9 ipl/common/libiplsdk.a

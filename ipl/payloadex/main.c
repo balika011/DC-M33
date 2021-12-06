@@ -266,7 +266,10 @@ int entry(u32 a0, u32 a1, u32 dispsw_low32, u32 a3, u32 dispsw_high32, u32 t1, u
 #endif
 
 #ifdef DEBUG
+		// enable bootloader Kprintf
 		dispsw_high32 |= 0x1000000;
+		// enable uart4 Krpintf (add uart4.prx after init.prx in pspbtcnf)
+		dispsw_high32 |= 0x2000000;
 #endif
 
 	return Ipl_Payload(a0, a1, dispsw_low32, a3, dispsw_high32, t1, t2);	
