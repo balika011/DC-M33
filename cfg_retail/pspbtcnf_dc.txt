@@ -8,6 +8,7 @@ $/kd/systimer.prx VGUPD
 $/kd/iofilemgr.prx VGUPD
 $/kd/memlmd_01g.prx VGUPD
 $/kd/modulemgr.prx VGUPD
+$/kd/nidresolver.prx VGUPD
 $/kd/systemctrl.prx VGUPD
 $/kd/init.prx VGUPD
 $/kd/loadexec_01g.prx VGUPD
@@ -34,8 +35,8 @@ $/kd/umd9660.prx GU
 $/kd/isofs.prx GU
 $/kd/msstor.prx VGUPD
 $/kd/fatms.prx VGUPD
-$/kd/wlan.prx GUPD
-$/kd/wlanfirm_01g.prx GUPD
+$/kd/wlan.prx VGUPD
+$/kd/wlanfirm_01g.prx VGUPD
 $/kd/registry.prx VGUPD
 $/kd/mgr.prx PD
 $/kd/msaudio.prx 
@@ -65,8 +66,6 @@ $%/vsh/module/pafmini.prx P
 %%/kd/dummy_anchor_IhariUafaayk98.prx GUD
 $%/kd/libatrac3plus.prx 
 $%/vsh/module/paf.prx 
-$/kd/wlan.prx V
-$/kd/wlanfirm_01g.prx VP
 $%/vsh/module/libpspvmc.prx P
 %%/kd/dummy_anchor_IhariUafaayk98.prx P
 $%%/kd/resurrection.prx V

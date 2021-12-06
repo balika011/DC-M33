@@ -539,6 +539,7 @@ const char *common_m33[] =
 	"kd/march33.prx",
 	"kd/idcanager.prx",
 	"kd/galaxy.prx",
+	"kd/nidresolver.prx",
 	"kd/systemctrl.prx"
 };
 

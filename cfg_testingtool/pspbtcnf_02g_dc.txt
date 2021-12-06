@@ -9,6 +9,7 @@ $/kd/iofilemgr.prx VGUD
 $/kd/sm1.prx GD
 $/kd/memlmd_02g.prx VGUD
 $/kd/modulemgr.prx VGUD
+$/kd/nidresolver.prx VGUD
 $/kd/systemctrl.prx VGUD
 $/kd/init.prx VGUD
 $/kd/bsod.prx GD
@@ -38,8 +39,8 @@ $/kd/umd9660.prx GU
 $/kd/isofs.prx GU
 $/kd/msstor.prx VGUD
 $/kd/fatms.prx VGUD
-$/kd/wlan.prx GUD
-$/kd/wlanfirm_02g.prx GUD
+$/kd/wlan.prx VGUD
+$/kd/wlanfirm_02g.prx VGUD
 $/kd/registry.prx VGUD
 $/kd/mgr.prx D
 $/kd/chkreg.prx U
@@ -64,6 +65,4 @@ $%/kd/usersystemlib.prx VGUD
 %%/kd/dummy_anchor_IhariUafaayk98.prx GUD
 $%/kd/libatrac3plus.prx 
 $%/vsh/module/paf.prx 
-$/kd/wlan.prx V
-$/kd/wlanfirm_02g.prx V
 $%%/kd/resurrection.prx V

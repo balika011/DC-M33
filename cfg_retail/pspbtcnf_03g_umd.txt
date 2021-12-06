@@ -8,6 +8,7 @@ $/kd/systimer.prx VGUPD
 $/kd/iofilemgr.prx VGUPD
 $/kd/memlmd_03g.prx VGUPD
 $/kd/modulemgr.prx VGUPD
+$/kd/nidresolver.prx VGUPD
 $/kd/systemctrl.prx VGUPD
 $/kd/init.prx VGUPD
 $/kd/loadexec_03g.prx VGUPD

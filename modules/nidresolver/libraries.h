@@ -1,20 +1,7 @@
 #ifndef __LIBRARIES_H__
 #define __LIBRARIES_H__
 
-#define N_LIBRARIES	26
-
-typedef struct
-{
-	u32 oldnid;
-	u32 newnid;
-} Nids;
-
-typedef struct
-{
-	const char *name;
-	Nids *nids;
-	int  nnids;
-} LibraryData;
+#include <nidresolver.h>
 
 Nids SysMemForKernel[] = 
 {
@@ -1114,7 +1101,7 @@ Nids sceCodec_driver[] =
 	{ 0x20C61103, 0x1D80837C },
 };
 
-LibraryData libraries[N_LIBRARIES] =
+LibraryData libraries[] =
 {
 	{ "SysMemForKernel", SysMemForKernel, 96 },
 	{ "KDebugForKernel", KDebugForKernel, 26 },

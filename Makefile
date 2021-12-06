@@ -1,6 +1,6 @@
 PSPDEV=$(shell psp-config --pspdev-path)
 
-all: TM/DC9 TM/msipl.bin TM/DC9/ipl_01g.bin TM/DC9/ipl_02g.bin TM/DC9/ipl_03g.bin TM/DC9/nandcipl_01g.bin TM/DC9/nandcipl_02g.bin TM/DC9/nandcipl_03g.bin TM/DC9/retail/kd/pspbtcnf_dc.bin TM/DC9/retail/kd/pspbtcnf_umd.bin TM/DC9/retail/kd/pspbtcnf_np.bin TM/DC9/retail/kd/pspbtcnf_m33.bin TM/DC9/retail/kd/pspbtcnf_recovery.bin TM/DC9/retail/kd/pspbtcnf_02g_dc.bin TM/DC9/retail/kd/pspbtcnf_02g_umd.bin TM/DC9/retail/kd/pspbtcnf_02g_np.bin TM/DC9/retail/kd/pspbtcnf_02g_m33.bin TM/DC9/retail/kd/pspbtcnf_02g_recovery.bin TM/DC9/retail/kd/pspbtcnf_03g_dc.bin TM/DC9/retail/kd/pspbtcnf_03g_umd.bin TM/DC9/retail/kd/pspbtcnf_03g_np.bin TM/DC9/retail/kd/pspbtcnf_03g_m33.bin TM/DC9/retail/kd/pspbtcnf_03g_recovery.bin TM/DC9/testingtool/kd/pspbtcnf_dc.bin TM/DC9/testingtool/kd/pspbtcnf_umd.bin TM/DC9/testingtool/kd/pspbtcnf_np.bin TM/DC9/testingtool/kd/pspbtcnf_m33.bin TM/DC9/testingtool/kd/pspbtcnf_recovery.bin TM/DC9/testingtool/kd/pspbtcnf_02g_dc.bin TM/DC9/testingtool/kd/pspbtcnf_02g_umd.bin TM/DC9/testingtool/kd/pspbtcnf_02g_np.bin TM/DC9/testingtool/kd/pspbtcnf_02g_m33.bin TM/DC9/testingtool/kd/pspbtcnf_02g_recovery.bin TM/DC9/testingtool/kd/pspbtcnf_03g_dc.bin TM/DC9/testingtool/kd/pspbtcnf_03g_umd.bin TM/DC9/testingtool/kd/pspbtcnf_03g_np.bin TM/DC9/testingtool/kd/pspbtcnf_03g_m33.bin TM/DC9/testingtool/kd/pspbtcnf_03g_recovery.bin TM/DC9/tmctrl.prx TM/DC9/kd/ipl_update.prx TM/DC9/kd/resurrection.prx TM/DC9/kd/dcman.prx TM/DC9/kd/iop.prx TM/DC9/kd/lflash_fdisk.prx TM/DC9/kd/idsregeneration.prx TM/DC9/kd/emc_sm_updater.prx TM/DC9/kd/lfatfs_updater.prx TM/DC9/kd/lflash_fatfmt_updater.prx TM/DC9/vsh/module/intraFont.prx TM/DC9/vsh/module/vlf.prx TM/DC9/kd/pspdecrypt.prx TM/DC9/kd/galaxy.prx TM/DC9/kd/idcanager.prx TM/DC9/kd/march33.prx TM/DC9/kd/popcorn.prx TM/DC9/kd/systemctrl.prx TM/DC9/kd/usbdevice.prx TM/DC9/kd/vshctrl.prx TM/DC9/vsh/module/recovery.prx TM/DC9/vsh/module/satelite.prx
+all: TM/DC9 TM/msipl.bin TM/DC9/ipl_01g.bin TM/DC9/ipl_02g.bin TM/DC9/ipl_03g.bin TM/DC9/nandcipl_01g.bin TM/DC9/nandcipl_02g.bin TM/DC9/nandcipl_03g.bin TM/DC9/retail/kd/pspbtcnf_dc.bin TM/DC9/retail/kd/pspbtcnf_umd.bin TM/DC9/retail/kd/pspbtcnf_np.bin TM/DC9/retail/kd/pspbtcnf_m33.bin TM/DC9/retail/kd/pspbtcnf_recovery.bin TM/DC9/retail/kd/pspbtcnf_02g_dc.bin TM/DC9/retail/kd/pspbtcnf_02g_umd.bin TM/DC9/retail/kd/pspbtcnf_02g_np.bin TM/DC9/retail/kd/pspbtcnf_02g_m33.bin TM/DC9/retail/kd/pspbtcnf_02g_recovery.bin TM/DC9/retail/kd/pspbtcnf_03g_dc.bin TM/DC9/retail/kd/pspbtcnf_03g_umd.bin TM/DC9/retail/kd/pspbtcnf_03g_np.bin TM/DC9/retail/kd/pspbtcnf_03g_m33.bin TM/DC9/retail/kd/pspbtcnf_03g_recovery.bin TM/DC9/testingtool/kd/pspbtcnf_dc.bin TM/DC9/testingtool/kd/pspbtcnf_umd.bin TM/DC9/testingtool/kd/pspbtcnf_np.bin TM/DC9/testingtool/kd/pspbtcnf_m33.bin TM/DC9/testingtool/kd/pspbtcnf_recovery.bin TM/DC9/testingtool/kd/pspbtcnf_02g_dc.bin TM/DC9/testingtool/kd/pspbtcnf_02g_umd.bin TM/DC9/testingtool/kd/pspbtcnf_02g_np.bin TM/DC9/testingtool/kd/pspbtcnf_02g_m33.bin TM/DC9/testingtool/kd/pspbtcnf_02g_recovery.bin TM/DC9/testingtool/kd/pspbtcnf_03g_dc.bin TM/DC9/testingtool/kd/pspbtcnf_03g_umd.bin TM/DC9/testingtool/kd/pspbtcnf_03g_np.bin TM/DC9/testingtool/kd/pspbtcnf_03g_m33.bin TM/DC9/testingtool/kd/pspbtcnf_03g_recovery.bin TM/DC9/tmctrl.prx TM/DC9/kd/ipl_update.prx TM/DC9/kd/resurrection.prx TM/DC9/kd/dcman.prx TM/DC9/kd/iop.prx TM/DC9/kd/lflash_fdisk.prx TM/DC9/kd/idsregeneration.prx TM/DC9/kd/emc_sm_updater.prx TM/DC9/kd/lfatfs_updater.prx TM/DC9/kd/lflash_fatfmt_updater.prx TM/DC9/vsh/module/intraFont.prx TM/DC9/vsh/module/vlf.prx TM/DC9/kd/pspdecrypt.prx TM/DC9/kd/galaxy.prx TM/DC9/kd/idcanager.prx TM/DC9/kd/march33.prx TM/DC9/kd/popcorn.prx TM/DC9/kd/nidresolver.prx TM/DC9/kd/systemctrl.prx TM/DC9/kd/usbdevice.prx TM/DC9/kd/vshctrl.prx TM/DC9/vsh/module/recovery.prx TM/DC9/vsh/module/satelite.prx
 
 clean:
 	rm -rf TM
@@ -26,6 +26,7 @@ clean:
 	make -C modules/idcanager clean
 	make -C modules/vshctrl clean
 	make -C modules/usbdevice clean
+	make -C modules/nidresolver clean
 	make -C modules/systemctrl clean
 	rm -f modules/systemctrl/rebootex.S
 	rm -f modules/systemctrl/rebootex_02g.S
@@ -393,7 +394,11 @@ TM/DC9/kd/march33.prx: TM/DC9
 TM/DC9/kd/popcorn.prx: TM/DC9
 	make -C modules/popcorn
 	python3 psptools/pack_module.py modules/popcorn/popcorn.prx TM/DC9/kd/popcorn.prx --tag 0x4c9416f0
-	
+
+TM/DC9/kd/nidresolver.prx: TM/DC9
+	make -C modules/nidresolver
+	python3 psptools/pack_module.py modules/nidresolver/nidresolver.prx TM/DC9/kd/nidresolver.prx --tag 0x4c9416f0
+
 TM/DC9/kd/systemctrl.prx: TM/DC9 ipl/common/libiplsdk.a
 	make -C ipl/rebootex clean
 	make -C ipl/rebootex BFLAGS="-DIPL_01G"

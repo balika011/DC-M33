@@ -7,6 +7,7 @@
 #include <string.h>
 #include <pspsysmem_kernel.h>
 #include <oe_malloc.h>
+#include <nidresolver.h>
 
 #include "main.h"
 #include "sysmodpatches.h"
@@ -15,7 +16,6 @@
 #include "systemctrl.h"
 #include "systemctrl_se.h"
 #include "systemctrl_internal.h"
-#include "libraries.h"
 
 PSP_MODULE_INFO("SystemControl", 0x3007, 2, 1);
 const int module_sdk_version = 0x5000010;
@@ -31,7 +31,6 @@ static SceModule2 *last_module;
 static STMOD_HANDLER stmod_handler = NULL;
 static KDEC_HANDLER kdec_handler = NULL;
 static MDEC_HANDLER mdec_handler = NULL;
-static LLE_HANDLER lle_handler = NULL;
 
 static int idle;
 
@@ -45,7 +44,6 @@ static int (* UnsignCheck)(void *buf, int size, int m);
 static int (* KDecrypt)(void *buf, int size, int *retSize, int m);
 static int (* SetKeys)(int unk, void *buf);
 static int (* MDecrypt)(u32 *tag, u8 *keys, u32 code, void *buf, int size, int *retSize, int m, void *unk0, int unk1, int unk2, int unk3, int unk4);
-static int (* aLinkLibEntries)(SceLibraryStubTable *imports, SceSize size, int user, int cs);
 
 
 int sceKernelCheckExecFile(void *buf, int *check);
@@ -437,35 +435,6 @@ int ProbeExec2Patched(u8 *buf, u32 *check)
 	return res;
 }
 
-LibraryData *FindLib(const char *lib)
-{
-	int i;
-
-	if (!lib)
-		return NULL;
-
-	for (i = 0; i < N_LIBRARIES; i++)
-	{
-		if (strcmp(lib, libraries[i].name) == 0)
-			return &libraries[i];
-	}
-
-	return NULL;
-}
-
-u32 FindNewNid(LibraryData *lib, u32 nid)
-{
-	int i;
-
-	for (i = 0; i < lib->nnids; i++)
-	{
-		if (lib->nids[i].oldnid == nid)
-			return lib->nids[i].newnid;
-	}
-
-	return 0;
-}
-
 u32 sctrlHENFindFunction(const char* szMod, const char* szLib, u32 nid)
 {
 	struct SceLibraryEntryTable *entry;
@@ -522,88 +491,6 @@ u32 sctrlHENFindFunction(const char* szMod, const char* szLib, u32 nid)
 	}
 
 	return 0;
-}
-
-int aLinkLibEntriesPatched(SceLibraryStubTable *imports, SceSize size)
-{
-	int i = 0;
-	int resolve = 1;
-	int *module_sdk_version;
-	SceLibraryStubTable *power_driver = NULL;
-
-	module_sdk_version = (int *)sctrlHENFindFunction((void *)imports, NULL, 0x11B97506);
-	if (module_sdk_version)
-	{
-		int high = (*module_sdk_version >> 16);
-		if (high == 0x500)
-		{
-			resolve = 0;			
-		}
-	}
-
-	if (resolve)
-	{
-		int j;
-		u32 stubTab = (u32)imports;
-	
-		while (i < size)
-		{
-			SceLibraryStubTable *import = (SceLibraryStubTable *)(stubTab + i);
-			LibraryData *data = FindLib(import->libname);
-
-			if (strcmp(import->libname, "scePower_driver") == 0)
-			{
-				power_driver = import;
-			}
-
-			if (lle_handler)
-			{
-				lle_handler(import);
-			}
-
-			if (data)
-			{		
-				for (j = 0; j < import->stubcount; j++)
-				{
-					u32 nnid = FindNewNid(data, import->nidtable[j]);
-					if (nnid)
-					{
-						import->nidtable[j] = nnid;
-					}
-				}
-			}
-
-			i += (import->len*4);
-		}
-
-		ClearCaches();
-	}
-	
-	int res = aLinkLibEntries(imports, size, 0, 0);
-
-	if (power_driver)
-	{
-		for (i = 0; i < power_driver->stubcount; i++)
-		{
-			if (power_driver->nidtable[i] == 0x737486F2)
-			{
-				u32 func = FindPowerFunction(power_driver->nidtable[i]);
-
-				if (func)
-				{
-					REDIRECT_FUNCTION((u32)&((u32 *)power_driver->stubtable)[i*2], func);
-					ClearCaches();
-				}
-			}
-		}
-	}
-
-	return res;
-}
-
-void sctrlHENRegisterLLEHandler(LLE_HANDLER handler)
-{
-	lle_handler = handler;
 }
 
 SceUID sceKernelCreateThreadPatched(const char *name, SceKernelThreadEntry entry, int initPriority,
@@ -897,10 +784,6 @@ void PatchLoadCore()
 	// Allow ModuleMgrForKernel to load sdk user modules
 	_sw(0, text_addr + 0x6998);
 	_sw(0, text_addr + 0x699C);
-
-	// Nids resolver patch
-	MAKE_CALL(text_addr + 0x1298, aLinkLibEntriesPatched);
-	aLinkLibEntries = (void *)(text_addr + 0x3468);
 
 	/* Patch init start */
 	MAKE_CALL(text_addr + 0x1E5C, PatchInit);
