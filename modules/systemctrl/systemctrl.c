@@ -186,7 +186,7 @@ int sctrlSEMountUmdFromFile(char *file, int noumd, int isofs)
 	return 0;
 }
 
-PspIoDrv *sctrlHENFindDriver(char *drvname)
+SceIoDeviceTable *sctrlHENFindDriver(char *drvname)
 {
 	int k1 = pspSdkSetK1(0);
 	SceModule2 *mod = sceKernelFindModuleByName("sceIOFileManager");
@@ -202,6 +202,6 @@ PspIoDrv *sctrlHENFindDriver(char *drvname)
 
 	pspSdkSetK1(k1);
 
-	return (PspIoDrv *) u[1];
+	return (SceIoDeviceTable *) u[1];
 }
 

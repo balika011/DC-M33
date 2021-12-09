@@ -155,7 +155,7 @@ int SlotCloseOneReadOnly()
 	return 0x80010018;
 }
 
-static int FlashEmu_IoInit(PspIoDrvArg* arg)
+static int FlashEmu_IoInit(SceIoDeviceEntry* de)
 {
 	//Kprintf("IoInit.\n");
 	flashemu_sema = sceKernelCreateSema("FlashSema", 0, 1, 1, NULL);
@@ -164,7 +164,7 @@ static int FlashEmu_IoInit(PspIoDrvArg* arg)
 	return 0;
 }
 
-static int FlashEmu_IoExit(PspIoDrvArg* arg)
+static int FlashEmu_IoExit(SceIoDeviceEntry* de)
 {
 	//Kprintf("IoExit.\n");
 
@@ -173,7 +173,7 @@ static int FlashEmu_IoExit(PspIoDrvArg* arg)
 
 static int open_main(int *argv)
 {
-	PspIoDrvFileArg *arg = (PspIoDrvFileArg *)argv[0];
+	SceIoIob *iob = (SceIoIob *)argv[0];
 	const char *file = (const char *)argv[1];
 	int flags = argv[2];
 	SceMode mode = (SceMode)argv[3];
@@ -207,17 +207,17 @@ static int open_main(int *argv)
 		}
 	}
 	
-	arg->arg = (void *) slot;
+	iob->i_private = (void *) slot;
 	UnLock();
 
 	return 0;
 }
 
-static int FlashEmu_IoOpen(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
+static int FlashEmu_IoOpen(SceIoIob *iob, char *file, int flags, SceMode mode)
 {
 	int argv[4];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)file;
 	argv[2] = (int)flags;
 	argv[3] = (int)mode;
@@ -225,9 +225,9 @@ static int FlashEmu_IoOpen(PspIoDrvFileArg *arg, char *file, int flags, SceMode 
 	return sceKernelExtendKernelStack(0x4000, (void *)open_main, (void *)argv);	
 }
 
-static int close_main(PspIoDrvFileArg *arg)
+static int close_main(SceIoIob *iob)
 {
-	int slot = (int)arg->arg;
+	int slot = (int)iob->i_private;
 	SceUID fd = SlotGetFd(slot);
 	if (fd < 0)
 		return fd;
@@ -241,10 +241,10 @@ static int close_main(PspIoDrvFileArg *arg)
 	return 0;
 }
 
-static int FlashEmu_IoClose(PspIoDrvFileArg *arg)
+static int FlashEmu_IoClose(SceIoIob *iob)
 {
 	Lock();
-	int res = sceKernelExtendKernelStack(0x4000, (void *)close_main, (void *)arg);
+	int res = sceKernelExtendKernelStack(0x4000, (void *)close_main, (void *)iob);
 	UnLock();
 
 	return res;
@@ -252,13 +252,13 @@ static int FlashEmu_IoClose(PspIoDrvFileArg *arg)
 
 static int read_main(int *argv)
 {
-	PspIoDrvFileArg *arg = (PspIoDrvFileArg *)argv[0];
+	SceIoIob *iob = (SceIoIob *)argv[0];
 	char *data = (char *)argv[1];
 	int len = argv[2];
 
 	Lock();
 	
-	SceUID fd = SlotGetFd((int)arg->arg);
+	SceUID fd = SlotGetFd((int)iob->i_private);
 	if (fd < 0)
 	{
 		//Kprintf("Error 0x%08X in IoRead\n", fd);
@@ -274,11 +274,11 @@ static int read_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoRead(PspIoDrvFileArg *arg, char *data, int len)
+static int FlashEmu_IoRead(SceIoIob *iob, char *data, int len)
 {
 	int argv[3];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)data;
 	argv[2] = (int)len;
 	
@@ -287,13 +287,13 @@ static int FlashEmu_IoRead(PspIoDrvFileArg *arg, char *data, int len)
 
 static int write_main(int *argv)
 {
-	PspIoDrvFileArg *arg = (PspIoDrvFileArg *)argv[0];
+	SceIoIob *iob = (SceIoIob *)argv[0];
 	const char *data = (const char *)argv[1];
 	int len = argv[2];
 
 	Lock();
 	
-	SceUID fd = SlotGetFd((int) arg->arg);
+	SceUID fd = SlotGetFd((int) iob->i_private);
 	if (fd < 0)
 	{
 		//Kprintf("Error 0x%08X in IoWrite\n", fd);
@@ -310,11 +310,11 @@ static int write_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoWrite(PspIoDrvFileArg *arg, const char *data, int len)
+static int FlashEmu_IoWrite(SceIoIob *iob, const char *data, int len)
 {
 	int argv[3];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)data;
 	argv[2] = (int)len;
 	
@@ -323,13 +323,13 @@ static int FlashEmu_IoWrite(PspIoDrvFileArg *arg, const char *data, int len)
 
 static int lseek_main(int *argv)
 {
-	PspIoDrvFileArg *arg = (PspIoDrvFileArg *)argv[0];
+	SceIoIob *iob = (SceIoIob *)argv[0];
 	u32 ofs = (u32)argv[1];
 	int whence = argv[2];
 
 	Lock();
 	
-	SceUID fd = SlotGetFd((int)arg->arg);
+	SceUID fd = SlotGetFd((int)iob->i_private);
 	if (fd < 0)
 	{
 		//Kprintf("Error 0x%08X in IoLseek\n", fd);
@@ -344,18 +344,18 @@ static int lseek_main(int *argv)
 	return res;
 }
 
-static SceOff FlashEmu_IoLseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
+static SceOff FlashEmu_IoLseek(SceIoIob *iob, SceOff ofs, int whence)
 {
 	int argv[3];
 	
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)ofs;
 	argv[2] = (int)whence;
 
 	return (SceOff)sceKernelExtendKernelStack(0x4000, (void *)lseek_main, (void *)argv);
 }
 
-static int FlashEmu_IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+static int FlashEmu_IoIoctl(SceIoIob *iob, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
 	int res;
 	
@@ -381,7 +381,7 @@ static int FlashEmu_IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata
 			
 		case 0x00208013: // ????
 			res = 0;
-			if(arg->fs_num != 3 || sceKernelGetModel() == 0)
+			if(sceKernelGetModel() == 0 || iob->i_unit != 3)
 				res = 0x80010016;
 			break;
 
@@ -409,11 +409,11 @@ static int remove_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoRemove(PspIoDrvFileArg *arg, const char *name)
+static int FlashEmu_IoRemove(SceIoIob *iob, const char *name)
 {
 	int argv[2];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)name;
 	
 	return sceKernelExtendKernelStack(0x4000, (void *)remove_main, (void *)argv);	
@@ -435,11 +435,11 @@ static int mkdir_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoMkdir(PspIoDrvFileArg *arg, const char *name, SceMode mode)
+static int FlashEmu_IoMkdir(SceIoIob *iob, const char *name, SceMode mode)
 {
 	int argv[3];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)name;
 	argv[2] = mode;
 
@@ -461,11 +461,11 @@ static int rmdir_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoRmdir(PspIoDrvFileArg *arg, const char *name)
+static int FlashEmu_IoRmdir(SceIoIob *iob, const char *name)
 {
 	int argv[2];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)name;	
 
 	return sceKernelExtendKernelStack(0x4000, (void *)rmdir_main, (void *)argv);
@@ -473,7 +473,7 @@ static int FlashEmu_IoRmdir(PspIoDrvFileArg *arg, const char *name)
 
 static int dopen_main(int *argv)
 {
-	PspIoDrvFileArg *arg = (PspIoDrvFileArg *)argv[0];
+	SceIoIob *iob = (SceIoIob *)argv[0];
 	const char *dirname = (const char *)argv[1];
 	
 	Lock();
@@ -505,24 +505,24 @@ static int dopen_main(int *argv)
 		}
 	}
 	
-	arg->arg = (void *) slot;
+	iob->i_private = (void *) slot;
 	UnLock();
 	return 0;
 }
 
-static int FlashEmu_IoDopen(PspIoDrvFileArg *arg, const char *dirname)
+static int FlashEmu_IoDopen(SceIoIob *iob, const char *dirname)
 {
 	int argv[2];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)dirname;	
 
 	return sceKernelExtendKernelStack(0x4000, (void *)dopen_main, (void *)argv);
 }
 
-static int dclose_main(PspIoDrvFileArg *arg)
+static int dclose_main(SceIoIob *iob)
 {
-	int slot = (int) arg->arg;
+	int slot = (int) iob->i_private;
 
 	Lock();
 	
@@ -541,19 +541,19 @@ static int dclose_main(PspIoDrvFileArg *arg)
 	return res;
 }
 
-static int FlashEmu_IoDclose(PspIoDrvFileArg *arg)
+static int FlashEmu_IoDclose(SceIoIob *iob)
 {
-	return sceKernelExtendKernelStack(0x4000, (void *)dclose_main, (void *)arg);
+	return sceKernelExtendKernelStack(0x4000, (void *)dclose_main, (void *)iob);
 }
 
 static int dread_main(int *argv)
 {
-	PspIoDrvFileArg *arg = (PspIoDrvFileArg *)argv[0];
+	SceIoIob *iob = (SceIoIob *)argv[0];
 	SceIoDirent *dir = (SceIoDirent *)argv[1];
 	
 	Lock();
 	
-	SceUID fd = SlotGetFd((int) arg->arg);
+	SceUID fd = SlotGetFd((int) iob->i_private);
 	if (fd < 0)
 	{
 		//Kprintf("Error 0x%08X in IoDread, file %s\n", fd, path);
@@ -568,11 +568,11 @@ static int dread_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoDread(PspIoDrvFileArg *arg, SceIoDirent *dir)
+static int FlashEmu_IoDread(SceIoIob *iob, SceIoDirent *dir)
 {
 	int argv[2];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)dir;
 	
 	return sceKernelExtendKernelStack(0x4000, (void *)dread_main, (void *)argv);
@@ -604,11 +604,11 @@ static int getstat_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoGetstat(PspIoDrvFileArg *arg, const char *file, SceIoStat *stat)
+static int FlashEmu_IoGetstat(SceIoIob *iob, const char *file, SceIoStat *stat)
 {
 	int argv[3];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)file;
 	argv[2] = (int)stat;
 
@@ -632,11 +632,11 @@ static int chstat_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoChstat(PspIoDrvFileArg *arg, const char *file, SceIoStat *stat, int bits)
+static int FlashEmu_IoChstat(SceIoIob *iob, const char *file, SceIoStat *stat, int bits)
 {
 	int argv[4];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)file;
 	argv[2] = (int)stat;
 	argv[3] = (int)bits;
@@ -660,11 +660,11 @@ static int rename_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoRename(PspIoDrvFileArg *arg, const char *oldname, const char *newname)
+static int FlashEmu_IoRename(SceIoIob *iob, const char *oldname, const char *newname)
 {
 	int argv[3];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)oldname;
 	argv[2] = (int)newname;
 
@@ -686,29 +686,29 @@ static int chdir_main(int *argv)
 	return res;
 }
 
-static int FlashEmu_IoChdir(PspIoDrvFileArg *arg, const char *dir)
+static int FlashEmu_IoChdir(SceIoIob *iob, const char *dir)
 {
 	int argv[2];
 
-	argv[0] = (int)arg;
+	argv[0] = (int)iob;
 	argv[1] = (int)dir;	
 
 	return sceKernelExtendKernelStack(0x4000, (void *)chdir_main, (void *)argv);
 }
 
-static int FlashEmu_IoMount(PspIoDrvFileArg *arg)
+static int FlashEmu_IoMount(SceIoIob *iob)
 {
 	//Kprintf("IoMount: %s %s %08X %08X %08X \n", asgn_name, dev_name, wr_mode, unk, unk2);
 	return 0;
 }
 
-static int FlashEmu_IoUmount(PspIoDrvFileArg *arg)
+static int FlashEmu_IoUmount(SceIoIob *iob)
 {
-	//Kprintf("IoUmount, fs_num %d\n", arg->fs_num);
+	//Kprintf("IoUmount, i_unit %d\n", iob->i_unit);
 	return 0;
 }
 
-static int FlashEmu_IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+static int FlashEmu_IoDevctl(SceIoIob *iob, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
 	int res = 0;
 
@@ -720,7 +720,7 @@ static int FlashEmu_IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned
 			
 		case 0x00208813:
 			res = 0;
-			if (sceKernelGetModel() == 0 || arg->fs_num != 3)
+			if (sceKernelGetModel() == 0 || iob->i_unit != 3)
 				return 0x80010016;
 
 		default:
@@ -731,12 +731,12 @@ static int FlashEmu_IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned
 	return res;
 }
 
-int FlashEmu_IoUnk21(PspIoDrvFileArg *arg)
+int FlashEmu_IoUnk21(SceIoIob *iob)
 {
 	return 0x80010086;
 }
 
-static PspIoDrvFuncs flashemu_funcs =
+static SceIoDeviceFunction flashemu_funcs =
 {
 	FlashEmu_IoInit,
 	FlashEmu_IoExit,
@@ -762,7 +762,7 @@ static PspIoDrvFuncs flashemu_funcs =
 	FlashEmu_IoUnk21
 };
 
-static PspIoDrv flashemu =
+static SceIoDeviceTable flashemu =
 {
 	"flashfat",
 	0x1E0010,
@@ -781,7 +781,7 @@ int Fake_Error()
 	return 0x80010086;
 }
 
-static PspIoDrvFuncs fake_funcs =
+static SceIoDeviceFunction fake_funcs =
 {
 	(void *) Fake_Success,
 	(void *) Fake_Success,
@@ -807,7 +807,7 @@ static PspIoDrvFuncs fake_funcs =
 	(void *) Fake_Success
 };
 
-static PspIoDrv fake =
+static SceIoDeviceTable fake =
 {
 	"lflash",
 	4,

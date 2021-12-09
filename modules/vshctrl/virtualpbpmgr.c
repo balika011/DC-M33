@@ -168,12 +168,12 @@ int virtualpbp_reset()
 	return 0;
 }
 
-void getlba_andsize(PspIoDrvFileArg *arg, const char *file, int *lba, int *size)
+void getlba_andsize(SceIoIob *iob, const char *file, int *lba, int *size)
 {
 	SceIoStat stat;
 	
 	memset(&stat, 0, sizeof(SceIoStat));	
-	if (isofs_getstat(arg, file, &stat) >= 0)
+	if (isofs_getstat(iob, file, &stat) >= 0)
 	{
 		*lba = stat.st_private[0];
 		*size = stat.st_size;
@@ -182,7 +182,7 @@ void getlba_andsize(PspIoDrvFileArg *arg, const char *file, int *lba, int *size)
 
 int virtualpbp_add(char *isofile, ScePspDateTime *mtime, VirtualPbp *res)
 {
-	PspIoDrvFileArg arg;
+	SceIoIob iob;
 	int offset;	
 
 	sceKernelWaitSema(vpsema, 1, NULL);
@@ -197,7 +197,7 @@ int virtualpbp_add(char *isofile, ScePspDateTime *mtime, VirtualPbp *res)
 	strncpy(vpbps[g_index].isofile, isofile, sizeof(vpbps[g_index].isofile));
 	SetUmdFile(isofile);	
 
-	memset(&arg, 0, sizeof(arg));
+	memset(&iob, 0, sizeof(iob));
 	if (isofs_init(NULL) < 0)
 	{
 		isofs_exit(NULL);
@@ -205,12 +205,12 @@ int virtualpbp_add(char *isofile, ScePspDateTime *mtime, VirtualPbp *res)
 		return -1;
 	}
 
-	if (isofs_open(&arg, "/PSP_GAME/PARAM.SFO", PSP_O_RDONLY, 0) >= 0)
+	if (isofs_open(&iob, "/PSP_GAME/PARAM.SFO", PSP_O_RDONLY, 0) >= 0)
 	{
 		char *buf = (char *)oe_malloc(1024);
 		
-		isofs_read(&arg, buf, 1024);
-		isofs_close(&arg);
+		isofs_read(&iob, buf, 1024);
+		isofs_close(&iob);
 		GetSFOTitleAndDiscID(vpbps[g_index].sfotitle, sizeof(vpbps[g_index].sfotitle), vpbps[g_index].discid, sizeof(vpbps[g_index].discid), buf);
 		oe_free(buf);
 	}
@@ -221,11 +221,11 @@ int virtualpbp_add(char *isofile, ScePspDateTime *mtime, VirtualPbp *res)
 		return -1;
 	}
 
-	getlba_andsize(&arg, "/PSP_GAME/ICON0.PNG", &vpbps[g_index].i0png_lba, &vpbps[g_index].i0png_size);
-	getlba_andsize(&arg, "/PSP_GAME/ICON1.PMF", &vpbps[g_index].i1pmf_lba, &vpbps[g_index].i1pmf_size);
-	getlba_andsize(&arg, "/PSP_GAME/PIC0.PNG", &vpbps[g_index].p0png_lba, &vpbps[g_index].p0png_size);
-	getlba_andsize(&arg, "/PSP_GAME/PIC1.PNG", &vpbps[g_index].p1png_lba, &vpbps[g_index].p1png_size);
-	getlba_andsize(&arg, "/PSP_GAME/SND0.AT3", &vpbps[g_index].s0at3_lba, &vpbps[g_index].s0at3_size);
+	getlba_andsize(&iob, "/PSP_GAME/ICON0.PNG", &vpbps[g_index].i0png_lba, &vpbps[g_index].i0png_size);
+	getlba_andsize(&iob, "/PSP_GAME/ICON1.PMF", &vpbps[g_index].i1pmf_lba, &vpbps[g_index].i1pmf_size);
+	getlba_andsize(&iob, "/PSP_GAME/PIC0.PNG", &vpbps[g_index].p0png_lba, &vpbps[g_index].p0png_size);
+	getlba_andsize(&iob, "/PSP_GAME/PIC1.PNG", &vpbps[g_index].p1png_lba, &vpbps[g_index].p1png_size);
+	getlba_andsize(&iob, "/PSP_GAME/SND0.AT3", &vpbps[g_index].s0at3_lba, &vpbps[g_index].s0at3_size);
 	
 	isofs_exit(NULL);
 
@@ -338,13 +338,13 @@ int virtualpbp_read(SceUID fd, void *data, SceSize size)
 	SetUmdFile(vpbps[fd].isofile);
 	isofs_fastinit();
 
-	PspIoDrvFileArg arg;
+	SceIoIob iob;
 	int remaining;
 	int n, read, base;
 	void *p;
 	char filename[32];
 
-	memset(&arg, 0, sizeof(PspIoDrvFileArg));
+	memset(&iob, 0, sizeof(SceIoIob));
 	remaining = size;
 	read = 0;
 	p = data;
@@ -381,10 +381,10 @@ int virtualpbp_read(SceUID fd, void *data, SceSize size)
 
 			sprintf(filename, "/sce_lbn0x%x_size0x%x", vpbps[fd].psfo_lba, vpbps[fd].psfo_size);
 			
-			isofs_open(&arg, filename, PSP_O_RDONLY, 0);
-			isofs_lseek(&arg, base, PSP_SEEK_SET);
-			isofs_read(&arg, p, n);
-			isofs_close(&arg);
+			isofs_open(&iob, filename, PSP_O_RDONLY, 0);
+			isofs_lseek(&iob, base, PSP_SEEK_SET);
+			isofs_read(&iob, p, n);
+			isofs_close(&aiobrg);
 
 			remaining -= n;
 			p += n;
@@ -430,10 +430,10 @@ int virtualpbp_read(SceUID fd, void *data, SceSize size)
 
 			sprintf(filename, "/sce_lbn0x%x_size0x%x", vpbps[fd].i0png_lba, vpbps[fd].i0png_size);
 			
-			isofs_open(&arg, filename, PSP_O_RDONLY, 0);
-			isofs_lseek(&arg, base, PSP_SEEK_SET);
-			isofs_read(&arg, p, n);
-			isofs_close(&arg);
+			isofs_open(&iob, filename, PSP_O_RDONLY, 0);
+			isofs_lseek(&iob, base, PSP_SEEK_SET);
+			isofs_read(&iob, p, n);
+			isofs_close(&iob);
 
 			remaining -= n;
 			p += n;
@@ -454,10 +454,10 @@ int virtualpbp_read(SceUID fd, void *data, SceSize size)
 
 			sprintf(filename, "/sce_lbn0x%x_size0x%x", vpbps[fd].i1pmf_lba, vpbps[fd].i1pmf_size);
 			
-			isofs_open(&arg, filename, PSP_O_RDONLY, 0);
-			isofs_lseek(&arg, base, PSP_SEEK_SET);
-			isofs_read(&arg, p, n);
-			isofs_close(&arg);
+			isofs_open(&iob, filename, PSP_O_RDONLY, 0);
+			isofs_lseek(&iob, base, PSP_SEEK_SET);
+			isofs_read(&iob, p, n);
+			isofs_close(&iob);
 
 			remaining -= n;
 			p += n;
@@ -478,10 +478,10 @@ int virtualpbp_read(SceUID fd, void *data, SceSize size)
 
 			sprintf(filename, "/sce_lbn0x%x_size0x%x", vpbps[fd].p0png_lba, vpbps[fd].p0png_size);
 			
-			isofs_open(&arg, filename, PSP_O_RDONLY, 0);
-			isofs_lseek(&arg, base, PSP_SEEK_SET);
-			isofs_read(&arg, p, n);
-			isofs_close(&arg);
+			isofs_open(&iob, filename, PSP_O_RDONLY, 0);
+			isofs_lseek(&iob, base, PSP_SEEK_SET);
+			isofs_read(&iob, p, n);
+			isofs_close(&iob);
 
 			remaining -= n;
 			p += n;
@@ -502,10 +502,10 @@ int virtualpbp_read(SceUID fd, void *data, SceSize size)
 
 			sprintf(filename, "/sce_lbn0x%x_size0x%x", vpbps[fd].p1png_lba, vpbps[fd].p1png_size);
 			
-			isofs_open(&arg, filename, PSP_O_RDONLY, 0);
-			isofs_lseek(&arg, base, PSP_SEEK_SET);
-			isofs_read(&arg, p, n);
-			isofs_close(&arg);
+			isofs_open(&iob, filename, PSP_O_RDONLY, 0);
+			isofs_lseek(&iob, base, PSP_SEEK_SET);
+			isofs_read(&iob, p, n);
+			isofs_close(&iob);
 
 			remaining -= n;
 			p += n;
@@ -526,10 +526,10 @@ int virtualpbp_read(SceUID fd, void *data, SceSize size)
 
 			sprintf(filename, "/sce_lbn0x%x_size0x%x", vpbps[fd].s0at3_lba, vpbps[fd].s0at3_size);
 			
-			isofs_open(&arg, filename, PSP_O_RDONLY, 0);
-			isofs_lseek(&arg, base, PSP_SEEK_SET);
-			isofs_read(&arg, p, n);
-			isofs_close(&arg);
+			isofs_open(&iob, filename, PSP_O_RDONLY, 0);
+			isofs_lseek(&iob, base, PSP_SEEK_SET);
+			isofs_read(&iob, p, n);
+			isofs_close(&iob);
 
 			remaining -= n;
 			p += n;

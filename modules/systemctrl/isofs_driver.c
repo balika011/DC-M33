@@ -305,7 +305,7 @@ int FindPathLBA(char *path, Iso9660DirectoryRecord *retRecord)
 	return lba;
 }
 
-int isofs_init(PspIoDrvArg* arg)
+int isofs_init(SceIoDeviceEntry* arg)
 {
 	int res;
 
@@ -367,7 +367,7 @@ int isofs_fastinit()
 	return 0;
 }
 
-int isofs_exit(PspIoDrvArg* arg)
+int isofs_exit(SceIoDeviceEntry* arg)
 {
 	g_lastLBA = -1;
 	g_lastReadSize = 0;	
@@ -392,7 +392,7 @@ int isofs_exit(PspIoDrvArg* arg)
 	return 0;
 }
 
-int isofs_exit2(PspIoDrvArg* arg)
+int isofs_exit2(SceIoDeviceEntry* arg)
 {
 	return 0;
 }
@@ -414,7 +414,7 @@ int isofs_reset()
 
 typedef struct
 {
-	PspIoDrvFileArg *arg; 
+	SceIoIob *iob; 
 	char *file;
 	int flags;
 	SceMode mode;
@@ -435,7 +435,7 @@ int isofs_open2()
 
 	//Kprintf("isofs_open %s\n", file);
 
-	if (!open_params.file || !open_params.arg)
+	if (!open_params.file || !open_params.iob)
 	{
 		//sceKernelSignalSema(isofs_sema, 1);
 		return SCE_ERROR_ERRNO_EINVAL;
@@ -456,7 +456,7 @@ int isofs_open2()
 		handlers[i].filepointer = 0;
 		handlers[i].attributes = main_record.fileFlags;
 
-		open_params.arg->arg = (void *)i;
+		open_params.iob->i_private = (void *)i;
 
 		//sceKernelSignalSema(isofs_sema, 1);
 		return 0;
@@ -478,7 +478,7 @@ int isofs_open2()
 		return SCE_ERROR_ERRNO_ENAMETOOLONG;
 	}
 	
-	if (open_params.arg->fs_num >= 1)
+	if (open_params.iob->i_unit >= 1)
 	{
 		//sceKernelSignalSema(isofs_sema, 1);
 		//Kprintf("Error open 2 %s\n", open_params.file);
@@ -607,17 +607,17 @@ int isofs_open2()
 		//Kprintf("lba opened %08X\n", lba);
 	}
 
-	open_params.arg->arg = (void *)i;
+	open_params.iob->i_private = (void *)i;
 	
 	//sceKernelSignalSema(isofs_sema, 1);
 	return 0;
 }
 
-int isofs_open(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
+int isofs_open(SceIoIob *iob, char *file, int flags, SceMode mode)
 {
 	sceKernelWaitSema(isofs_sema, 1, NULL);	
 
-	open_params.arg = arg;
+	open_params.iob = iob;
 	open_params.file = file;
 	open_params.flags = flags;
 	open_params.mode = mode;
@@ -628,9 +628,9 @@ int isofs_open(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
 	return res;
 }
 
-int isofs_close(PspIoDrvFileArg *arg)
+int isofs_close(SceIoIob *iob)
 {
-	SceUID fd = (SceUID)arg->arg;
+	SceUID fd = (SceUID)iob->i_private;
 
 	sceKernelWaitSema(isofs_sema, 1, NULL);
 	
@@ -654,7 +654,7 @@ int isofs_close(PspIoDrvFileArg *arg)
 
 typedef struct
 {
-	PspIoDrvFileArg *arg;
+	SceIoIob *iob;
 	char *data;
 	int len;
 } ReadParams;
@@ -671,7 +671,7 @@ int isofs_read2()
 
 	//Kprintf("Free stack 2%d\n", sceKernelGetThreadKernelStackFreeSize(sceKernelGetThreadId()));
 
-	SceUID fd = (SceUID)read_params.arg->arg;
+	SceUID fd = (SceUID)read_params.iob->i_private;
 
 	//Kprintf("Read %d\n", read_params.len);
 
@@ -797,11 +797,11 @@ int isofs_read2()
 }
 
 
-int isofs_read(PspIoDrvFileArg *arg, char *data, int len)
+int isofs_read(SceIoIob *iob, char *data, int len)
 {
 	sceKernelWaitSema(isofs_sema, 1, NULL);
 
-	read_params.arg = arg;
+	read_params.iob = iob;
 	read_params.data = data;
 	read_params.len = len;
 	int res = sceKernelExtendKernelStack(0x1800, (void *)isofs_read2, NULL);
@@ -810,9 +810,9 @@ int isofs_read(PspIoDrvFileArg *arg, char *data, int len)
 	return res;
 }
 
-SceOff isofs_lseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
+SceOff isofs_lseek(SceIoIob *iob, SceOff ofs, int whence)
 {
-	SceUID fd = (SceUID)arg->arg;
+	SceUID fd = (SceUID)iob->i_private;
 
 	sceKernelWaitSema(isofs_sema, 1, NULL);
 
@@ -852,7 +852,7 @@ SceOff isofs_lseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
 
 typedef struct
 {
-	PspIoDrvFileArg *arg;
+	SceIoIob *iob;
 	const char *file;
 	SceIoStat *stat;
 } GetStatParams;
@@ -867,7 +867,7 @@ int isofs_getstat2()
 		
 	//sceKernelWaitSema(isofs_sema, 1, NULL);	
 
-	if (!getstat_params.arg || !getstat_params.file || !getstat_params.stat)
+	if (!getstat_params.iob || !getstat_params.file || !getstat_params.stat)
 	{
 		//sceKernelSignalSema(isofs_sema, 1);
 		return SCE_ERROR_ERRNO_EINVAL;
@@ -888,7 +888,7 @@ int isofs_getstat2()
 		fullpath[strlen(fullpath)-1] = 0;
 	}	
 	
-	if (getstat_params.arg->fs_num >= 1)
+	if (getstat_params.iob->i_unit >= 1)
 	{
 		//sceKernelSignalSema(isofs_sema, 1);
 		return SCE_ERROR_ERRNO_EINVAL;
@@ -999,11 +999,11 @@ int isofs_getstat2()
 	return 0;
 }
 
-int isofs_getstat(PspIoDrvFileArg *arg, const char *file, SceIoStat *stat)
+int isofs_getstat(SceIoIob *iob, const char *file, SceIoStat *stat)
 {
 	sceKernelWaitSema(isofs_sema, 1, NULL);
 	
-	getstat_params.arg = arg;
+	getstat_params.iob = iob;
 	getstat_params.file = file;
 	getstat_params.stat = stat;
 
@@ -1013,13 +1013,13 @@ int isofs_getstat(PspIoDrvFileArg *arg, const char *file, SceIoStat *stat)
 	return res;
 }
 
-int isofs_dopen(PspIoDrvFileArg *arg, const char *dirname)
+int isofs_dopen(SceIoIob *iob, const char *dirname)
 {
 	SceUID fd;
 
 	//Kprintf("Free stack %d\n", sceKernelGetThreadKernelStackFreeSize(sceKernelGetThreadId()));
 
-	int res = isofs_open(arg, (char *)dirname, PSP_O_RDONLY, 0);
+	int res = isofs_open(iob, (char *)dirname, PSP_O_RDONLY, 0);
 
 	if (res < 0)
 	{
@@ -1028,7 +1028,7 @@ int isofs_dopen(PspIoDrvFileArg *arg, const char *dirname)
 
 	sceKernelWaitSema(isofs_sema, 1, NULL);
 
-	fd = (SceUID)arg->arg;	
+	fd = (SceUID)iob->i_private;	
 
 	if (!(handlers[fd].attributes & ISO9660_FILEFLAGS_DIR))
 	{
@@ -1045,9 +1045,9 @@ int isofs_dopen(PspIoDrvFileArg *arg, const char *dirname)
 	return 0;
 }
 
-int isofs_dclose(PspIoDrvFileArg *arg)
+int isofs_dclose(SceIoIob *iob)
 {
-	SceUID fd = (SceUID)arg->arg;
+	SceUID fd = (SceUID)iob->i_private;
 
 	sceKernelWaitSema(isofs_sema, 1, NULL);
 
@@ -1077,7 +1077,7 @@ int isofs_dclose(PspIoDrvFileArg *arg)
 
 typedef struct
 {
-	PspIoDrvFileArg *arg;
+	SceIoIob *iob;
 	SceIoDirent *dirent;
 } DreadParams;
 
@@ -1087,7 +1087,7 @@ int isofs_dread2()
 {
 	Iso9660DirectoryRecord *record;
 	u8 *p;
-	SceUID fd = (SceUID)dread_params.arg->arg;	
+	SceUID fd = (SceUID)dread_params.iob->i_private;	
 
 	//Kprintf("dread.\n");
 
@@ -1221,11 +1221,11 @@ int isofs_dread2()
 	return 1;	
 }
 
-int isofs_dread(PspIoDrvFileArg *arg, SceIoDirent *dirent)
+int isofs_dread(SceIoIob *iob, SceIoDirent *dirent)
 {
 	sceKernelWaitSema(isofs_sema, 1, NULL);
 	
-	dread_params.arg = arg;
+	dread_params.iob = iob;
 	dread_params.dirent = dirent;
 	int res = sceKernelExtendKernelStack(0x1800, (void *)isofs_dread2, NULL);
 
@@ -1233,9 +1233,9 @@ int isofs_dread(PspIoDrvFileArg *arg, SceIoDirent *dirent)
 	return res;
 }
 
-int isofs_ioctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+int isofs_ioctl(SceIoIob *iob, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
-	SceUID fd = (SceUID)arg->arg;
+	SceUID fd = (SceUID)iob->i_private;
 	int lowcmd;
 	u32 *outdata32 = (u32 *)outdata;
 
@@ -1328,27 +1328,27 @@ int isofs_ioctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen,
 	return -1;	
 }
 
-int isofs_devctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+int isofs_devctl(SceIoIob *iob, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
 	return 0;
 }
 
-int isofs_chdir(PspIoDrvFileArg *arg, const char *dir)
+int isofs_chdir(SceIoIob *iob, const char *dir)
 {
 	return 0;
 }
 
-int isofs_mount(PspIoDrvFileArg *arg)
+int isofs_mount(SceIoIob *iob)
 {
 	return 0;
 }
 
-int isofs_umount(PspIoDrvFileArg *arg)
+int isofs_umount(SceIoIob *iob)
 {
 	return 0;
 }
 
-PspIoDrvFuncs isofs_funcs =
+SceIoDeviceFunction isofs_funcs =
 {
 	isofs_init,
 	isofs_exit,
@@ -1374,10 +1374,10 @@ PspIoDrvFuncs isofs_funcs =
 	NULL
 };
 
-PspIoDrv isofs_driver = { "isofs", 0x10, 0x800, "ISOFS", &isofs_funcs };
+SceIoDeviceTable isofs_driver = { "isofs", 0x10, 0x800, "ISOFS", &isofs_funcs };
 
 
-PspIoDrv *getisofs_driver()
+SceIoDeviceTable *getisofs_driver()
 {
 	return &isofs_driver;
 }

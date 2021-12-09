@@ -55,21 +55,21 @@ typedef struct
 	int curlba;
 } FileHandle;
 
-int isofs_init(PspIoDrvArg* arg);
+int isofs_init(SceIoDeviceEntry* arg);
 int isofs_fastinit();
-int isofs_exit(PspIoDrvArg* arg); 
+int isofs_exit(SceIoDeviceEntry* arg); 
 int isofs_reset();
-int isofs_open(PspIoDrvFileArg *arg, char *fullpath, int flags, SceMode mode); 
-int isofs_close(PspIoDrvFileArg *arg);
-int isofs_read(PspIoDrvFileArg *arg, char *data, int len);
-SceOff isofs_lseek(PspIoDrvFileArg *arg, SceOff ofs, int whence);
-int isofs_getstat(PspIoDrvFileArg *arg, const char *file, SceIoStat *stat);
-int isofs_dopen(PspIoDrvFileArg *arg, const char *dirname); 
-int isofs_dclose(PspIoDrvFileArg *arg);
-int isofs_dread(PspIoDrvFileArg *arg, SceIoDirent *dir);
-int isofs_ioctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
-int isofs_devctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
-PspIoDrv *getisofs_driver();
+int isofs_open(SceIoIob *arg, char *fullpath, int flags, SceMode mode); 
+int isofs_close(SceIoIob *arg);
+int isofs_read(SceIoIob *arg, char *data, int len);
+SceOff isofs_lseek(SceIoIob *arg, SceOff ofs, int whence);
+int isofs_getstat(SceIoIob *arg, const char *file, SceIoStat *stat);
+int isofs_dopen(SceIoIob *arg, const char *dirname); 
+int isofs_dclose(SceIoIob *arg);
+int isofs_dread(SceIoIob *arg, SceIoDirent *dir);
+int isofs_ioctl(SceIoIob *arg, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
+int isofs_devctl(SceIoIob *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
+SceIoDeviceTable *getisofs_driver();
 
 
 

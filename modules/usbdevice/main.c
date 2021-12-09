@@ -11,9 +11,9 @@
 
 PSP_MODULE_INFO("pspUsbDev_Driver", 0x1006, 1, 0);
 
-PspIoDrv *lflash_driver;
-PspIoDrv *umd_driver;
-PspIoDrv *msstor_driver;
+SceIoDeviceTable *lflash_driver;
+SceIoDeviceTable *umd_driver;
+SceIoDeviceTable *msstor_driver;
 int device_unit;
 int read_only = 0;
 u32 device_sizes[5];
@@ -28,16 +28,16 @@ u8  *umd_sector;
 
 u8 unassigned_devices[4];
 
-int (* Orig_IoOpen)(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode);
-int (* Orig_IoClose)(PspIoDrvFileArg *arg);
-int (* Orig_IoRead)(PspIoDrvFileArg *arg, char *data, int len);
-int (* Orig_IoWrite)(PspIoDrvFileArg *arg, const char *data, int len);
-SceOff(* Orig_IoLseek)(PspIoDrvFileArg *arg, SceOff ofs, int whence);
-int (* Orig_IoIoctl)(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
-int (* Orig_IoDevctl)(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
+int (* Orig_df_open)(SceIoIob *iob, char *file, int flags, SceMode mode);
+int (* Orig_df_close)(SceIoIob *iob);
+int (* Orig_df_read)(SceIoIob *iob, char *data, int len);
+int (* Orig_df_write)(SceIoIob *iob, const char *data, int len);
+SceOff(* Orig_df_lseek)(SceIoIob *iob, SceOff ofs, int whence);
+int (* Orig_df_ioctl)(SceIoIob *iob, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
+int (* Orig_df_devctl)(SceIoIob *iob, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen);
 
 
-static int Lflash_IoOpen(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
+static int Lflash_IoOpen(SceIoIob *iob, char *file, int flags, SceMode mode)
 {
 	switch (device_unit)
 	{
@@ -61,15 +61,15 @@ static int Lflash_IoOpen(PspIoDrvFileArg *arg, char *file, int flags, SceMode mo
 			return 0x800200d2;
 	}
 
-	return lflash_driver->funcs->IoOpen(arg, file, flags, mode);
+	return lflash_driver->dt_func->df_open(iob, file, flags, mode);
 }
 
-static int Common_IoWrite(PspIoDrvFileArg *arg, const char *data, int len)
+static int Common_IoWrite(SceIoIob *iob, const char *data, int len)
 {
 	if (read_only)
 		return -1;
 	else
-		return lflash_driver->funcs->IoWrite(arg, data, len);
+		return lflash_driver->dt_func->df_write(iob, data, len);
 }
 
 static u8 data_5803[96] = 
@@ -82,7 +82,7 @@ static u8 data_5803[96] =
 	0x00, 0x00, 0x00, 0x01, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-static int Common_IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+static int Common_IoIoctl(SceIoIob *iob, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
 	if (cmd == 0x02125008)
 	{
@@ -105,7 +105,7 @@ static int Common_IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, 
 	}
 	else if (cmd == 0x0211D032)
 	{
-		return Common_IoWrite(arg, outdata, outlen);
+		return Common_IoWrite(iob, outdata, outlen);
 	}	
 	else if (cmd == 0x0201D033)
 	{
@@ -115,7 +115,7 @@ static int Common_IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, 
 	return 0;
 }
 
-static int Common_IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+static int Common_IoDevctl(SceIoIob *iob, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
 	if (cmd == 0x02125801)
 	{
@@ -133,13 +133,13 @@ static int Common_IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned i
 	return 0x80010086;
 }
 
-static int UmdVfat_Open(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
+static int UmdVfat_Open(SceIoIob *iob, char *file, int flags, SceMode mode)
 {
 	umd_vfat_ptr = 0;
 	mode = PSP_O_RDONLY;
 	umd_last_sector = -1;
 	
-	return umd_driver->funcs->IoOpen(arg, file, flags, mode);
+	return umd_driver->dt_func->df_open(iob, file, flags, mode);
 }
 
 u8 boot_sector[0x40] = 
@@ -194,7 +194,7 @@ static int ReadAllocTableSector(u32 fatsec, u16 *fat)
 	return 0;
 }
 
-static int ReadUmdSector(PspIoDrvFileArg *arg, u32 sector)
+static int ReadUmdSector(SceIoIob *iob, u32 sector)
 {
 	if (sector == umd_last_sector)
 	{
@@ -203,13 +203,13 @@ static int ReadUmdSector(PspIoDrvFileArg *arg, u32 sector)
 
 	if (umd_last_sector != (sector-1))
 	{
-		if (umd_driver->funcs->IoLseek(arg, sector, PSP_SEEK_SET) < 0)
+		if (umd_driver->dt_func->df_lseek(iob, sector, PSP_SEEK_SET) < 0)
 		{
 			return -1;
 		}
 	}
 
-	int res = umd_driver->funcs->IoRead(arg, (void *)umd_sector, 1);
+	int res = umd_driver->dt_func->df_read(iob, (void *)umd_sector, 1);
 	if (res >= 0)
 	{
 		umd_last_sector = sector;
@@ -218,7 +218,7 @@ static int ReadUmdSector(PspIoDrvFileArg *arg, u32 sector)
 	return res;
 }
 
-static int ReadUmdVfatSector(PspIoDrvFileArg *arg, u32 sector, u8 *buf)
+static int ReadUmdVfatSector(SceIoIob *iob, u32 sector, u8 *buf)
 {
 	if (sector == 0)
 	{
@@ -242,7 +242,7 @@ static int ReadUmdVfatSector(PspIoDrvFileArg *arg, u32 sector, u8 *buf)
 	return 0;
 }
 
-static int UmdVfat_Read(PspIoDrvFileArg *arg, char *data, int len)
+static int UmdVfat_Read(SceIoIob *iob, char *data, int len)
 {
 	int i, read = 0;
 	int rem;
@@ -274,7 +274,7 @@ static int UmdVfat_Read(PspIoDrvFileArg *arg, char *data, int len)
 
 			if (x && rem >= 0)
 			{
-				ReadUmdSector(arg, lba);
+				ReadUmdSector(iob, lba);
 
 				int m = 4-x;
 
@@ -293,14 +293,14 @@ static int UmdVfat_Read(PspIoDrvFileArg *arg, char *data, int len)
 			{
 				if (move)
 				{
-					umd_driver->funcs->IoLseek(arg, lba, PSP_SEEK_SET);
+					umd_driver->dt_func->df_lseek(iob, lba, PSP_SEEK_SET);
 				}
 
 				int nsectors = rem / 4;
 
 				if (nsectors > 0)
 				{
-					if (umd_driver->funcs->IoRead(arg, data, nsectors) < 0)
+					if (umd_driver->dt_func->df_read(iob, data, nsectors) < 0)
 						return -1;
 
 					data += (nsectors*0x800);
@@ -311,7 +311,7 @@ static int UmdVfat_Read(PspIoDrvFileArg *arg, char *data, int len)
 				
 				if (rem > 0)
 				{
-					ReadUmdSector(arg, lba);
+					ReadUmdSector(iob, lba);
 					memcpy(data, umd_sector, rem*0x200);
 				}
 			}
@@ -323,7 +323,7 @@ static int UmdVfat_Read(PspIoDrvFileArg *arg, char *data, int len)
 
 	for (i = 0; i < len; i++)
 	{
-		if (ReadUmdVfatSector(arg, umd_vfat_ptr, (u8 *)data) != 0)
+		if (ReadUmdVfatSector(iob, umd_vfat_ptr, (u8 *)data) != 0)
 		{
 			break;
 		}
@@ -336,7 +336,7 @@ static int UmdVfat_Read(PspIoDrvFileArg *arg, char *data, int len)
 	return read;
 }
 
-SceOff UmdVfat_IoLseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
+SceOff UmdVfat_IoLseek(SceIoIob *iob, SceOff ofs, int whence)
 {
 	int ofs32 = (int)ofs;
 	
@@ -504,22 +504,22 @@ int pspUsbDeviceSetDevice(u32 unit, int ronly, int unassign_mask)
 
 	if (unit == PSP_USBDEVICE_UMD9660)
 	{
-		msstor_driver->funcs->IoOpen = UmdVfat_Open;
-		msstor_driver->funcs->IoClose = umd_driver->funcs->IoClose;
-		msstor_driver->funcs->IoRead = UmdVfat_Read;
-		msstor_driver->funcs->IoLseek = UmdVfat_IoLseek;
+		msstor_driver->dt_func->df_open = UmdVfat_Open;
+		msstor_driver->dt_func->df_close = umd_driver->dt_func->df_close;
+		msstor_driver->dt_func->df_read = UmdVfat_Read;
+		msstor_driver->dt_func->df_lseek = UmdVfat_IoLseek;
 	}
 	else
 	{
-		msstor_driver->funcs->IoOpen = Lflash_IoOpen;
-		msstor_driver->funcs->IoClose = lflash_driver->funcs->IoClose;
-		msstor_driver->funcs->IoRead = lflash_driver->funcs->IoRead;
-		msstor_driver->funcs->IoLseek = lflash_driver->funcs->IoLseek;
+		msstor_driver->dt_func->df_open = Lflash_IoOpen;
+		msstor_driver->dt_func->df_close = lflash_driver->dt_func->df_close;
+		msstor_driver->dt_func->df_read = lflash_driver->dt_func->df_read;
+		msstor_driver->dt_func->df_lseek = lflash_driver->dt_func->df_lseek;
 	}
 
-	msstor_driver->funcs->IoWrite =  Common_IoWrite;	
-	msstor_driver->funcs->IoIoctl =  Common_IoIoctl;
-	msstor_driver->funcs->IoDevctl = Common_IoDevctl;
+	msstor_driver->dt_func->df_write =  Common_IoWrite;	
+	msstor_driver->dt_func->df_ioctl =  Common_IoIoctl;
+	msstor_driver->dt_func->df_devctl = Common_IoDevctl;
 
 	sceKernelCpuResumeIntr(intr);
 
@@ -536,13 +536,13 @@ int pspUsbDeviceFinishDevice()
 	
 	int intr = sceKernelCpuSuspendIntr();
 
-	msstor_driver->funcs->IoOpen = Orig_IoOpen;
-	msstor_driver->funcs->IoClose = Orig_IoClose;
-	msstor_driver->funcs->IoRead = Orig_IoRead;
-	msstor_driver->funcs->IoWrite = Orig_IoWrite;
-	msstor_driver->funcs->IoLseek = Orig_IoLseek;
-	msstor_driver->funcs->IoIoctl = Orig_IoIoctl;
-	msstor_driver->funcs->IoDevctl = Orig_IoDevctl;
+	msstor_driver->dt_func->df_open = Orig_df_open;
+	msstor_driver->dt_func->df_close = Orig_df_close;
+	msstor_driver->dt_func->df_read = Orig_df_read;
+	msstor_driver->dt_func->df_write = Orig_df_write;
+	msstor_driver->dt_func->df_lseek = Orig_df_lseek;
+	msstor_driver->dt_func->df_ioctl = Orig_df_ioctl;
+	msstor_driver->dt_func->df_devctl = Orig_df_devctl;
 
 	sceKernelCpuResumeIntr(intr);
 
@@ -637,13 +637,13 @@ int module_start(SceSize args, void *argp)
 		}
 	}
 		
-	Orig_IoOpen = msstor_driver->funcs->IoOpen;
-	Orig_IoClose = msstor_driver->funcs->IoClose;
-	Orig_IoRead = msstor_driver->funcs->IoRead;
-	Orig_IoWrite = msstor_driver->funcs->IoWrite;
-	Orig_IoLseek = msstor_driver->funcs->IoLseek;
-	Orig_IoIoctl = msstor_driver->funcs->IoIoctl;
-	Orig_IoDevctl = msstor_driver->funcs->IoDevctl;
+	Orig_df_open = msstor_driver->dt_func->df_open;
+	Orig_df_close = msstor_driver->dt_func->df_close;
+	Orig_df_read = msstor_driver->dt_func->df_read;
+	Orig_df_write = msstor_driver->dt_func->df_write;
+	Orig_df_lseek = msstor_driver->dt_func->df_lseek;
+	Orig_df_ioctl = msstor_driver->dt_func->df_ioctl;
+	Orig_df_devctl = msstor_driver->dt_func->df_devctl;
 
 	sceKernelFreeFpl(fpl, outdata);
 	sceKernelDeleteFpl(fpl);

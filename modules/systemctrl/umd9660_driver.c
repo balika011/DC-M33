@@ -194,7 +194,7 @@ void ReadOneSector(int lba)
 	}
 }
 
-int umd_init(PspIoDrvArg* arg)
+int umd_init(SceIoDeviceEntry* de)
 {
 	if (!umdsector)	
 	{
@@ -219,7 +219,7 @@ int umd_init(PspIoDrvArg* arg)
 	return 0;
 }
 
-int umd_exit(PspIoDrvArg* arg)
+int umd_exit(SceIoDeviceEntry* de)
 {
 	sceKernelWaitSema(umdsema, 1, NULL);
 	
@@ -238,7 +238,7 @@ int umd_exit(PspIoDrvArg* arg)
 	return 0;
 }
 
-int umd_open(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
+int umd_open(SceIoIob *iob, char *file, int flags, SceMode mode)
 {
 	int i;
 	
@@ -258,14 +258,14 @@ int umd_open(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
 		return SCE_ERROR_ERRNO_ENODEV;
 	}
 
-	arg->arg = 0;
+	iob->i_private = 0;
 	discpointer = 0;	
 	
 	sceKernelSignalSema(umdsema, 1);
 	return 0;
 }
 
-int umd_close(PspIoDrvFileArg *arg)
+int umd_close(SceIoIob *iob)
 {
 	sceKernelWaitSema(umdsema, 1, NULL);
 	sceKernelSignalSema(umdsema, 1);
@@ -273,7 +273,7 @@ int umd_close(PspIoDrvFileArg *arg)
 	return 0;
 }
 
-int umd_read(PspIoDrvFileArg *arg, char *data, int len)
+int umd_read(SceIoIob *iob, char *data, int len)
 {
 	sceKernelWaitSema(umdsema, 1, NULL);
 
@@ -290,7 +290,7 @@ int umd_read(PspIoDrvFileArg *arg, char *data, int len)
 	return res;
 }
 
-SceOff umd_lseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
+SceOff umd_lseek(SceIoIob *iob, SceOff ofs, int whence)
 {
 	sceKernelWaitSema(umdsema, 1, NULL);
 
@@ -319,7 +319,7 @@ SceOff umd_lseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
 	return discpointer;
 }
 
-int umd_ioctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+int umd_ioctl(SceIoIob *iob, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
 	u32 *outdata32 = (u32 *)outdata;
 
@@ -337,7 +337,7 @@ int umd_ioctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inlen, v
 	return 0;
 }
 
-int umd_devctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
+int umd_devctl(SceIoIob *iob, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
 	u32 *outdata32 = (u32 *)outdata;
 
@@ -372,7 +372,7 @@ int umd_devctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void
 	return -1;
 }
 
-PspIoDrvFuncs umd_funcs = 
+SceIoDeviceFunction umd_funcs = 
 { 
 	umd_init,
 	umd_exit,
@@ -398,10 +398,10 @@ PspIoDrvFuncs umd_funcs =
 	NULL
 };
 
-PspIoDrv umd_driver = { "umd", 0x4, 0x800, "UMD9660", &umd_funcs };
+SceIoDeviceTable umd_driver = { "umd", 0x4, 0x800, "UMD9660", &umd_funcs };
 
 
-PspIoDrv *getumd9660_driver()
+SceIoDeviceTable *getumd9660_driver()
 {
 	return &umd_driver;
 }

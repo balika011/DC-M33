@@ -9,7 +9,7 @@
 int  OpenIso();
 int  ReadUmdFileRetry(void *buf, int size, int fpointer);
 int  Umd9660ReadSectors(int lba, int nsectors, void *buf);
-PspIoDrv *getumd9660_driver();
+SceIoDeviceTable *getumd9660_driver();
 void DoAnyUmd();
 
 

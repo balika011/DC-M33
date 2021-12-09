@@ -181,7 +181,7 @@ int sctrlHENGetVersion();
  * @returns the driver if found, NULL otherwise
  *
  */
-PspIoDrv *sctrlHENFindDriver(char *drvname);
+SceIoDeviceTable *sctrlHENFindDriver(char *drvname);
 
 /** 
  * Finds a function.
