@@ -14,10 +14,12 @@ TM/DC10/testingtool/kd/pspbtcnf_02g_dc.bin TM/DC10/testingtool/kd/pspbtcnf_02g_u
 TM/DC10/testingtool/kd/pspbtcnf_03g_dc.bin TM/DC10/testingtool/kd/pspbtcnf_03g_umd.bin TM/DC10/testingtool/kd/pspbtcnf_03g_np.bin TM/DC10/testingtool/kd/pspbtcnf_03g_m33.bin TM/DC10/testingtool/kd/pspbtcnf_03g_recovery.bin \
 TM/DC10/tmctrl.prx TM/DC10/kd/ipl_update.prx TM/DC10/vsh/module/resurrection.prx TM/DC10/kd/dcman.prx TM/DC10/kd/iop.prx TM/DC10/kd/lflash_fdisk.prx TM/DC10/kd/idsregeneration.prx TM/DC10/kd/emc_sm_updater.prx \
 TM/DC10/kd/lfatfs_updater.prx TM/DC10/kd/lflash_fatfmt_updater.prx TM/DC10/vsh/module/intraFont.prx TM/DC10/vsh/module/vlf.prx TM/DC10/kd/pspdecrypt.prx TM/DC10/kd/galaxy.prx TM/DC10/kd/idcanager.prx TM/DC10/kd/march33.prx \
-TM/DC10/kd/popcorn.prx TM/DC10/kd/nidresolver.prx TM/DC10/kd/systemctrl.prx TM/DC10/kd/usbdevice.prx TM/DC10/kd/vshctrl.prx TM/DC10/vsh/module/recovery.prx TM/DC10/vsh/module/satelite.prx
+TM/DC10/kd/popcorn.prx TM/DC10/kd/nidresolver.prx TM/DC10/kd/systemctrl.prx TM/DC10/kd/usbdevice.prx TM/DC10/kd/vshctrl.prx TM/DC10/vsh/module/recovery.prx TM/DC10/vsh/module/satelite.prx \
+PSP/GAME/MasterHax/hax.bin PSP/GAME/MasterHax/EBOOT.PBP
 
 clean:
 	rm -rf TM
+	rm -rf PSP
 	make -C ipl/common clean
 	make -C ipl/msipl clean
 	make -C ipl/payloadex clean
@@ -50,6 +52,9 @@ clean:
 	make -C modules/satelite clean
 	make -C modules/galaxy clean
 	make -C modules/popcorn clean
+	make -C ipl/hax clean
+	make -C modules/masterhax clean
+	make -C modules/xmbctrl clean
 
 TM:
 	mkdir TM
@@ -696,4 +701,15 @@ TM/DC10/vsh/module/recovery.prx: TM/DC10
 TM/DC10/vsh/module/satelite.prx: TM/DC10
 	make -C modules/satelite
 	python3 psptools/pack_module.py modules/satelite/satelite.prx TM/DC10/vsh/module/satelite.prx --tag 0x457b90f0
+
+PSP/GAME/MasterHax:
+	mkdir -p PSP/GAME/MasterHax
+
+PSP/GAME/MasterHax/hax.bin: PSP/GAME/MasterHax
+	make -C ipl/hax
+	cp ipl/hax/hax.bin PSP/GAME/MasterHax/hax.bin
+
+PSP/GAME/MasterHax/EBOOT.PBP: PSP/GAME/MasterHax
+	make -C modules/masterhax
+	python3 psptools/pack_game.py modules/masterhax/EBOOT.PBP PSP/GAME/MasterHax/EBOOT.PBP
 
