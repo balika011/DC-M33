@@ -2,7 +2,6 @@ import struct
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
-from Crypto import Random
 from ecdsa.ellipticcurve import CurveFp, Point
 from ecdsa.curves import Curve
 from ecdsa import SigningKey, VerifyingKey
@@ -215,7 +214,7 @@ def kirk1(block):
 
 def kirk1_encrypt_ecdsa(data, salt=b'', key=None):
     if key is None:
-        key = Random.get_random_bytes(16)
+        key = bytearray.fromhex('AA'*16)
 
     # pad to 16 byte boundary if required
     padding = b''
@@ -242,10 +241,10 @@ def kirk1_encrypt_ecdsa(data, salt=b'', key=None):
 
 def kirk1_encrypt_cmac(data, salt=b'', aes_key=None, cmac_key=None):
     if aes_key is None:
-        aes_key = Random.get_random_bytes(16)
+        aes_key = bytearray.fromhex('AA'*16)
 
     if cmac_key is None:
-        cmac_key = Random.get_random_bytes(16)
+        cmac_key = bytearray.fromhex('AA'*16)
 
     # pad to 16 byte boundary if required
     padding = b''

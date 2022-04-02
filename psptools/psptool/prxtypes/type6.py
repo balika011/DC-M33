@@ -3,7 +3,6 @@ import psptool.kirk as kirk
 from .common import expand_seed, prx_header, set_kirk_cmd_1, set_kirk_cmd_1_ecdsa
 from Crypto.Util.strxor import strxor as xor
 from Crypto.Hash import SHA1
-from Crypto import Random
 
 
 class prx_header_6(object):
@@ -139,7 +138,7 @@ def encrypt(prx, meta, id=None):
 
     # calculate an id
     if id == None:
-        id = Random.get_random_bytes(16)
+        id = bytearray.fromhex('AA'*16)
 
     elif type(id) is str:
         id = '{:16.16}'.format(id).encode()

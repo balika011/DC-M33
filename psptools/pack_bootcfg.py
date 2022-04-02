@@ -38,8 +38,7 @@ class PSPHeader:
         self.devkitversion = 0
         self.decrypt_mode = 2
 
-        # to be filled in by caller
-        self.psptag = 0x4C9416F0
+        self.psptag = 0x4C9494F0
         self.oetag = 0xCCCCCCCC
         self.comp_size = 0
     

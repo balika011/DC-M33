@@ -102,7 +102,7 @@ class PSPHeader:
         self.devkitversion = 0
 
         if modinfo.is_kernel():
-            self.devkitversion = 0x05000010
+            self.devkitversion = 0x06060110
             self.decrypt_mode = 2
 
         elif is_pbp:

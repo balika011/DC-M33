@@ -21,35 +21,40 @@ _metatypes = {
         'key': 0x5B,
         'seed': 'BA7661478B55A8728915796DD72F780E',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x4C9494F0: {
         'key': 0x43,
         'seed': '76F26C0ACA3ABA4EAC76D240F5C3BFF9',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x4C9495F0: {
         'key': 0x43,
         'seed': '7A3E5575B96AFC4F3EE3DFB36CE82A82',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x4C9496F0: {
         'key': 0x43,
         'seed': 'EBD91E053CAEAB62E3B71F37E5CD68C3',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x4C9490F0: {
         'key': 0x43,
         'seed': 'FA790936E619E8A4A94137188102E9B3',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x4C9484F0: {
@@ -98,21 +103,24 @@ _metatypes = {
         'key': 0x5B,
         'seed': 'C59C779C4101E48579C87163A57D4FFB',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x457B92F0: {
         'key': 0x5B,
         'seed': '928CA412D65C55315B94239B62B3DB47',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x380290F0: {
         'key': 0x5A,
         'seed': 'F94A6B96793FEE0A04C88D7E5F383ACF',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x0B000000: {
@@ -175,21 +183,24 @@ _metatypes = {
         'key': 0x5B,
         'seed': '88AF18E9C3AA6B56F7C5A8BF1A84E9F3',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x4C9497F0: {
         'key': 0x43,
         'seed': 'BFF834028447BD871C52032379BB5981',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x380293F0: {
         'key': 0x5A,
         'seed': 'CB93123831C02D2E7A185CAC9293AB32',
         'pubkey': '773F4BE14C0AB452672B6756824CCF42AA37FFC08941E5635E84E9FB53DA949E9BB7C2A4229FDF1F',
-        'decrypt': type9.decrypt
+        'decrypt': type9.decrypt,
+        'encrypt': type9.encrypt
     },
 
     0x4C9414F0: {
@@ -230,6 +241,20 @@ _metatypes = {
     0x457B0AF0: {
         'key': 0x5B,
         'seed': 'E8BE2F06B1052AB9181803E3EB647D26',
+        'decrypt': type2.decrypt,
+        'encrypt': type2.encrypt
+    },
+
+    0x0C000000: {
+        'key': 0x4F,
+        'seed': '824CA518D3C86EEA174104DCEAC501FC97B19454711922EEE02DE9833D6430E6425C305FEB41A0E062C663EE5DA50D1EC210144906C6938471A5426313F0B6D543519EFA910A7CE1581B95254011F18DB1018D0409545C54F55308B05385B4CE0BF5C3FBC655240BF2C62CE40CF0053CD76C39D5872209F73DC5A2FD55923FB1F6FEC8181D6B04525F8CE8E7265A6E5A',
+        'decrypt': type8.decrypt,
+        'encrypt': type8.encrypt
+    },
+    
+    0xADF305F0: {
+    	'key': 0x60,
+    	'seed': '1299705E24076CD02D06FE7EB30C1126',
         'decrypt': type2.decrypt,
         'encrypt': type2.encrypt
     }
