@@ -1,11 +1,14 @@
 PSPDEV=$(shell psp-config --pspdev-path)
 
 all: TM/DC10 TM/msipl.bin \
-TM/DC10/ipl_01g.bin TM/DC10/ipl_02g.bin TM/DC10/ipl_03g.bin \
-TM/DC10/nandcipl_01g.bin TM/DC10/nandcipl_02g.bin TM/DC10/nandcipl_03g.bin \
+TM/DC10/ipl_01g.bin TM/DC10/ipl_02g.bin TM/DC10/ipl_03g.bin TM/DC10/ipl_04g.bin TM/DC10/ipl_05g.bin TM/DC10/ipl_07g.bin TM/DC10/ipl_09g.bin TM/DC10/ipl_11g.bin \
+TM/DC10/nandcipl_01g.bin TM/DC10/nandcipl_02g.bin TM/DC10/nandcipl_03g.bin TM/DC10/nandcipl_04g.bin TM/DC10/nandcipl_05g.bin TM/DC10/nandcipl_07g.bin TM/DC10/nandcipl_09g.bin TM/DC10/nandcipl_11g.bin \
 TM/DC10/retail/kd/pspbtcnf_dc.bin TM/DC10/retail/kd/pspbtcnf_umd.bin TM/DC10/retail/kd/pspbtcnf_np.bin TM/DC10/retail/kd/pspbtcnf_m33.bin TM/DC10/retail/kd/pspbtcnf_recovery.bin \
 TM/DC10/retail/kd/pspbtcnf_02g_dc.bin TM/DC10/retail/kd/pspbtcnf_02g_umd.bin TM/DC10/retail/kd/pspbtcnf_02g_np.bin TM/DC10/retail/kd/pspbtcnf_02g_m33.bin TM/DC10/retail/kd/pspbtcnf_02g_recovery.bin \
 TM/DC10/retail/kd/pspbtcnf_03g_dc.bin TM/DC10/retail/kd/pspbtcnf_03g_umd.bin TM/DC10/retail/kd/pspbtcnf_03g_np.bin TM/DC10/retail/kd/pspbtcnf_03g_m33.bin TM/DC10/retail/kd/pspbtcnf_03g_recovery.bin \
+TM/DC10/retail/kd/pspbtcnf_04g_dc.bin TM/DC10/retail/kd/pspbtcnf_04g_umd.bin TM/DC10/retail/kd/pspbtcnf_04g_np.bin TM/DC10/retail/kd/pspbtcnf_04g_m33.bin TM/DC10/retail/kd/pspbtcnf_04g_recovery.bin \
+TM/DC10/retail/kd/pspbtcnf_09g_dc.bin TM/DC10/retail/kd/pspbtcnf_09g_umd.bin TM/DC10/retail/kd/pspbtcnf_09g_np.bin TM/DC10/retail/kd/pspbtcnf_09g_m33.bin TM/DC10/retail/kd/pspbtcnf_09g_recovery.bin \
+TM/DC10/retail/kd/pspbtcnf_11g_dc.bin TM/DC10/retail/kd/pspbtcnf_11g_umd.bin TM/DC10/retail/kd/pspbtcnf_11g_np.bin TM/DC10/retail/kd/pspbtcnf_11g_m33.bin TM/DC10/retail/kd/pspbtcnf_11g_recovery.bin \
 TM/DC10/testingtool/kd/pspbtcnf_dc.bin TM/DC10/testingtool/kd/pspbtcnf_umd.bin TM/DC10/testingtool/kd/pspbtcnf_np.bin TM/DC10/testingtool/kd/pspbtcnf_m33.bin TM/DC10/testingtool/kd/pspbtcnf_recovery.bin \
 TM/DC10/testingtool/kd/pspbtcnf_02g_dc.bin TM/DC10/testingtool/kd/pspbtcnf_02g_umd.bin TM/DC10/testingtool/kd/pspbtcnf_02g_np.bin TM/DC10/testingtool/kd/pspbtcnf_02g_m33.bin TM/DC10/testingtool/kd/pspbtcnf_02g_recovery.bin \
 TM/DC10/testingtool/kd/pspbtcnf_03g_dc.bin TM/DC10/testingtool/kd/pspbtcnf_03g_umd.bin TM/DC10/testingtool/kd/pspbtcnf_03g_np.bin TM/DC10/testingtool/kd/pspbtcnf_03g_m33.bin TM/DC10/testingtool/kd/pspbtcnf_03g_recovery.bin \
@@ -251,6 +254,81 @@ TM/DC10/retail/kd/pspbtcnf_03g_recovery.bin: bootcnf/bootcnf cfg_retail/pspbtcnf
 	bootcnf/bootcnf -it cfg_retail/pspbtcnf_03g_recovery.txt -ob pspbtcnf_03g_recovery.bin
 	psptools/pack_bootcfg.py pspbtcnf_03g_recovery.bin TM/DC10/retail/kd/pspbtcnf_03g_recovery.bin
 	rm pspbtcnf_03g_recovery.bin
+
+TM/DC10/retail/kd/pspbtcnf_04g_dc.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_04g_dc.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_04g_dc.txt -ob pspbtcnf_04g_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_04g_dc.bin TM/DC10/retail/kd/pspbtcnf_04g_dc.bin
+	rm pspbtcnf_04g_dc.bin
+
+TM/DC10/retail/kd/pspbtcnf_04g_umd.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_04g_umd.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_04g_umd.txt -ob pspbtcnf_04g_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_04g_umd.bin TM/DC10/retail/kd/pspbtcnf_04g_umd.bin
+	rm pspbtcnf_04g_umd.bin
+
+TM/DC10/retail/kd/pspbtcnf_04g_np.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_04g_np.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_04g_np.txt -ob pspbtcnf_04g_np.bin
+	psptools/pack_bootcfg.py pspbtcnf_04g_np.bin TM/DC10/retail/kd/pspbtcnf_04g_np.bin
+	rm pspbtcnf_04g_np.bin
+
+TM/DC10/retail/kd/pspbtcnf_04g_m33.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_04g_m33.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_04g_m33.txt -ob pspbtcnf_04g_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_04g_m33.bin TM/DC10/retail/kd/pspbtcnf_04g_m33.bin
+	rm pspbtcnf_04g_m33.bin
+
+TM/DC10/retail/kd/pspbtcnf_04g_recovery.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_04g_recovery.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_04g_recovery.txt -ob pspbtcnf_04g_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_04g_recovery.bin TM/DC10/retail/kd/pspbtcnf_04g_recovery.bin
+	rm pspbtcnf_04g_recovery.bin
+
+TM/DC10/retail/kd/pspbtcnf_09g_dc.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_09g_dc.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_09g_dc.txt -ob pspbtcnf_09g_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_09g_dc.bin TM/DC10/retail/kd/pspbtcnf_09g_dc.bin
+	rm pspbtcnf_09g_dc.bin
+
+TM/DC10/retail/kd/pspbtcnf_09g_umd.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_09g_umd.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_09g_umd.txt -ob pspbtcnf_09g_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_09g_umd.bin TM/DC10/retail/kd/pspbtcnf_09g_umd.bin
+	rm pspbtcnf_09g_umd.bin
+
+TM/DC10/retail/kd/pspbtcnf_09g_np.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_09g_np.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_09g_np.txt -ob pspbtcnf_09g_np.bin
+	psptools/pack_bootcfg.py pspbtcnf_09g_np.bin TM/DC10/retail/kd/pspbtcnf_09g_np.bin
+	rm pspbtcnf_09g_np.bin
+
+TM/DC10/retail/kd/pspbtcnf_09g_m33.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_09g_m33.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_09g_m33.txt -ob pspbtcnf_09g_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_09g_m33.bin TM/DC10/retail/kd/pspbtcnf_09g_m33.bin
+	rm pspbtcnf_09g_m33.bin
+
+TM/DC10/retail/kd/pspbtcnf_09g_recovery.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_09g_recovery.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_09g_recovery.txt -ob pspbtcnf_09g_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_09g_recovery.bin TM/DC10/retail/kd/pspbtcnf_09g_recovery.bin
+	rm pspbtcnf_09g_recovery.bin
+
+TM/DC10/retail/kd/pspbtcnf_11g_dc.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_11g_dc.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_11g_dc.txt -ob pspbtcnf_11g_dc.bin
+	psptools/pack_bootcfg.py pspbtcnf_11g_dc.bin TM/DC10/retail/kd/pspbtcnf_11g_dc.bin
+	rm pspbtcnf_11g_dc.bin
+
+TM/DC10/retail/kd/pspbtcnf_11g_umd.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_11g_umd.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_11g_umd.txt -ob pspbtcnf_11g_umd.bin
+	psptools/pack_bootcfg.py pspbtcnf_11g_umd.bin TM/DC10/retail/kd/pspbtcnf_11g_umd.bin
+	rm pspbtcnf_11g_umd.bin
+
+TM/DC10/retail/kd/pspbtcnf_11g_np.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_11g_np.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_11g_np.txt -ob pspbtcnf_11g_np.bin
+	psptools/pack_bootcfg.py pspbtcnf_11g_np.bin TM/DC10/retail/kd/pspbtcnf_11g_np.bin
+	rm pspbtcnf_11g_np.bin
+
+TM/DC10/retail/kd/pspbtcnf_11g_m33.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_11g_m33.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_11g_m33.txt -ob pspbtcnf_11g_m33.bin
+	psptools/pack_bootcfg.py pspbtcnf_11g_m33.bin TM/DC10/retail/kd/pspbtcnf_11g_m33.bin
+	rm pspbtcnf_11g_m33.bin
+
+TM/DC10/retail/kd/pspbtcnf_11g_recovery.bin: bootcnf/bootcnf cfg_retail/pspbtcnf_11g_recovery.txt TM/DC10
+	bootcnf/bootcnf -it cfg_retail/pspbtcnf_11g_recovery.txt -ob pspbtcnf_11g_recovery.bin
+	psptools/pack_bootcfg.py pspbtcnf_11g_recovery.bin TM/DC10/retail/kd/pspbtcnf_11g_recovery.bin
+	rm pspbtcnf_11g_recovery.bin
 
 TM/DC10/testingtool/kd/pspbtcnf_dc.bin: bootcnf/bootcnf cfg_testingtool/pspbtcnf_dc.txt TM/DC10
 	bootcnf/bootcnf -it cfg_testingtool/pspbtcnf_dc.txt -ob pspbtcnf_dc.bin
