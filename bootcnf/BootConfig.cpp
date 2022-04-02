@@ -281,7 +281,7 @@ int CBootConfig::WriteBinary(const char *file)
 
 	// Write the header
 	hdr.FileHeader	= 0x0F803001;
-	hdr.devkit = 0x05000210;
+	hdr.devkit = 0x06060110;
 	hdr.unknown0[0] = 0x6B8B4567;
 	hdr.unknown0[1] = 0x327B23C6;
 	hdr.unknown1[0] = 0x643C9869;
