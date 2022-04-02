@@ -43,7 +43,6 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	asm("sync"::);
 
 	sceSysconInit();
-	sceSysconCtrlMsPower(1);
 	
 #ifdef DEBUG
 	sceSysconCtrlHRPower(1);
@@ -89,7 +88,7 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 		
 	char path[60];
 	
-	sprintf(path, "/TM/DC9/ipl_%02dg.bin", gen);
+	sprintf(path, "/TM/DC10/ipl_%02dg.bin", gen);
 	
 #ifdef DEBUG
 	printf("ipl: %s\n", path);
@@ -98,10 +97,10 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	MsFatOpen(path);
 	
 	MsFatRead((void *) 0x40e0000, 0xC000);
-	MsFatRead((void *) 0x40f0000, 0xe0000);
+	MsFatRead((void *) 0x40ec000, 0xe0000);
 
 	ClearCaches();
 	
-	return ((int (*)())0x40e0000)();
+	return ((int (*)()) 0x40e0000)();
 }
 

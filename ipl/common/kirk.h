@@ -3,7 +3,7 @@
 
 void KirkReset();
 int KirkCmd1(void *dest, void *src);
-void KirkCmd15();
+void KirkCmdF();
 int kirkDecryptAes(u8 *out, u8 *data, u32 size, u8 key_idx);
 
 #endif

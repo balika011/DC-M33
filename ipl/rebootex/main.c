@@ -19,29 +19,28 @@
 #ifdef IPL_01G
 
 #define Ipl_Payload(a0, a1, a2, a3, t0, t1, t2) ((int (*)(void *, void *, void *, void *, void *, void *, void *)) 0x88600000)(a0, a1, a2, a3, t0, t1, t2)
-#define DcacheClear() ((int (*)(void)) 0x886007C0)()
-#define IcacheClear() ((int (*)(void)) 0x8860022C)()
-#define sceBootModuleLoad(str) ((int (*)(char *)) 0x88604F34)(str)
-#define sceBootLfatOpen(str) ((int (*)(char *)) 0x88607B10)(str)
+#define DcacheClear() ((int (*)(void)) 0x88600880)() // OK
+#define IcacheClear() ((int (*)(void)) 0x8860012C)() // OK
+#define sceBootModuleLoad(str) ((int (*)(char *)) 0x8860574C)(str) // OK
+#define sceBootLfatOpen(str) ((int (*)(char *)) 0x8860B6C0)(str) // OK
 
-#define FAT_MOUNT_ADDR 0x88601F44
-#define FAT_OPEN_ADDR 0x88601F58
-#define FAT_READ_ADDR 0x88601FC8
-#define FAT_CLOSE_ADDR 0x88601FF4
+#define FAT_MOUNT_ADDR 0x886027B0 // OK
+#define FAT_OPEN_ADDR 0x886027C4 // OK
+#define FAT_READ_ADDR 0x88602834 // OK
+#define FAT_CLOSE_ADDR 0x88602860 // OK
 
-#define MODULE_PATCH 0x886069D0
+#define MODULE_PATCH 0x886070F8 // OK
 
-#define REMOVE_BY_DEBUG 0x88603018
-#define KPRINTF_ADDR 0x88612738
-
-#define RECOVERY_ERROR1 0x88601FA4
-#define RECOVERY_ERROR2 0x88601FBC
+#define RECOVERY_ERROR1 0x88602810 // OK
+#define RECOVERY_ERROR2 0x88602828 // OK
 	
-#define LOAD_CORE 0x88604E28
+#define LOAD_CORE 0x88605640 // OK
 
-#define PSP_CONFIG_HASH 0x88606C68
+#define PSP_CONFIG_HASH 0x88607390 // OK
 
-#define NAND_ENCRYPTION 0x8860133C
+#define NAND_ENCRYPTION 0x88601620 // OK
+
+#define KIRK11_SIGANTURE_CHECK 0x88601040 // OK
 
 #elif IPL_02G
 
@@ -58,9 +57,6 @@
 
 #define MODULE_PATCH 0x88606A90
 
-#define REMOVE_BY_DEBUG 0x886030E0
-#define KPRINTF_ADDR 0x88612828
-
 #define RECOVERY_ERROR1 0x8860206C
 #define RECOVERY_ERROR2 0x88602084
 	
@@ -69,6 +65,8 @@
 #define PSP_CONFIG_HASH 0x88606D38
 
 #define NAND_ENCRYPTION 0x886013CC
+
+#define KIRK11_SIGANTURE_CHECK 0
 
 #elif IPL_03G
 
@@ -85,9 +83,6 @@
 
 #define MODULE_PATCH 0x88606AA0
 
-#define REMOVE_BY_DEBUG 0x886030E0
-#define KPRINTF_ADDR 0x88612828
-
 #define RECOVERY_ERROR1 0x8860206C
 #define RECOVERY_ERROR2 0x88602084
 	
@@ -96,6 +91,8 @@
 #define PSP_CONFIG_HASH 0x88606D38
 
 #define NAND_ENCRYPTION 0x886013CC
+
+#define KIRK11_SIGANTURE_CHECK 0
 
 #else
 
@@ -133,15 +130,15 @@ int sceBootLfatOpenPatched(char *file)
 	}
 
 #ifdef MSIPL
-	strcpy(g_filename, "/TM/DC9");
+	strcpy(g_filename, "/TM/DC10");
 	strcat(g_filename, g_file);
 	int ret = MsFatOpen(g_filename);
 	if (ret < 0)
 	{
 		if (_lw(0x88FB00CC) == 2)
-			strcpy(g_filename, "/TM/DC9/testingtool");
+			strcpy(g_filename, "/TM/DC10/testingtool");
 		else
-			strcpy(g_filename, "/TM/DC9/retail");
+			strcpy(g_filename, "/TM/DC10/retail");
 		strcat(g_filename, g_file);
 		ret = MsFatOpen(g_filename);
 	}
@@ -176,37 +173,53 @@ int sceBootModuleLoadPatched(char *file)
 }
 #endif
 
+int PatchMemlmd(u32 memlmdStub)
+{
+#ifdef DEBUG
+	printf("PatchMemlmd\n");
+#endif
+
+	u32 stubs = *(u32 *)(memlmdStub + 0x18);
+	u32 jmp = *(u32 *) stubs;
+	u32 memlmd_2ae425d2 = (jmp & ~J_OPCODE) << 2 | 0x80000000;
+
+	u32 text_addr = memlmd_2ae425d2 - 0x13F0;
+	
+	// disable ecdsa signature check
+	_sw(0, text_addr + 0xDBC);
+	_sw(0, text_addr + 0xDBD);
+
+	ClearCaches();
+
+	return 0;
+}
+
 int PatchLoadCore(void *a0, void *a1, void *a2, int (* module_start)(void *, void *, void *))
 {
 #ifdef DEBUG
 	printf("PatchLoadCore\n");
 #endif
 
-	u32 text_addr = ((u32)module_start) - 0xC74;
+	u32 text_addr = ((u32)module_start) - 0xAF8;
 
 #ifdef MSIPL
 	// disable unsign check
-	_sw(0x1021, text_addr + 0x691C);
-	_sw(0x1021, text_addr + 0x694C);
-	_sw(0x1021, text_addr + 0x69E4);
+	_sw(0x1021, text_addr + 0x5994);
+	_sw(0x1021, text_addr + 0x59C4);
+	_sw(0x1021, text_addr + 0x5A5C);
 #endif
+
+	_sw(0x02602021, text_addr + 0x2BD0);
+	MAKE_CALL(text_addr + 0x2CA4, PatchMemlmd);
 
 	ClearCaches();
 	
 	return module_start(a0, a1, a2);
 }
 
-#ifdef DEBUG
-int kprintf(uint32_t unk, char *fmt, va_list va)
-{
-	vprintf(fmt, va);
-
-	return 0;
-}
-#endif
-
 int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 {
+#ifdef MSIPL
 	// GPIO enable ?
 	REG32(0xbc100058) |= 0x02;
 
@@ -216,6 +229,7 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	
 	sceSysconInit();
 	sceSysconCtrlMsPower(1);
+#endif
 	
 #ifdef DEBUG
 	sceSysconCtrlHRPower(1);
@@ -242,15 +256,6 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 #ifdef MSIPL
 	MAKE_CALL(MODULE_PATCH, sceBootModuleLoadPatched);
 #endif
-	
-#ifdef DEBUG
-	// patch point : removeByDebugSecion 
-	// Dummy a function to make it return 1 
-	_sw(0x03e00008, REMOVE_BY_DEBUG);
-	_sw(0x24020001, REMOVE_BY_DEBUG + 4);
-
-	_sw((uint32_t) kprintf, KPRINTF_ADDR);
-#endif
 
 	// Patch the call to LoadCore module_start 
 	// 88602910: jr $t7 -> mov $a3, $t7 // a3 = LoadCore module_start 
@@ -269,6 +274,10 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	_sw(0x1021, NAND_ENCRYPTION + 4);
 #endif
 
+	// Patch ecdsa signature check
+	_sw(0, KIRK11_SIGANTURE_CHECK);
+	_sw(0, KIRK11_SIGANTURE_CHECK + 4);
+
 	/*
 	rtm_module_after = _lw(0x88FB00D0);
 	rtm_buf = _lw(0x88FB00D4);
@@ -277,6 +286,25 @@ int entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	inject_rtm = 0;
 	in_rtm = 0;
 	*/
+
+#ifdef DEBUG
+	_sw(0, 0x886029E4);
+	_sw(0, 0x886035FC);
+	_sw(0, 0x886036D4);
+	_sw(0, 0x886029B4);
+
+	((u32 *)a0)[16] = 0;
+	((u32 *)a0)[17] = 0;
+	
+	// enable bootloader Kprintf
+	((u32 *)a0)[17] |= 0x1000000;
+	// enable uart4 Krpintf (add uart4.prx after init.prx in pspbtcnf)
+	((u32 *)a0)[17] |= 0x2000000;
+	// iofilemgr debug stuff
+	((u32 *)a0)[17] |= 0x8000000;
+
+	printf("Kick it!\n");	
+#endif
 
 	ClearCaches();
 

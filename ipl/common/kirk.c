@@ -67,9 +67,9 @@ int KirkCmd1(void *dest, void *src)
 	return -1;
 }
 
-void KirkCmd15()
+void KirkCmdF()
 {
-	g_KIRK->Command = 15;
+	g_KIRK->Command = 0x0f;
 	g_KIRK->SourceAddr = PHYS_TO_HW(0xBFC00C00);
 	g_KIRK->DestAddr = PHYS_TO_HW(0xBFC00C00);
 	g_KIRK->StartProcessing = 1;
@@ -89,7 +89,7 @@ int kirkDecryptAes(u8 *out, u8 *data, u32 size, u8 key_idx)
 	header->data_size = size;
 	memcpy(&header[1], data, size);
 	asm("sync"::);
-	g_KIRK->Command = 7;
+	g_KIRK->Command = 0x07;
 	g_KIRK->SourceAddr = PHYS_TO_HW(header);
 	g_KIRK->DestAddr = PHYS_TO_HW(header);
 	g_KIRK->StartProcessing = 1;

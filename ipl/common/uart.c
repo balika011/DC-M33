@@ -3,7 +3,7 @@
 
 // PrimeCell UART (PL011)
 
-// #define USE_HP
+#define USE_HP
 
 #define UART_IO_BASE	0xBE400000
 
@@ -109,8 +109,8 @@ char _getchar()
 
 void _putchar(char c)
 {
-	if (c == '\n')
-		_putchar('\r');
+	//if (c == '\n')
+	//	_putchar('\r');
 
 	while ((*(vu32 *)(DEBUG_BASE + UART_FR_REG) & UART_FR_TXFF) != 0);
 
