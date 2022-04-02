@@ -12,7 +12,7 @@ TM/DC10/retail/kd/pspbtcnf_11g_dc.bin TM/DC10/retail/kd/pspbtcnf_11g_umd.bin TM/
 TM/DC10/testingtool/kd/pspbtcnf_dc.bin TM/DC10/testingtool/kd/pspbtcnf_umd.bin TM/DC10/testingtool/kd/pspbtcnf_np.bin TM/DC10/testingtool/kd/pspbtcnf_m33.bin TM/DC10/testingtool/kd/pspbtcnf_recovery.bin \
 TM/DC10/testingtool/kd/pspbtcnf_02g_dc.bin TM/DC10/testingtool/kd/pspbtcnf_02g_umd.bin TM/DC10/testingtool/kd/pspbtcnf_02g_np.bin TM/DC10/testingtool/kd/pspbtcnf_02g_m33.bin TM/DC10/testingtool/kd/pspbtcnf_02g_recovery.bin \
 TM/DC10/testingtool/kd/pspbtcnf_03g_dc.bin TM/DC10/testingtool/kd/pspbtcnf_03g_umd.bin TM/DC10/testingtool/kd/pspbtcnf_03g_np.bin TM/DC10/testingtool/kd/pspbtcnf_03g_m33.bin TM/DC10/testingtool/kd/pspbtcnf_03g_recovery.bin \
-TM/DC10/tmctrl.prx TM/DC10/kd/ipl_update.prx TM/DC10/kd/resurrection.prx TM/DC10/kd/dcman.prx TM/DC10/kd/iop.prx TM/DC10/kd/lflash_fdisk.prx TM/DC10/kd/idsregeneration.prx TM/DC10/kd/emc_sm_updater.prx \
+TM/DC10/tmctrl.prx TM/DC10/kd/ipl_update.prx TM/DC10/vsh/module/resurrection.prx TM/DC10/kd/dcman.prx TM/DC10/kd/iop.prx TM/DC10/kd/lflash_fdisk.prx TM/DC10/kd/idsregeneration.prx TM/DC10/kd/emc_sm_updater.prx \
 TM/DC10/kd/lfatfs_updater.prx TM/DC10/kd/lflash_fatfmt_updater.prx TM/DC10/vsh/module/intraFont.prx TM/DC10/vsh/module/vlf.prx TM/DC10/kd/pspdecrypt.prx TM/DC10/kd/galaxy.prx TM/DC10/kd/idcanager.prx TM/DC10/kd/march33.prx \
 TM/DC10/kd/popcorn.prx TM/DC10/kd/nidresolver.prx TM/DC10/kd/systemctrl.prx TM/DC10/kd/usbdevice.prx TM/DC10/kd/vshctrl.prx TM/DC10/vsh/module/recovery.prx TM/DC10/vsh/module/satelite.prx
 
@@ -31,6 +31,7 @@ clean:
 	rm -f modules/flashemu/rebootex.S
 	rm -f modules/flashemu/rebootex_02g.S
 	rm -f modules/flashemu/rebootex_03g.S
+	rm -f modules/flashemu/cptbl.S
 	make -C modules/ipl_update clean
 	make -C modules/vunbricker clean
 	make -C modules/dcman clean
@@ -41,6 +42,7 @@ clean:
 	make -C modules/vshctrl clean
 	make -C modules/usbdevice clean
 	make -C modules/nidresolver clean
+	make -C modules/nidresolver/LoadCoreForKernel clean
 	make -C modules/systemctrl clean
 	rm -f modules/systemctrl/rebootex.S
 	rm -f modules/systemctrl/rebootex_02g.S
@@ -128,6 +130,91 @@ TM/DC10/ipl_03g.bin: TM/DC10 ipl/common/libiplsdk.a
 	psptools/unpack_ipl.py 661/nandipl_03g.bin ipl_03g.dec --xor 1
 	dd if=ipl_03g.dec of=TM/DC10/ipl_03g.bin bs=1 seek=49152
 	rm ipl_03g.dec
+	
+TM/DC10/ipl_04g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_04G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_04G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_04G -DMSIPL=1"
+
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC10/ipl_04g.bin
+	psptools/unpack_ipl.py 661/nandipl_04g.bin ipl_04g.dec --xor 1
+	dd if=ipl_04g.dec of=TM/DC10/ipl_04g.bin bs=1 seek=49152
+	rm ipl_04g.dec
+	
+TM/DC10/ipl_05g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_05G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_05G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_05G -DMSIPL=1"
+
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC10/ipl_05g.bin
+	psptools/unpack_ipl.py 661/nandipl_05g.bin ipl_05g.dec --xor 2
+	dd if=ipl_05g.dec of=TM/DC10/ipl_05g.bin bs=1 seek=49152
+	rm ipl_05g.dec
+	
+TM/DC10/ipl_07g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_07G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_07G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_07G -DMSIPL=1"
+
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC10/ipl_07g.bin
+	psptools/unpack_ipl.py 661/nandipl_07g.bin ipl_07g.dec --xor 1
+	dd if=ipl_07g.dec of=TM/DC10/ipl_07g.bin bs=1 seek=49152
+	rm ipl_07g.dec
+	
+TM/DC10/ipl_09g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_09G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_09G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_09G -DMSIPL=1"
+
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC10/ipl_09g.bin
+	psptools/unpack_ipl.py 661/nandipl_09g.bin ipl_09g.dec --xor 1
+	dd if=ipl_09g.dec of=TM/DC10/ipl_09g.bin bs=1 seek=49152
+	rm ipl_09g.dec
+	
+TM/DC10/ipl_11g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_11G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_11G -DMSIPL=1"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_11G -DMSIPL=1"
+
+	dd if=ipl/ipl_stage1_payload/ipl_stage1_payload.bin of=TM/DC10/ipl_11g.bin
+	psptools/unpack_ipl.py 661/nandipl_11g.bin ipl_11g.dec --xor 1
+	dd if=ipl_11g.dec of=TM/DC10/ipl_11g.bin bs=1 seek=49152
+	rm ipl_11g.dec
 
 TM/DC10/nandcipl_01g.bin: TM/DC10 ipl/common/libiplsdk.a
 	make -C ipl/payloadex clean
@@ -142,7 +229,7 @@ TM/DC10/nandcipl_01g.bin: TM/DC10 ipl/common/libiplsdk.a
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_01G"
 
 	psptools/unpack_ipl.py 661/nandipl_01g.bin ipl_01g.dec
-	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_01g.dec@0x40f0000 TM/DC10/nandcipl_01g.bin 0x40e0000
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_01g.dec@0x40ec000 TM/DC10/nandcipl_01g.bin 0x40e0000
 	rm ipl_01g.dec
 
 TM/DC10/nandcipl_02g.bin: TM/DC10 ipl/common/libiplsdk.a
@@ -158,7 +245,7 @@ TM/DC10/nandcipl_02g.bin: TM/DC10 ipl/common/libiplsdk.a
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_02G"
 
 	psptools/unpack_ipl.py 661/nandipl_02g.bin ipl_02g.dec
-	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_02g.dec@0x40f0000 TM/DC10/nandcipl_02g.bin 0x40e0000
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_02g.dec@0x40ec000 TM/DC10/nandcipl_02g.bin 0x40e0000
 	rm ipl_02g.dec
 
 TM/DC10/nandcipl_03g.bin: TM/DC10 ipl/common/libiplsdk.a
@@ -174,8 +261,88 @@ TM/DC10/nandcipl_03g.bin: TM/DC10 ipl/common/libiplsdk.a
 	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_03G"
 
 	psptools/unpack_ipl.py 661/nandipl_03g.bin ipl_03g.dec --xor 1
-	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_03g.dec@0x40f0000 TM/DC10/nandcipl_03g.bin 0x40e0000
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_03g.dec@0x40ec000 TM/DC10/nandcipl_03g.bin 0x40e0000
 	rm ipl_03g.dec
+
+TM/DC10/nandcipl_04g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_04G"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_04G"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_04G"
+
+	psptools/unpack_ipl.py 661/nandipl_04g.bin ipl_04g.dec --xor 1
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_04g.dec@0x40ec000 TM/DC10/nandcipl_04g.bin 0x40e0000
+	rm ipl_04g.dec
+
+TM/DC10/nandcipl_05g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_05G"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_05G"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_05G"
+
+	psptools/unpack_ipl.py 661/nandipl_05g.bin ipl_05g.dec --xor 2
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_05g.dec@0x40ec000 TM/DC10/nandcipl_05g.bin 0x40e0000
+	rm ipl_05g.dec
+
+TM/DC10/nandcipl_07g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_07G"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_07G"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_07G"
+
+	psptools/unpack_ipl.py 661/nandipl_07g.bin ipl_07g.dec --xor 1
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_07g.dec@0x40ec000 TM/DC10/nandcipl_07g.bin 0x40e0000
+	rm ipl_07g.dec
+
+TM/DC10/nandcipl_09g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_09G"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_09G"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_09G"
+
+	psptools/unpack_ipl.py 661/nandipl_09g.bin ipl_09g.dec --xor 1
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_09g.dec@0x40ec000 TM/DC10/nandcipl_09g.bin 0x40e0000
+	rm ipl_09g.dec
+
+TM/DC10/nandcipl_11g.bin: TM/DC10 ipl/common/libiplsdk.a
+	make -C ipl/payloadex clean
+	make -C ipl/payloadex BFLAGS="-DIPL_11G"
+	$(PSPDEV)/bin/bin2s ipl/payloadex/payloadex.bin ipl/ipl_stage2_payload/payloadex.S payloadex
+
+	make -C ipl/ipl_stage2_payload clean
+	make -C ipl/ipl_stage2_payload BFLAGS="-DIPL_11G"
+	$(PSPDEV)/bin/bin2s ipl/ipl_stage2_payload/ipl_stage2_payload.bin ipl/ipl_stage1_payload/payload.S payload
+
+	make -C ipl/ipl_stage1_payload clean
+	make -C ipl/ipl_stage1_payload BFLAGS="-DIPL_11G"
+
+	psptools/unpack_ipl.py 661/nandipl_11g.bin ipl_11g.dec --xor 1
+	psptools/pack_ipl.py ipl/ipl_stage1_payload/ipl_stage1_payload.bin@0x40e0000 ipl_11g.dec@0x40ec000 TM/DC10/nandcipl_11g.bin 0x40e0000
+	rm ipl_11g.dec
 
 bootcnf/bootcnf:
 	make -C bootcnf
@@ -423,70 +590,75 @@ TM/DC10/tmctrl.prx: TM/DC10 ipl/common/libiplsdk.a
 	cat ipl/rebootex/rebootex.bin | gzip > rebootex_03g.bin.gz
 	$(PSPDEV)/bin/bin2s rebootex_03g.bin.gz modules/flashemu/rebootex_03g.S rebootex_03g
 	rm rebootex_03g.bin.gz
+	
+	$(PSPDEV)/bin/bin2s 661/flash0/codepage/cptbl.dat modules/flashemu/cptbl.S cptbl
 
 	make -C modules/flashemu
-	python3 psptools/pack_module.py modules/flashemu/flashemu.prx TM/DC10/tmctrl.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/flashemu/flashemu.prx TM/DC10/tmctrl.prx --tag 0x4c9494f0
 	
 TM/DC10/kd/ipl_update.prx: TM/DC10
 	make -C modules/ipl_update
-	python3 psptools/pack_module.py modules/ipl_update/ipl_update.prx TM/DC10/kd/ipl_update.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/ipl_update/ipl_update.prx TM/DC10/kd/ipl_update.prx --tag 0x4c9494f0
 
-TM/DC10/kd/resurrection.prx: TM/DC10
+TM/DC10/vsh/module/resurrection.prx: TM/DC10
 	make -C modules/vunbricker
-	python3 psptools/pack_module.py modules/vunbricker/resurrection.prx TM/DC10/kd/resurrection.prx --tag 0x38020af0
+	python3 psptools/pack_module.py modules/vunbricker/resurrection.prx TM/DC10/vsh/module/resurrection.prx --tag 0x380290f0
 
 TM/DC10/kd/dcman.prx: TM/DC10
 	make -C modules/dcman
-	python3 psptools/pack_module.py modules/dcman/dcman.prx TM/DC10/kd/dcman.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/dcman/dcman.prx TM/DC10/kd/dcman.prx --tag 0x4c9494f0
 
 TM/DC10/kd/iop.prx: TM/DC10
 	make -C modules/iop
-	python3 psptools/pack_module.py modules/iop/iop.prx TM/DC10/kd/iop.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/iop/iop.prx TM/DC10/kd/iop.prx --tag 0x4c9494f0
 
 TM/DC10/kd/lflash_fdisk.prx: TM/DC10
 	make -C modules/lflash_fdisk
-	python3 psptools/pack_module.py modules/lflash_fdisk/lflash_fdisk.prx TM/DC10/kd/lflash_fdisk.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/lflash_fdisk/lflash_fdisk.prx TM/DC10/kd/lflash_fdisk.prx --tag 0x4c9494f0
 
 TM/DC10/kd/idsregeneration.prx: TM/DC10
 	make -C modules/idsregeneration
-	python3 psptools/pack_module.py modules/idsregeneration/idsregeneration.prx TM/DC10/kd/idsregeneration.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/idsregeneration/idsregeneration.prx TM/DC10/kd/idsregeneration.prx --tag 0x4c9494f0
 	
 TM/DC10/kd/emc_sm_updater.prx: TM/DC10
-	python3 psptools/pack_module.py modules/emc_sm_updater.prx TM/DC10/kd/emc_sm_updater.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/emc_sm_updater.prx TM/DC10/kd/emc_sm_updater.prx --tag 0x4c9494f0
 
 TM/DC10/kd/lfatfs_updater.prx: TM/DC10
-	python3 psptools/pack_module.py modules/lfatfs_updater.prx TM/DC10/kd/lfatfs_updater.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/lfatfs_updater.prx TM/DC10/kd/lfatfs_updater.prx --tag 0x4c9494f0
 
 TM/DC10/kd/lflash_fatfmt_updater.prx: TM/DC10
-	python3 psptools/pack_module.py modules/lflash_fatfmt_updater.prx TM/DC10/kd/lflash_fatfmt_updater.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/lflash_fatfmt_updater.prx TM/DC10/kd/lflash_fatfmt_updater.prx --tag 0x4c9494f0
 
 TM/DC10/vsh/module/intraFont.prx: TM/DC10
-	python3 psptools/pack_module.py modules/intraFont.elf TM/DC10/vsh/module/intraFont.prx --tag 0x457b0af0
+	python3 psptools/pack_module.py modules/intraFont.elf TM/DC10/vsh/module/intraFont.prx --tag 0x457b90f0
 
 TM/DC10/vsh/module/vlf.prx: TM/DC10
-	python3 psptools/pack_module.py modules/vlf.elf TM/DC10/vsh/module/vlf.prx --tag 0x457b0af0
+	python3 psptools/pack_module.py modules/vlf.elf TM/DC10/vsh/module/vlf.prx --tag 0x457b90f0
 
 TM/DC10/kd/pspdecrypt.prx: TM/DC10
-	python3 psptools/pack_module.py modules/pspdecrypt.elf TM/DC10/kd/pspdecrypt.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/pspdecrypt.elf TM/DC10/kd/pspdecrypt.prx --tag 0x4c9494f0
 
 TM/DC10/kd/galaxy.prx: TM/DC10
 	make -C modules/galaxy
-	python3 psptools/pack_module.py modules/galaxy/galaxy.prx TM/DC10/kd/galaxy.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/galaxy/galaxy.prx TM/DC10/kd/galaxy.prx --tag 0x4c9494f0
 
 TM/DC10/kd/idcanager.prx: TM/DC10
 	make -C modules/idcanager
-	python3 psptools/pack_module.py modules/idcanager/idcanager.prx TM/DC10/kd/idcanager.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/idcanager/idcanager.prx TM/DC10/kd/idcanager.prx --tag 0x4c9494f0
 	
 TM/DC10/kd/march33.prx: TM/DC10
-	python3 psptools/pack_module.py modules/march33.elf TM/DC10/kd/march33.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/march33.elf TM/DC10/kd/march33.prx --tag 0x4c9494f0
 	
 TM/DC10/kd/popcorn.prx: TM/DC10
 	make -C modules/popcorn
-	python3 psptools/pack_module.py modules/popcorn/popcorn.prx TM/DC10/kd/popcorn.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/popcorn/popcorn.prx TM/DC10/kd/popcorn.prx --tag 0x4c9494f0
 
-TM/DC10/kd/nidresolver.prx: TM/DC10
+modules/nidresolver/LoadCoreForKernel/libloadcore_kernel.a:
+	make -C modules/nidresolver/LoadCoreForKernel
+	
+TM/DC10/kd/nidresolver.prx: TM/DC10 modules/nidresolver/LoadCoreForKernel/libloadcore_kernel.a
 	make -C modules/nidresolver
-	python3 psptools/pack_module.py modules/nidresolver/nidresolver.prx TM/DC10/kd/nidresolver.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/nidresolver/nidresolver.prx TM/DC10/kd/nidresolver.prx --tag 0x4c9494f0
 
 TM/DC10/kd/systemctrl.prx: TM/DC10 ipl/common/libiplsdk.a
 	make -C ipl/rebootex clean
@@ -508,21 +680,20 @@ TM/DC10/kd/systemctrl.prx: TM/DC10 ipl/common/libiplsdk.a
 	rm rebootex.bin.gz
 	
 	make -C modules/systemctrl
-	python3 psptools/pack_module.py modules/systemctrl/systemctrl.prx TM/DC10/kd/systemctrl.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/systemctrl/systemctrl.prx TM/DC10/kd/systemctrl.prx --tag 0x4c9494f0
 
 TM/DC10/kd/usbdevice.prx: TM/DC10
 	make -C modules/usbdevice
-	python3 psptools/pack_module.py modules/usbdevice/usbdevice.prx TM/DC10/kd/usbdevice.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/usbdevice/usbdevice.prx TM/DC10/kd/usbdevice.prx --tag 0x4c9494f0
 
 TM/DC10/kd/vshctrl.prx: TM/DC10
 	make -C modules/vshctrl
-	python3 psptools/pack_module.py modules/vshctrl/vshctrl.prx TM/DC10/kd/vshctrl.prx --tag 0x4c9416f0
+	python3 psptools/pack_module.py modules/vshctrl/vshctrl.prx TM/DC10/kd/vshctrl.prx --tag 0x4c9494f0
 
 TM/DC10/vsh/module/recovery.prx: TM/DC10
-	python3 psptools/pack_module.py modules/recovery.elf TM/DC10/vsh/module/recovery.prx --tag 0x38020af0
+	python3 psptools/pack_module.py modules/recovery.elf TM/DC10/vsh/module/recovery.prx --tag 0x380290f0
 
 TM/DC10/vsh/module/satelite.prx: TM/DC10
 	make -C modules/satelite
-	python3 psptools/pack_module.py modules/satelite/satelite.prx TM/DC10/vsh/module/satelite.prx --tag 0x457b0af0
-
+	python3 psptools/pack_module.py modules/satelite/satelite.prx TM/DC10/vsh/module/satelite.prx --tag 0x457b90f0
 

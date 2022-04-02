@@ -9,17 +9,14 @@ TM
 
 bootcnf/bootcnf
 
-ipl/common/libiplsdk.a
-
 ipl/ipl_stage1_payload/payload.S
 
-ipl/ipl_stage2_payload/payloadex.S
+ipl/ipl_stage2_payload/payloadex.s
 
 modules/flashemu/rebootex.S
 modules/flashemu/rebootex_02g.S
 modules/flashemu/rebootex_03g.S
+modules/flashemu/cptbl.S
 
 modules/systemctrl/rebootex.S
-modules/systemctrl/rebootex_02g.S
-modules/systemctrl/rebootex_03g.S
 
