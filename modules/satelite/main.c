@@ -11,7 +11,6 @@
 #include "videoiso.h"
 
 PSP_MODULE_INFO("VshCtrlSatelite", 0, 1, 0);
-const int module_sdk_version = 0x03080110;
 
 #define ALL_ALLOW    (PSP_CTRL_UP|PSP_CTRL_RIGHT|PSP_CTRL_DOWN|PSP_CTRL_LEFT)
 #define ALL_BUTTON   (PSP_CTRL_TRIANGLE|PSP_CTRL_CIRCLE|PSP_CTRL_CROSS|PSP_CTRL_SQUARE)

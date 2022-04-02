@@ -51,64 +51,11 @@ void SystemControlPatch()
 	sctrlHENSetRebootexOverride(rbtx);
 }
 
-int sceMSFAT_IoOpenPatched(int type, void (*cb)(void *), void *arg)
-{
-	int res;
-	do
-	{
-		res = sceKernelExtendKernelStack(type, cb, arg);
-		if (res != 0x80010018)
-			break;
-		res = sceKernelExtendKernelStack(0x4000, (void (*)(void*)) SlotCloseOneReadOnly, 0);
-	}
-	while (res >= 0);
-
-	return res;
-}
-
-int sceMSFAT_IoDopenPatched(int type, void (*cb)(void *), void *arg)
-{
-	int res;
-	do
-	{
-		res = sceKernelExtendKernelStack(type, cb, arg);
-		if (res != 0x80010018)
-			break;
-		res = sceKernelExtendKernelStack(0x4000, (void (*)(void*)) SlotCloseOneReadOnly, 0);
-	}
-	while (res >= 0);
-
-	return res;
-}
-
-int sceMSFAT_IoDevctlPatched(int type, void (*cb)(void *), void *arg)
-{
-	int res;
-	do
-	{
-		res = sceKernelExtendKernelStack(type, cb, arg);
-		if (res != 0x80010018)
-			break;
-		res = sceKernelExtendKernelStack(0x4000, (void (*)(void*)) SlotCloseOneReadOnly, 0);
-	}
-	while (res >= 0);
-
-	return res;
-}
-
 STMOD_HANDLER previous = NULL;
 
 int OnModuleStart(SceModule2 *module)
 {
-	if (strcmp(module->modname, "sceMediaSync") == 0)
-	{
-		u32 text_addr = ((SceModule2 *)sceKernelFindModuleByName("sceMSFAT_Driver"))->text_addr;
-		MAKE_CALL(text_addr + 0x48D4, sceMSFAT_IoOpenPatched);
-		MAKE_CALL(text_addr + 0x5338, sceMSFAT_IoDopenPatched);
-		MAKE_CALL(text_addr + 0x5B90, sceMSFAT_IoDevctlPatched);
-		ClearCaches();
-	}
-	else if (strcmp(module->modname, "sceLflashFatfmt") == 0)
+	if (strcmp(module->modname, "sceLflashFatfmt") == 0)
 	{
 		u32 StartFatfmt = sctrlHENFindFunction("sceLflashFatfmt", "LflashFatfmt", 0xB7A424A4);// sceLflashFatfmtStartFatfmt
 		if (StartFatfmt)

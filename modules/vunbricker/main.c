@@ -194,10 +194,12 @@ void HardwareInfo()
 		model_str = "(Phat)";
 	else if (model == 1)
 		model_str = "(Slim)";
-	else if (model == 2)
-		model_str = "(Brite)";
+	else if (model == 4)
+		model_str = "(Go)";
+	else if (model == 10)
+		model_str = "(Street)";
 	else
-		model_str = "";
+		model_str = "(Brite)";
 
 	hi_texts[0] = vlfGuiAddTextF(40, 80, "Model: %02dg %s", model+1, model_str);
 	hi_texts[1] = vlfGuiAddTextF(245, 80, "Motherboard: %s", mobos[mb]);
@@ -301,13 +303,13 @@ void MainMenu(int sel)
 {
 	char *items[] =
 	{
-		"Install 5.02 M33-6",
-		"Install 5.02 TestingTool M33-6",
-		"Install 5.02",
+		"Install 6.61 M33",
+		"Install 6.61 TestingTool M33",
+		"Install 6.61",
 		"NAND operations",
 		"Hardware Info",
-		"Boot 5.02 M33-6 from MemoryStick",
-		"Boot 5.02 TestingTool M33-6 from MemoryStick",
+		"Boot 6.61 M33 from MemoryStick",
+		"Boot 6.61 TestingTool M33 from MemoryStick",
 		"Shutdown",
 		"Reboot Device"
 	};

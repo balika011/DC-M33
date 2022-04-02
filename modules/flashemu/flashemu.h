@@ -4,7 +4,6 @@
 int InstallFlashEmu();
 int UninstallFlashEmu();
 void PreareRebootFlashEmu();
-int SlotCloseOneReadOnly();
 
 #endif
 

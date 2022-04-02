@@ -17,7 +17,7 @@ int sctrlKernelSetUserLevel(int level)
 	SceModule2 *mod = sceKernelFindModuleByName("sceThreadManager");
 	u32 *thstruct;
 
-	thstruct = (u32 *)_lw(mod->text_addr + 0x18D40);
+	thstruct = (u32 *)_lw(mod->text_addr + 0x19F40); // OK
 
 	thstruct[0x14/4] = (level ^ 8) << 28;
 
@@ -33,8 +33,8 @@ int sctrlKernelSetDevkitVersion(int version)
 	int high = version >> 16;
 	int low = version & 0xFFFF;
 
-	_sh(high, 0x880112F4);
-	_sh(low, 0x880112FC);
+	_sh(high, 0x8801191C);
+	_sh(low, 0x88011924);
 
 	ClearCaches();
 
@@ -59,7 +59,7 @@ int sctrlHENGetVersion()
 
 int sctrlSEGetVersion()
 {
-	return 0x00020005;
+	return 0x00020000;
 }
 
 int sctrlKernelLoadExecVSHDisc(const char *file, struct SceKernelLoadExecVSHParam *param)
@@ -120,7 +120,7 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 {
 	int k1 = pspSdkSetK1(0);
 	SceModule2 *mod = sceKernelFindModuleByName("sceLoadExec");
-	int (* LoadExecVSH)(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param, int unk2) = (void *)(mod->text_addr + 0x1E58);
+	int (* LoadExecVSH)(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param, int unk2) = (void *)(mod->text_addr + 0x2384); // OK, TODO: 5G: 0x25D8
 	int res = LoadExecVSH(apitype, file, param, 0x10000);
 	pspSdkSetK1(k1);
 
@@ -141,8 +141,8 @@ static void PatchIsofsDriver2()
 	SceModule2 *mod = sceKernelFindModuleByName("sceIsofs_driver");
 	if (mod)
 	{
-		_sw(0x03e00008, mod->text_addr + 0x4390);
-		_sw(0x34020000, mod->text_addr + 0x4394);
+		_sw(0x03e00008, mod->text_addr + 0x4330); // OK
+		_sw(0x34020000, mod->text_addr + 0x4334); // OK
 		ClearCaches();
 	}
 }
@@ -192,8 +192,8 @@ SceIoDeviceTable *sctrlHENFindDriver(char *drvname)
 	SceModule2 *mod = sceKernelFindModuleByName("sceIOFileManager");
 	u32 text_addr = mod->text_addr;
 
-	u32 *(* GetDevice)(char *) = (void *)(text_addr + 0x2838);
-	u32 *u = GetDevice(drvname);
+	u32 *(* lookup_device_list)(char *) = (void *)(text_addr + 0x2A4C); // OK
+	u32 *u = lookup_device_list(drvname);
 	if (!u)
 	{
 		pspSdkSetK1(k1);
@@ -203,5 +203,24 @@ SceIoDeviceTable *sctrlHENFindDriver(char *drvname)
 	pspSdkSetK1(k1);
 
 	return (SceIoDeviceTable *) u[1];
+}
+
+SceIoDeviceEntry *sctrlHENFindEntry(char *alias)
+{
+	int k1 = pspSdkSetK1(0);
+	SceModule2 *mod = sceKernelFindModuleByName("sceIOFileManager");
+	u32 text_addr = mod->text_addr;
+
+	u32 *(* parsealias)(char *) = (void *)(text_addr + 0x35D0); // OK
+	u32 *u = parsealias(alias);
+	if (!u)
+	{
+		pspSdkSetK1(k1);
+		return NULL;
+	}
+
+	pspSdkSetK1(k1);
+
+	return (SceIoDeviceEntry *) u[1];
 }
 

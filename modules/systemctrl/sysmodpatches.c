@@ -95,16 +95,14 @@ void PatchUmdCache(u32 text_addr)
 		if (sceKernelBootFrom() == PSP_BOOT_MS)
 		{
 			// Make umdcache exit inmediately so it doesn't alloc memory
-			_sw(0x03E00008, text_addr + 0xB94);
-			_sw(0x24020001, text_addr + 0xB98);
+			_sw(0x03E00008, text_addr + 0x9C8); // OK
+			_sw(0x24020001, text_addr + 0x9CC); // OK
 
 			ClearCaches();
 
 			// Unprotect memory
 			u32 *prot = (u32 *) 0xbc000040;
-			int i;
-
-			for (i = 0; i < 0x10; i++)
+			for (int i = 0; i < 0x10; i++)
 				prot[i] = 0xFFFFFFFF;						
 		}
 	}	
@@ -137,7 +135,7 @@ void PatchUmdMan(u32 text_addr)
 	if (sceKernelBootFrom() == PSP_BOOT_MS)
 	{
 		// Replace call to sceKernelBootFrom with return PSP_BOOT_DISC
-		_sw(0x24020020, text_addr + 0x431C);
+		_sw(0x24020020, text_addr + 0x431C); // OK
 		ClearCaches();
 	}
 }
@@ -189,18 +187,20 @@ int LoadRebootex(u8 *dest, u32 destSize, const u8 *src, void *unk, void *unk2)
 	return reboot_decompress(dest, destSize, src, unk, unk2);	
 }
 
-void PatchLoadExec(u32 text_addr)
+void PatchLoadExec()
 {
-	MAKE_CALL(text_addr + 0x27DC, LoadRebootex);
-	_sw(0x3C0188fc, text_addr + 0x2820);
+	u32 text_addr = sceKernelFindModuleByName("sceLoadExec")->text_addr;
+
+	MAKE_CALL(text_addr + 0x2D5C, LoadRebootex); // OK
+	_sw(0x3C0188fc, text_addr + 0x2DA8); // OK
 
 	// Allow LoadExecVSH in whatever user level
-	_sw(0x1000000b, text_addr + 0x1EA8);
-	_sw(0, text_addr + 0x1EE8);
+	_sw(0x1000000c, text_addr + 0x23D0); // OK
+	_sw(0, text_addr + 0x2414); // OK
 
 	// Allow ExitVSHVSH in whatever user level
-	_sw(0x10000008, text_addr + 0x1494);
-	_sw(0, text_addr + 0x14C8);
+	_sw(0x1000000d, text_addr + 0x25D4); // OK
+	_sw(0, text_addr + 0x261C); // OK
 	
 	reboot_decompress = (void *)(text_addr);
 }
@@ -271,17 +271,17 @@ void PatchInitLoadExecAndMediaSync(u32 text_addr)
 		{
 			// Patch mediasync (avoid error 0x80120005 old sfo error) 
 			// Make return 0, move s0, zero
-			_sw(0x00008021, text_addr + 0x628);
+			_sw(0x00008021, text_addr + 0x988); // OK
 
 			// Avoid direct elf (no pbp) error (for eLoader plugin)
 			// mov s0, zero
-			_sw(0x00008021, text_addr + 0x528);
+			_sw(0x00008021, text_addr + 0x864); // OK
 
 			if (sceKernelGetModel() != 0)
 			{
 				// Patch for slim large memory check
-				MAKE_CALL(text_addr + 0x61C, CheckSfoPatched);
-				CheckSfo = (void *)(text_addr + 0x860);
+				MAKE_CALL(text_addr + 0x97C, CheckSfoPatched);
+				CheckSfo = (void *)(text_addr + 0xF40);
 			}
 
 			ClearCaches();
@@ -306,12 +306,13 @@ void PatchInitLoadExecAndMediaSync(u32 text_addr)
 						sceIoDelDrv("umd");
 						sceIoAddDrv(getumd9660_driver());
 						// Patch the error of no disc
-						_sw(0x34020000, text_addr + 0x8C);
+						_sw(0x34020000, text_addr + 0x1C0); // OK
 					}
 					if (config.umdmode != MODE_OE_LEGACY)
 					{
 						// Patch the error of diferent sfo?
-						_sw(0x00008021, text_addr + 0x94);
+						MAKE_JUMP(text_addr + 0x1C8, text_addr + 0x98); // TODO: MAYBE?
+						_sw(0x00008021, text_addr + 0x1CC); // TODO: MAYBE?
 					}
 				}
 				else
@@ -336,8 +337,7 @@ void PatchInitLoadExecAndMediaSync(u32 text_addr)
 		bootfile = 0;		
 	}
 
-	SceModule2 *mod = sceKernelFindModuleByName("sceLoadExec");
-	PatchLoadExec(mod->text_addr);
+	PatchLoadExec();
 	
 	PatchMesgLed();
 	ClearCaches();
@@ -441,8 +441,8 @@ void PatchIsofsDriver(u32 text_addr)
 			if (config.umdmode == MODE_OE_LEGACY)
 			{
 				// make module exit inmediately 
-				_sw(0x03E00008, text_addr + 0x4328);
-				_sw(0x24020001, text_addr + 0x432C);				
+				_sw(0x03E00008, text_addr + 0x42C8); // OK
+				_sw(0x24020001, text_addr + 0x42CC); // OK
 
 				ClearCaches();
 			}
@@ -452,14 +452,14 @@ void PatchIsofsDriver(u32 text_addr)
 
 void PatchPower(u32 text_addr)
 {
-	_sw(0, text_addr + 0xCA8);
+	_sw(0, text_addr + 0xE68); // OK
 
 	ClearCaches();
 }
 
 void PatchWlan(u32 text_addr)
 {
-	_sw(0, text_addr + 0x25F4);
+	_sw(0, text_addr + 0x26C0); // OK
 	ClearCaches();
 }
 
@@ -476,6 +476,8 @@ void DoNoUmdPatches()
 	MAKE_DUMMY_FUNCTION0(FindUmdUserFunction(0x4A9E5E29)); // sceUmdWaitDriveStatCB
 	REDIRECT_FUNCTION(FindUmdUserFunction(0x6B4A146C), sceUmdGetDriveStatPatched);
 	MAKE_DUMMY_FUNCTION0(FindUmdUserFunction(0x20628E6F)); // sceUmdGetErrorStat
+	MAKE_DUMMY_FUNCTION0(FindUmdUserFunction(0x87533940)); // sceUmdReplaceProhibit
+	MAKE_DUMMY_FUNCTION0(FindUmdUserFunction(0xCBE9F02A)); // sceUmdReplacePermit
 
 	ClearCaches();
 }
@@ -623,8 +625,8 @@ void OnImposeLoad(u32 text_addr)
 			SceModule2 *mod = sceKernelFindModuleByName("sceUSB_Driver");
 			if (mod)
 			{
-				MAKE_DUMMY_FUNCTION0(mod->text_addr + 0x8BA0);
-				MAKE_DUMMY_FUNCTION0(mod->text_addr + 0x8B90);
+				MAKE_DUMMY_FUNCTION0(mod->text_addr + 0x8FE8); // OK
+				MAKE_DUMMY_FUNCTION0(mod->text_addr + 0x8FF0); // OK
 				ClearCaches();
 			}
 		}

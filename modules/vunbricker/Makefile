@@ -12,7 +12,7 @@ LIBDIR = ../lib
 LDFLAGS = -nostdlib -nodefaultlibs
 LIBS = -lpsppower -lpsprtc -lvlfgui -lvlfgu -lvlfutils -lvlflibc -lpspreg -lpspsystemctrl_user -lpspkubridge -lpspwlan
 
-PSP_FW_VERSION = 500
+PSP_FW_VERSION = 661
 
 BUILD_PRX = 1
 

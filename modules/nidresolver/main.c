@@ -48,16 +48,40 @@ u32 FindNewNid(LibraryData *lib, u32 nid)
 			return lib->nids[i].newnid;
 	}
 
+#if 0
+	int unk = 1;
+	
+	for (int i = 0; i < lib->nnids; i++)
+	{
+		if (lib->nids[i].newnid == nid)
+		{
+			unk = 0;
+			break;
+		}
+	}
+	
+	if (unk)
+		Kprintf("Unknown nid: %x\n", nid);
+#endif
+
 	return 0;
 }
 
 int aLinkLibEntriesPatched(SceLibraryStubTable *imports, SceSize size)
 {
+#if 0
+	Kprintf("aLinkLibEntriesPatched++\n");
+#endif
+
 	u32 stubTab = (u32)imports;
 
 	for (int i = 0; i < size; i += (((SceLibraryStubTable *)(stubTab + i))->len * 4))
 	{
 		SceLibraryStubTable *import = (SceLibraryStubTable *)(stubTab + i);
+
+#if 0
+		Kprintf("Looking up import nids: %s\n", import->libname);
+#endif
 
 		if (lle_handler)
 		{
@@ -76,9 +100,27 @@ int aLinkLibEntriesPatched(SceLibraryStubTable *imports, SceSize size)
 				}
 			}
 		}
+		
+		if (strcmp("LoadCoreForKernel", import->libname) == 0)
+		{
+			for (int j = 0; j < import->stubcount; j++)
+			{
+				if (import->nidtable[j] == 0xd8779ac6)
+				{
+					SceModule2 *mod = sceKernelFindModuleByName("sceLoaderCore");
+					REDIRECT_FUNCTION((u32)&((u32 *)import->stubtable)[j*2], mod->text_addr + 0x748C);
+					ClearCaches();
+					break;
+				}
+			}
+		}
 	}
 
 	ClearCaches();
+
+#if 0
+	Kprintf("aLinkLibEntriesPatched--\n");
+#endif
 
 	return aLinkLibEntries(imports, size, 0, 0);
 }
@@ -88,9 +130,8 @@ void PatchLoadCore()
 	SceModule2 *mod = sceKernelFindModuleByName("sceLoaderCore");
 	u32 text_addr = mod->text_addr;
 
-	// Nids resolver patch
-	MAKE_CALL(text_addr + 0x1298, aLinkLibEntriesPatched);
-	aLinkLibEntries = (void *)(text_addr + 0x3468);
+	MAKE_CALL(text_addr + 0x111C, aLinkLibEntriesPatched); // OK
+	aLinkLibEntries = (void *)(text_addr + 0x3080); // OK
 }
 
 int module_start(SceSize args, void *argp)

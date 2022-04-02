@@ -437,6 +437,8 @@ int ProbeExec2Patched(u8 *buf, u32 *check)
 
 u32 sctrlHENFindFunction(const char* szMod, const char* szLib, u32 nid)
 {
+	Kprintf("sctrlHENFindFunction(\"%s\", \"%s\", 0x%x)\n", szMod, szLib, nid);
+
 	struct SceLibraryEntryTable *entry;
 	SceModule2 *pMod;
 	void *entTab;
@@ -535,6 +537,8 @@ int OnModuleStart(SceModule2 *mod)
 	char *modname = mod->modname;
 	u32 text_addr = mod->text_addr;
 	
+	Kprintf("OnModuleStart: %s\n", modname);
+
 	if (strcmp(modname, "sceIsofs_driver") == 0)
 	{
 		if (sceKernelInitApitype() == 0x120)
@@ -551,10 +555,12 @@ int OnModuleStart(SceModule2 *mod)
 		}
 	}
 
+#if 0
 	else if (strcmp(modname, "sceUmdCache_driver") == 0)
 	{
 		PatchUmdCache(text_addr);
 	}
+#endif
 
 	else if (strcmp(modname, "sceUmdMan_driver") == 0)
 	{
@@ -742,7 +748,7 @@ void PatchSyscall(u32 funcaddr, void *newfunc)
 	
 	for (int i = 0; i < 0x1000; i++)
 	{
-		if (vectors[i + 4] == funcaddr)
+		if ((vectors[i + 4] & 0x0FFFFFFF) == (funcaddr & 0x0FFFFFFF))
 		{
 			vectors[i + 4] = (u32)newfunc;
 		}
@@ -751,161 +757,192 @@ void PatchSyscall(u32 funcaddr, void *newfunc)
 
 void PatchLoadCore()
 {
+	Kprintf("PatchLoadCore\n");
+
 	SceModule2 *mod = sceKernelFindModuleByName("sceLoaderCore");
 	u32 text_addr = mod->text_addr;
 
 	/* Patch calls and references to sceKernelCheckExecFile */
-	_sw((u32)sceKernelCheckExecFilePatched, text_addr + 0x84A4);
-	MAKE_CALL(text_addr + 0x1628, sceKernelCheckExecFilePatched);
-	MAKE_CALL(text_addr + 0x1678, sceKernelCheckExecFilePatched);
-	MAKE_CALL(text_addr + 0x49D8, sceKernelCheckExecFilePatched);
+	_sw((u32)sceKernelCheckExecFilePatched, text_addr + 0x7B5C); // OK
+	MAKE_CALL(text_addr + 0x11F0, sceKernelCheckExecFilePatched); // OK
+	MAKE_CALL(text_addr + 0x1240, sceKernelCheckExecFilePatched); // OK
+	MAKE_CALL(text_addr + 0x48B4, sceKernelCheckExecFilePatched); // OK
 
 	/* Change switch table */
-	_sw(_lw(text_addr + 0x89C0), text_addr + 0x89DC);
+	_sw(_lw(text_addr + 0x7F94), text_addr + 0x7FB0); // OK
 
 	/* Patch 2 functions called by sceKernelProbeExecutableObject */
-	ProbeExec1 = (void *)(text_addr + 0x61D8);
-	ProbeExec2 = (void *)(text_addr + 0x60F4);
-	MAKE_CALL(text_addr + 0x46D0, ProbeExec1Patched);
-	MAKE_CALL(text_addr + 0x486C, ProbeExec2Patched);
+	ProbeExec1 = (void *)(text_addr + 0x6468); // TODO: Maybe?
+	ProbeExec2 = (void *)(text_addr + 0x63C0); // TODO: Maybe?
+	MAKE_CALL(text_addr + 0x44B0, ProbeExec1Patched); // TODO: Maybe?
+	MAKE_CALL(text_addr + 0x46B0, ProbeExec2Patched); // TODO: Maybe?
 
 	/* Allow kernel modules to have syscall exports */
-	_sw(0x3c080000, text_addr + 0x40DC);	
-	_sw(0x3c080000, text_addr + 0x40C4);	
-	
+	_sw(0, text_addr + 0x3D74); // OK
+	_sw(0, text_addr + 0x3D78); // OK
+
 	/* Allow higher firmware modules to load */
 	// movz a0, zero, a1 -> mov a0, zero
-	_sw(0x00002021, text_addr + 0x7CF4);
+	_sw(0x00002021, text_addr + 0x73D0); // OK
 
 	// Allow ModuleMgrForKernel to load sdk kernel modules
-	_sw(0, text_addr + 0x6888);
-	_sw(0, text_addr + 0x688C);
+	_sw(0, text_addr + 0x5900); // OK
+	_sw(0, text_addr + 0x5904); // OK
 
 	// Allow ModuleMgrForKernel to load sdk user modules
-	_sw(0, text_addr + 0x6998);
-	_sw(0, text_addr + 0x699C);
+	_sw(0, text_addr + 0x5A10); // OK
+	_sw(0, text_addr + 0x5A14); // OK
+	
+	_sw(0, text_addr + 0x5AA8); // OK
+	_sw(0, text_addr + 0x5AAC); // OK
 
 	/* Patch init start */
-	MAKE_CALL(text_addr + 0x1E5C, PatchInit);
+	MAKE_CALL(text_addr + 0x1A28, PatchInit); // OK
 	// li a0, 4 -> mov a0, s7
-	_sw(0x02e02021, text_addr + 0x1E60);
+	_sw(0x02e02021, text_addr + 0x1A2C); // OK
 }
 
 void PatchModuleMgr()
 {
+	Kprintf("PatchModuleMgr\n");
+
 	SceModule2 *mod = sceKernelFindModuleByName("sceModuleManager");
 	u32 text_addr = mod->text_addr;
-	
+
 	/* Patch ModuleMgr sceKernelCheckExec calls */
-	MAKE_JUMP(text_addr + 0x8024, sceKernelCheckExecFilePatched);
+	MAKE_JUMP(text_addr + 0x8884, sceKernelCheckExecFilePatched); // OK
 
 	/* NoDeviceCheckPatch  */
-	_sw(0, text_addr + 0x760); // sceKernelLoadModule (User)
-	_sw(0x24020000, text_addr + 0x7BC); // sceKernelLoadModule (User)
+	_sw(0, text_addr + 0x760); // sceKernelLoadModule (User) // OK
+	_sw(0x24020000, text_addr + 0x7C0); // sceKernelLoadModule (User) // OK
 
-	_sw(0, text_addr + 0x2BE4); // sceKernelLoadModuleVSH
-	_sw(0, text_addr + 0x2C3C); // sceKernelLoadModuleVSH
-	_sw(0x10000009, text_addr + 0x2C68); // sceKernelLoadModuleVSH
+	_sw(0, text_addr + 0x30B0); // sceKernelLoadModuleVSH // OK
+	_sw(0, text_addr + 0x310C); // sceKernelLoadModuleVSH // OK
+	_sw(0x10000009, text_addr + 0x3138); // sceKernelLoadModuleVSH // OK
 	
-	_sw(0, text_addr + 0x2F90); // sceKernelLoadModule (Kernel)
-	_sw(0, text_addr + 0x2FE4); // sceKernelLoadModule (Kernel)
-	_sw(0x10000010, text_addr + 0x3010); // sceKernelLoadModule (Kernel)
+	_sw(0, text_addr + 0x3444); // sceKernelLoadModule (Kernel) // OK
+	_sw(0, text_addr + 0x349C); // sceKernelLoadModule (Kernel) // OK
+	_sw(0x10000010, text_addr + 0x34C8); // sceKernelLoadModule (Kernel) // OK
 
-	PartitionCheck = (void *)(text_addr + 0x78F4);
-	MAKE_CALL(text_addr + 0x5F3C, PartitionCheckPatched);
-	MAKE_CALL(text_addr + 0x62B8, PartitionCheckPatched);
+	PartitionCheck = (void *)(text_addr + 0x7FD0); // OK
+	MAKE_CALL(text_addr + 0x651C, PartitionCheckPatched); // OK
+	MAKE_CALL(text_addr + 0x6898, PartitionCheckPatched); // OK
 
 	// Add in some patches from TyRaNiD to allow modules before init
 	// to be queried with sceKernelQueryModuleInfo 
-	_sw(0, text_addr + 0x3F6C); 
-	_sw(0, text_addr + 0x3FB4);
-	_sw(0, text_addr + 0x3FCC);
+	_sw(0, text_addr + 0x4360); // OK
+	_sw(0, text_addr + 0x43A8); // OK
+	_sw(0, text_addr + 0x43C0); // OK
 
 	// New Patches in 3.70+ to replace the ApplyPspRelSection stuff
-	MAKE_JUMP(text_addr + 0x817C, sceKernelCreateThreadPatched);
-	MAKE_JUMP(text_addr + 0x81C4, sceKernelStartThreadPatched);	
+	MAKE_JUMP(text_addr + 0x895C, sceKernelCreateThreadPatched); // OK
+	MAKE_JUMP(text_addr + 0x89A4, sceKernelStartThreadPatched);	 // OK
 }
 
 void PatchMemlmd()
 {
+	Kprintf("PatchMemlmd\n");
+
 	SceModule2 *mod = sceKernelFindModuleByName("sceMemlmd");
 	u32 text_addr = mod->text_addr;
 
 	if (sceKernelGetModel() == 0)
 	{
-		MAKE_CALL(text_addr + 0x10D8, UnsignCheckPatched);
-		MAKE_CALL(text_addr + 0x112C, UnsignCheckPatched);
-		UnsignCheck = (void *)(text_addr + 0xF10);
+		MAKE_CALL(text_addr + 0x1238, UnsignCheckPatched); // OK
+		MAKE_CALL(text_addr + 0x128C, UnsignCheckPatched); // OK
+		UnsignCheck = (void *)(text_addr + 0x1070); // OK
 
-		MAKE_CALL(text_addr + 0xE10, KDecryptPatched);
-		MAKE_CALL(text_addr + 0xE74, KDecryptPatched);
-		KDecrypt = (void *)(text_addr + 0x134);
+		MAKE_CALL(text_addr + 0xF70, KDecryptPatched); // OK
+		MAKE_CALL(text_addr + 0xFD4, KDecryptPatched); // OK
+		KDecrypt = (void *)(text_addr + 0x20C); // OK
 
-		SetKeys = (void *)(text_addr + 0x1158);
+		SetKeys = (void *)(text_addr + 0x12B8); // OK
 	}
 	else
 	{
-		MAKE_CALL(text_addr + 0x1170, UnsignCheckPatched);
-		MAKE_CALL(text_addr + 0x11c4, UnsignCheckPatched);
-		UnsignCheck = (void *)(text_addr + 0x0FA8);
+		MAKE_CALL(text_addr + 0x12C0, UnsignCheckPatched); // OK
+		MAKE_CALL(text_addr + 0x1314, UnsignCheckPatched); // OK
+		UnsignCheck = (void *)(text_addr + 0x10F8); // OK
 
-		MAKE_CALL(text_addr + 0xEA8, KDecryptPatched);
-		MAKE_CALL(text_addr + 0xF0C, KDecryptPatched);
-		KDecrypt = (void *)(text_addr + 0x134);
+		MAKE_CALL(text_addr + 0xFF8, KDecryptPatched); // OK
+		MAKE_CALL(text_addr + 0x105C, KDecryptPatched); // OK
+		KDecrypt = (void *)(text_addr + 0x20C); // OK
 
-		SetKeys = (void *)(text_addr + 0x11F0);
-	}
-}
-
-void PatchMesgLed()
-{
-	SceModule2 *mod = sceKernelFindModuleByName("sceMesgLed");
-	u32 text_addr = mod->text_addr;
-
-	if (sceKernelGetModel() == 0)
-	{
-		MAKE_CALL(text_addr + 0x1878, MDecryptPatched); // vsh m 0 sceMesgLed_driver_55E4F665
-		MAKE_CALL(text_addr + 0x1DAC, MDecryptPatched); // user m 0 sceMesgLed_driver_DFF0F308
-		MAKE_CALL(text_addr + 0x3418, MDecryptPatched); // updater pbp m 0 sceMesgLed_driver_AA59DE09
-		MAKE_CALL(text_addr + 0x37D4, MDecryptPatched); // game pbp m 0 sceMesgLed_driver_5FDB29F3 (world tour soccer ADF305F0)
-		MAKE_CALL(text_addr + 0x1E7C, MDecryptPatched);
-		MDecrypt = (void *)(text_addr + 0xE0);
-	}
-	else if(sceKernelGetModel() == 1)
-	{
-		MAKE_CALL(text_addr + 0x1900, MDecryptPatched); // vsh m 0 sceMesgLed_driver_55E4F665
-		MAKE_CALL(text_addr + 0x1EC4, MDecryptPatched); // user m 0 sceMesgLed_driver_DFF0F308
-		MAKE_CALL(text_addr + 0x3920, MDecryptPatched); // updater pbp m 0 sceMesgLed_driver_AA59DE09
-		MAKE_CALL(text_addr + 0x3D6C, MDecryptPatched); // game pbp m 0 sceMesgLed_driver_5FDB29F3 (world tour soccer ADF305F0)
-		MAKE_CALL(text_addr + 0x1F54, MDecryptPatched);
-		MDecrypt = (void *)(text_addr + 0xE0);
-	}
-	else if(sceKernelGetModel() == 2)
-	{
-		MAKE_CALL(text_addr + 0x1900, MDecryptPatched); // vsh m 0 sceMesgLed_driver_55E4F665
-		MAKE_CALL(text_addr + 0x1F54, MDecryptPatched); // user m 0 sceMesgLed_driver_DFF0F308
-		MAKE_CALL(text_addr + 0x3E00, MDecryptPatched); // updater pbp m 0 sceMesgLed_driver_AA59DE09
-		MAKE_CALL(text_addr + 0x4294, MDecryptPatched); // game pbp m 0 sceMesgLed_driver_5FDB29F3 (world tour soccer ADF305F0)
-		MAKE_CALL(text_addr + 0x202C, MDecryptPatched);
-		MDecrypt = (void *)(text_addr + 0xE0);
+		SetKeys = (void *)(text_addr + 0x1340); // OK
 	}
 }
 
 void PatchInterruptMgr()
 {
+	Kprintf("PatchInterruptMgr\n");
+
 	SceModule2 *mod = sceKernelFindModuleByName("sceInterruptManager");
 	u32 text_addr = mod->text_addr;
 
 	// Allow execution of syscalls in kmode
-	_sw(0, text_addr + 0x145C);
+	_sw(0, text_addr + 0xD70); // OK
+	_sw(0, text_addr + 0xD78); // OK
 
 	// Stop kmem protection regeneration
-	_sw(0, text_addr + 0x150C);
-	_sw(0, text_addr + 0x1510);
+	_sw(0, text_addr + 0xDEC); // OK
+	_sw(0, text_addr + 0xDF0); // OK
+}
+
+void PatchMesgLed()
+{
+	Kprintf("PatchMesgLed\n");
+
+	u32 text_addr = sceKernelFindModuleByName("sceMesgLed")->text_addr;
+
+	// disable ecdsa signature check
+	_sw(0, text_addr + 0x55C);
+	_sw(0, text_addr + 0x560);
+	
+	switch(sceKernelGetModel())
+	{
+		case 0:
+			MAKE_CALL(text_addr + 0x2114, MDecryptPatched); // vsh m 0 sceMesgLed_driver_55E4F665 // OK
+			MAKE_CALL(text_addr + 0x1ED0, MDecryptPatched); // user m 0 sceMesgLed_driver_DFF0F308 // OK
+			MAKE_CALL(text_addr + 0x3FD8, MDecryptPatched); // updater pbp m 0 sceMesgLed_driver_AA59DE09 // OK
+			MAKE_CALL(text_addr + 0x4164, MDecryptPatched); // game pbp m 0 sceMesgLed_driver_5FDB29F3 (world tour soccer ADF305F0) // OK
+			MAKE_CALL(text_addr + 0x335C, MDecryptPatched); // OK
+			MDecrypt = (void *)(text_addr + 0xE0);
+			break;
+		case 1:
+			MAKE_CALL(text_addr + 0x21C4, MDecryptPatched); // vsh m 0 sceMesgLed_driver_55E4F665 // OK
+			MAKE_CALL(text_addr + 0x1EDC, MDecryptPatched); // user m 0 sceMesgLed_driver_DFF0F308 // OK
+			MAKE_CALL(text_addr + 0x4548, MDecryptPatched); // updater pbp m 0 sceMesgLed_driver_AA59DE09 // OK
+			MAKE_CALL(text_addr + 0x46D4, MDecryptPatched); // game pbp m 0 sceMesgLed_driver_5FDB29F3 (world tour soccer ADF305F0) // OK
+			MAKE_CALL(text_addr + 0x373C, MDecryptPatched); // OK
+			MDecrypt = (void *)(text_addr + 0xE0);
+			break;
+		case 2:
+		case 3:
+		case 6:
+		case 9:
+		case 10:
+			MAKE_CALL(text_addr + 0x2254, MDecryptPatched); // vsh m 0 sceMesgLed_driver_55E4F665 // OK
+			MAKE_CALL(text_addr + 0x1EDC, MDecryptPatched); // user m 0 sceMesgLed_driver_DFF0F308 // OK
+			MAKE_CALL(text_addr + 0x4A70, MDecryptPatched); // updater pbp m 0 sceMesgLed_driver_AA59DE09 // OK
+			MAKE_CALL(text_addr + 0x4BFC, MDecryptPatched); // game pbp m 0 sceMesgLed_driver_5FDB29F3 (world tour soccer ADF305F0) // OK
+			MAKE_CALL(text_addr + 0x3ADC, MDecryptPatched); // OK
+			MDecrypt = (void *)(text_addr + 0xE0);
+			break;
+		case 4:
+			MAKE_CALL(text_addr + 0x22EC, MDecryptPatched); // vsh m 0 sceMesgLed_driver_55E4F665 // OK
+			MAKE_CALL(text_addr + 0x1EE0, MDecryptPatched); // user m 0 sceMesgLed_driver_DFF0F308 // OK
+			MAKE_CALL(text_addr + 0x4F44, MDecryptPatched); // updater pbp m 0 sceMesgLed_driver_AA59DE09 // OK
+			MAKE_CALL(text_addr + 0x50D0, MDecryptPatched); // game pbp m 0 sceMesgLed_driver_5FDB29F3 (world tour soccer ADF305F0) // OK
+			MAKE_CALL(text_addr + 0x3E48, MDecryptPatched); // OK
+			MDecrypt = (void *)(text_addr + 0xE0);
+			break;
+	}
 }
 
 int module_start(SceSize args, void *argp)
 {
+	Kprintf("SYSTEMCTRL!\n");
+
 	PatchLoadCore();
 	PatchModuleMgr();
 

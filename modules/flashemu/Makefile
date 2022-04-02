@@ -1,5 +1,5 @@
 TARGET = flashemu
-OBJS = main.o flashemu.o exports.o rebootex.o rebootex_02g.o rebootex_03g.o
+OBJS = main.o flashemu.o exports.o rebootex.o rebootex_02g.o rebootex_03g.o cptbl.o
 
 INCDIR = ../include
 CFLAGS = -O2 -G0 -Wall -fno-pic

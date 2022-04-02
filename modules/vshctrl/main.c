@@ -25,7 +25,6 @@ PSP_MODULE_INFO("VshControl", 0x1007, 1, 3);
 
 #define EBOOT_BIN	"disc0:/PSP_GAME/SYSDIR/EBOOT.BIN"
 #define BOOT_BIN	"disc0:/PSP_GAME/SYSDIR/BOOT.BIN"
-#define PROGRAM	"ms0:/PSP/GAME/BOOT/EBOOT.PBP"
 
 SEConfig config;
 int (* vshmenu_ctrl)(SceCtrlData *pad_data, int count);
@@ -164,18 +163,13 @@ int sceCtrlReadBufferPositivePatched(SceCtrlData *pad_data, int count)
 
 				if (satelite >= 0)
 				{
-					char *argp;
-					SceSize args;
+					char *argp = NULL;
+					SceSize args = 0;
 
 					if (videoiso_mounted)
 					{
 						argp = GetUmdFile();
 						args = strlen(argp)+1;
-					}
-					else
-					{
-						argp = NULL;
-						args = 0;
 					}
 					
 					sceKernelStartModule(satelite, args, argp, NULL, NULL);
@@ -285,7 +279,7 @@ int GetVersionHook(void *buffer, int bufferlen, int *len)
 
 	int k1 = pspSdkSetK1(0);
 
-	if (strstr(buffer, "release:5.02"))
+	if (strstr(buffer, "release:6.61"))
 	{
 		int fd = sceIoOpen("flash0:/vsh/etc/version.txt", 1, 0);
 		if (fd < 0)
@@ -335,7 +329,7 @@ int sceUsbStopPatched(const char* driverName, int size, void *args)
 {
 	int res = sceUsbStop(driverName, size, args);
 	int k1 = pspSdkSetK1(0);
-		
+
 	if (!strcmp(driverName, PSP_USBSTOR_DRIVERNAME) && usbdev >= 0 && config.usbdevice >= 1 && config.usbdevice <= 5)
 	{
 		pspUsbDeviceFinishDevice();
@@ -361,19 +355,21 @@ int sceUsbStopPatched(const char* driverName, int size, void *args)
 
 void PatchVshMain(u32 text_addr)
 {
+#if 0
 	// Allow old sfo's.
 	if (sctrlHENIsTestingTool())
 	{
-		_sw(NOP, text_addr + 0xF1EC);
-		_sw(NOP, text_addr + 0xF1F4);
-		_sw(0x10000023, text_addr + 0xFAB4);
+		_sw(NOP, text_addr + 0xF1EC); // TODO
+		_sw(NOP, text_addr + 0xF1F4); // TODO
+		_sw(0x10000023, text_addr + 0xFAB4); // TODO
 	}
 	else
 	{
-		_sw(NOP, text_addr + 0xEE30);
-		_sw(NOP, text_addr + 0xEE38);
-		_sw(0x10000023, text_addr + 0xF0D8);
+		_sw(NOP, text_addr + 0xEE30); // TODO
+		_sw(NOP, text_addr + 0xEE38); // TODO
+		_sw(0x10000023, text_addr + 0xF0D8); // TODO
 	}
+#endif
  
 	IoPatches();
 
@@ -381,29 +377,32 @@ void PatchVshMain(u32 text_addr)
 
 	if (!config.novshmenu)
 	{
-		MAKE_CALL(mod->text_addr + 0x264, sceCtrlReadBufferPositivePatched);
+		MAKE_CALL(mod->text_addr + 0x25C, sceCtrlReadBufferPositivePatched); // OK
 		PatchSyscall(FindProc("sceController_Service", "sceCtrl", 0x1F803938), sceCtrlReadBufferPositivePatched);
 	}
 	
+#if 0
 	// For umd video iso
 	if (sctrlHENIsTestingTool())
 	{
-		MAKE_CALL(mod->text_addr + 0x854, sceIoDevctlPatched);
+		MAKE_CALL(mod->text_addr + 0x854, sceIoDevctlPatched); // TODO
 	}
 	else
 	{
-		MAKE_CALL(mod->text_addr + 0x724, sceIoDevctlPatched);
+		MAKE_CALL(mod->text_addr + 0x724, sceIoDevctlPatched); // TODO
 	}
+#endif
 
 	if (config.useversiontxt)
 	{
-		getVersion = FindProc("sceMesgLed", "sceResmgr", 0x9DC14891);
+		getVersion = FindProc("sceMesgLed", "sceResmgr", 0x9DC14891); // TODO
 		PatchSyscall(getVersion, GetVersionHook);
 	}
 
-	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xAE5DE6AF), sceUsbStartPatched);
-	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xC2464FA0), sceUsbStopPatched);
+	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xAE5DE6AF), sceUsbStartPatched); // TODO
+	PatchSyscall(FindProc("sceUSB_Driver", "sceUsb", 0xC2464FA0), sceUsbStopPatched); // TODO
 
+#if 0
 	u32 baryon = 0;
 	sceSysconGetBaryonVersion(&baryon);
 
@@ -412,8 +411,8 @@ void PatchVshMain(u32 text_addr)
 		if (!(baryon & 1))
 		{
 			// Fix UMD boot on TestingTool firmware on retail hardware
-			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B));
-			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE));
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B)); // TODO
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE)); // TODO
 		}
 	}
 	else
@@ -421,16 +420,18 @@ void PatchVshMain(u32 text_addr)
 		if ((baryon & 1))
 		{
 			// Fix UMD boot on retail firmware on TestingTool hardware
-			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1));
-			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE), FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993));
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x49B2179B), FindProc("sceVshBridge_Driver", "sceVshBridge", 0x3881F0E1)); // TODO
+			REDIRECT_FUNCTION(FindProc("sceVshBridge_Driver", "sceVshBridge", 0x524EE9AE), FindProc("sceVshBridge_Driver", "sceVshBridge", 0xED3F2993)); // TODO
 		}
 	}
+#endif
 
 	ClearCaches();	
 }
 
-wchar_t verinfo[] = L"5.02 M33  ";
-wchar_t verinfo_tt[] = L"5.02 TestingTool M33  ";
+#if 0
+wchar_t verinfo[] = L"6.61 M33  ";
+wchar_t verinfo_tt[] = L"6.61 TestingTool M33  ";
 void PatchSysconfPlugin(u32 text_addr)
 {	
 	int version = sctrlSEGetVersion() & 0xF;
@@ -450,29 +451,30 @@ void PatchSysconfPlugin(u32 text_addr)
 
 	if (sctrlHENIsTestingTool())
 	{
-		u32 version_text = text_addr + 0x24D0C;
+		u32 version_text = text_addr + 0x24D0C; // TODO
 	
 		// lui v0, addrhigh
-		_sw(0x3c020000 | (version_text >> 16), text_addr + 0x16EB4);
+		_sw(0x3c020000 | (version_text >> 16), text_addr + 0x16EB4); // TODO
 		// ori v0, v0, addrlow
-		_sw(0x34420000 | (version_text & 0xFFFF), text_addr + 0x16EB8);
+		_sw(0x34420000 | (version_text & 0xFFFF), text_addr + 0x16EB8); // TODO
 	
 		memcpy((void *) version_text, verinfo_tt, sizeof(verinfo_tt));
 	}
 	else
 	{
-		u32 version_text = text_addr + 0x23DE0;
+		u32 version_text = text_addr + 0x2A62C; // OK
 	
 		// lui v0, addrhigh
-		_sw(0x3c020000 | (version_text >> 16), text_addr + 0x15EE0);
+		_sw(0x3c020000 | (version_text >> 16), text_addr + 0x192E0); // OK
 		// ori v0, v0, addrlow
-		_sw(0x34420000 | (version_text & 0xFFFF), text_addr + 0x15EE4);
+		_sw(0x34420000 | (version_text & 0xFFFF), text_addr + 0x192E4); // OK
 	
 		memcpy((void *) version_text, verinfo, sizeof(verinfo));
 	}
 
 	ClearCaches();
 }
+#endif
 
 void PatchMsVideoMainPlugin(u32 text_addr)
 {
@@ -500,33 +502,48 @@ void PatchGamePlugin(u32 text_addr)
 	if (sctrlHENIsTestingTool())
 	{
 		// New Patch (3.71+)	
-		_sw(0x03e00008, text_addr + 0x14140);
-		_sw(0x00001021, text_addr + 0x14144);	
+		_sw(0x03e00008, text_addr + 0x14140); // TODO
+		_sw(0x00001021, text_addr + 0x14144); // TODO
 
 		if (config.hidepics)
 		{
 			// Hide pic0.png+pic1.png
 			// mov v0, v1
-			_sw(0x00601021, text_addr + 0x12120);
-			_sw(0x00601021, text_addr + 0x1212C);
+			_sw(0x00601021, text_addr + 0x12120); // TODO
+			_sw(0x00601021, text_addr + 0x1212C); // TODO
 		}
 	}
 	else
 	{
 		// New Patch (3.71+)	
-		_sw(0x03e00008, text_addr+0x11764);
-		_sw(0x00001021, text_addr+0x11768);	
+		_sw(0x03e00008, text_addr + 0x20528); // TODO: Maybe?
+		_sw(0x00001021, text_addr + 0x2052C); // TODO: Maybe?
+
+		_sw(0x03e00008, text_addr + 0x20E6C); // TODO: Maybe?
+		_sw(0x00001021, text_addr + 0x20E70); // TODO: Maybe?
 
 		if (config.hidepics)
 		{
 			// Hide pic0.png+pic1.png
 			// mov v0, v1
-			_sw(0x00601021, text_addr+0xF7A8);
-			_sw(0x00601021, text_addr+0xF7B4);
+			_sw(0x00601021, text_addr + 0x1D858); // OK
+			_sw(0x00601021, text_addr + 0x1D864); // OK
 		}
 	}
 	
 	ClearCaches();			
+}
+
+int xmbctrl_thread(SceSize args, void *argp)
+{
+	SceUID xmbctrl = sceKernelLoadModule("flash0:/vsh/module/xmbctrl.prx", 0, NULL);
+	Kprintf("xmbctrl: %x\n", xmbctrl);
+	if (xmbctrl >= 0)
+	{
+		Kprintf("xmbctrl start: %x\n", sceKernelStartModule(xmbctrl, 0, NULL, NULL, NULL));
+	}
+
+	return sceKernelExitDeleteThread(0);
 }
 
 STMOD_HANDLER previous;
@@ -539,20 +556,33 @@ int OnModuleStart(SceModule2 *mod)
 	{
 		PatchVshMain(text_addr);
 	}
-	
+
+#if 0
 	else if (strcmp(modname, "sysconf_plugin_module") == 0)
 	{
 		PatchSysconfPlugin(text_addr);
 	}
-			
+#endif
+	
+#if 0 // TODO
 	else if (strcmp(modname, "msvideo_main_plugin_module") == 0)
 	{
 		PatchMsVideoMainPlugin(text_addr);
 	}
+#endif
 
 	else if (strcmp(modname, "game_plugin_module") == 0)
 	{
 		PatchGamePlugin(text_addr);					
+	}
+
+	else if (strcmp(modname, "scePaf_Module") == 0)
+	{
+		SceUID thid = sceKernelCreateThread("xmbctrl_thread", xmbctrl_thread, 0x10, 0x4000, 0, NULL);
+		if (thid >= 0)
+		{
+			sceKernelStartThread(thid, 0, NULL);
+		}					
 	}
 
 	if (!previous)
@@ -565,10 +595,10 @@ int module_start(SceSize args, void *argp)
 {
 	SceModule2 *mod = sceKernelFindModuleByName("sceLoadExec");
 	
-	MAKE_CALL(mod->text_addr + 0x17FC, LoadExecVSHCommonPatched);
-	MAKE_CALL(mod->text_addr + 0x1824, LoadExecVSHCommonPatched);
-	MAKE_CALL(mod->text_addr + 0x1974, LoadExecVSHCommonPatched);
-	MAKE_CALL(mod->text_addr + 0x199C, LoadExecVSHCommonPatched);
+	MAKE_CALL(mod->text_addr + 0x1B08, LoadExecVSHCommonPatched); // OK
+	MAKE_CALL(mod->text_addr + 0x1B30, LoadExecVSHCommonPatched); // OK
+	MAKE_CALL(mod->text_addr + 0x1D98, LoadExecVSHCommonPatched); // OK
+	MAKE_CALL(mod->text_addr + 0x1DC0, LoadExecVSHCommonPatched); // OK
 
 	PatchSyscall(FindProc("sceRTC_Service", "sceRtc", 0xE7C27D1B), sceRtcGetCurrentClockLocalTimePatched);
 
@@ -579,7 +609,7 @@ int module_start(SceSize args, void *argp)
 	
 	ClearCaches();
 
-	previous = sctrlHENSetStartModuleHandler(OnModuleStart);
+	previous = sctrlHENSetStartModuleHandler(OnModuleStart);			
 
 	return 0;
 }

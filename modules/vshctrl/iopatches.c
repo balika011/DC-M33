@@ -589,17 +589,17 @@ void IoPatches()
 	text_addr = mod->text_addr;
 
 	// Patcth IoFileMgrForUser syscalls
-	PatchSyscall(text_addr + 0x144C, sceIoDopenPatched);
-	PatchSyscall(text_addr + 0x15CC, sceIoDreadPatched);
-	PatchSyscall(text_addr + 0x167C, sceIoDclosePatched);
-	PatchSyscall(text_addr + 0x3CD0, sceIoOpenPatched);
-	PatchSyscall(text_addr + 0x3C90, sceIoClosePatched);
-	PatchSyscall(text_addr + 0x3DE8, sceIoReadPatched);
-	PatchSyscall(text_addr + 0x3E58, sceIoLseekPatched);
-	PatchSyscall(text_addr + 0x3E90, sceIoLseek32Patched);
-	PatchSyscall(text_addr + 0x3F84, sceIoGetstatPatched);
-	PatchSyscall(text_addr + 0x3FA4, sceIoChstatPatched);
-	PatchSyscall(text_addr + 0x171C, sceIoRemovePatched);
-	PatchSyscall(text_addr + 0x3F44, sceIoRmdirPatched);
-	PatchSyscall(text_addr + 0x3F28, sceIoMkdirPatched);
+	PatchSyscall(text_addr + 0x1444, sceIoDopenPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x15B8, sceIoDreadPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x1668, sceIoDclosePatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x170C, sceIoRemovePatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x3F90, sceIoClosePatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x3FD0, sceIoOpenPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x40E0, sceIoReadPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x4150, sceIoLseekPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x4188, sceIoLseek32Patched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x4220, sceIoMkdirPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x423C, sceIoRmdirPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x427C, sceIoGetstatPatched); // OK, TODO: 5G
+	PatchSyscall(text_addr + 0x429C, sceIoChstatPatched); // OK, TODO: 5G
 }

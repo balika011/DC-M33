@@ -13,7 +13,6 @@
 
 static int plugindone = 0;
 extern SEConfig config;
-InitControl initcontrol;
 SceUID evflag;
 int ms_status;
 
@@ -321,7 +320,7 @@ int sceKernelStartModulePatched(SceUID modid, SceSize argsize, void *argp, int *
 
 START_MODULE:
 
-	res = sceKernelStartModule(modid, argsize, argp, status, option);	
+	res = sceKernelStartModule(modid, argsize, argp, status, option);
 	
 	if (vshmain_args)
 	{
@@ -337,93 +336,11 @@ START_MODULE:
 	return res;
 }
 
-int sctrlKernelSetInitApitype(int apitype)
-{
-	int k1 = pspSdkSetK1(0);
-	int prev = sceKernelInitApitype();
-
-	*initcontrol.apitype = apitype;	
-
-	pspSdkSetK1(k1);
-	return prev;
-}
-
-int sctrlKernelSetInitFileName(char *filename)
-{
-	int k1 = pspSdkSetK1(0);
-
-	*initcontrol.filename = filename;
-
-	pspSdkSetK1(k1);
-	return 0;
-}
-
-int sctrlKernelSetInitMode(int mode)
-{
-	int k1 = pspSdkSetK1(0);
-	int prev = sceKernelInitKeyConfig();
-
-	*initcontrol.mode = mode;
-
-	pspSdkSetK1(k1);
-	return prev;
-}
-
-int sctrlHENRegisterHomebrewLoader(void *func)
-{
-	MAKE_JUMP(initcontrol.text_addr + 0x1B18, (u32) func);	
-	ClearCaches();
-
-	return 0;
-}
-
-InitControl *sctrlHENGetInitControl()
-{
-	return &initcontrol;
-}
-
-void sctrlHENTakeInitControl(int (* ictrl)(InitControl *))
-{
-	u32 addr = initcontrol.text_addr + 0xCB8;
-	u16 high = addr >> 16;
-	u16 low = addr & 0xFFFF;
-
-	// lui ra, high
-	_sw(0x3c1f0000 | high, initcontrol.text_addr + 0xC30);
-	// ori ra, ra, low
-	_sw(0x37ff0000 | low, initcontrol.text_addr + 0xC34);
-
-	high = ((u32) &initcontrol) >> 16;
-	low  = ((u32) &initcontrol) & 0xFFFF;
-
-	// lui a0, high
-	_sw(0x3c040000 | high, initcontrol.text_addr + 0xC38);
-	MAKE_JUMP(initcontrol.text_addr + 0xC3C, ictrl);
-	// ori a0, a0, low
-	_sw(0x34840000 | low, initcontrol.text_addr + 0xC40);
-
-	initcontrol.bootinfo->nextmodule++;
-
-	ClearCaches();
-}
-
 int PatchInit(int (* module_bootstart)(SceSize, BootInfo *), BootInfo *bootinfo)
 {
-	u32 text_addr = ((u32)module_bootstart) - 0xD0;
+	u32 text_addr = ((u32)module_bootstart) - 0x1A4C; // OK
 
-	memset(&initcontrol, 0, sizeof(InitControl));
-
-	initcontrol.text_addr = text_addr;
-	initcontrol.bootinfo = bootinfo;
-	initcontrol.apitype = (int *)(text_addr + 0x22B0);
-	initcontrol.filename = (char **)(text_addr + 0x22D4);
-	initcontrol.mode = (int *)(text_addr + 0x2424);
-	initcontrol.powerlock_count = (int *)(text_addr + 0x2428);
-	initcontrol.FreeUnkParamAndModuleInfo = (void *)(text_addr + 0x154C);
-	initcontrol.FreeParamsAndBootInfo = (void *)(text_addr + 0x164C);
-	initcontrol.ProcessCallbacks = (void *)(text_addr + 0x13D4);
-	
-	MAKE_JUMP(text_addr + 0x1B20, sceKernelStartModulePatched);
+	MAKE_JUMP(text_addr + 0x1C3C, sceKernelStartModulePatched); // OK
 	ClearCaches();
 	
 	return module_bootstart(4, bootinfo);

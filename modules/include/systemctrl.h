@@ -105,25 +105,6 @@ int sctrlKernelLoadExecVSHMs4(const char *file, struct SceKernelLoadExecVSHParam
 int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param);
 
 /**
- * Sets the api type 
- *
- * @param apitype - The apitype to set
- * @returns the previous apitype
- *
- * @Note - this will modify also the value of sceKernelBootFrom, since the value of
- * bootfrom is calculated from the apitype
-*/
-int sctrlKernelSetInitApitype(int apitype);
-
-/**
- * Sets the filename of the launched executable.
- *
- * @param filename - The filename to set
- * @returns 0 on success
-*/
-int sctrlKernelSetInitFileName(char *filename);
-
-/**
  * Sets the init key config
  *
  * @param key - The key code
@@ -182,6 +163,8 @@ int sctrlHENGetVersion();
  *
  */
 SceIoDeviceTable *sctrlHENFindDriver(char *drvname);
+
+SceIoDeviceEntry *sctrlHENFindEntry(char *alias);
 
 /** 
  * Finds a function.
